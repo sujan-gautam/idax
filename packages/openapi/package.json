@@ -1,0 +1,11 @@
+{
+    "name": "@project-ida/openapi",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "lint": "spectral lint openapi.yaml"
+    },
+    "devDependencies": {
+        "@stoplight/spectral-cli": "^6.0.0"
+    }
+}

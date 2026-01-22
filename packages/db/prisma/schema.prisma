@@ -1,0 +1,235 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Plan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum TenantStatus {
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+}
+
+enum UploadStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+  WAITING_APPROVAL
+}
+
+enum JobType {
+  PARSE
+  EDA
+  RECIPE_GEN
+  TRANSFORM
+}
+
+model Tenant {
+  id        String       @id @default(uuid())
+  name      String
+  plan      Plan         @default(FREE)
+  status    TenantStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  users     User[]
+  projects  Project[]
+  quotas    Quotas?
+  featureFlags FeatureFlags?
+  apiKeys   ApiKey[]
+  auditLogs AuditLog[]
+  uploads   Upload[]
+  jobs      Job[]
+  datasets  Dataset[]
+  recipes   Recipe[]
+  edaResults EDAResult[]
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  name         String?
+  passwordHash String?
+  role         Role       @default(MEMBER)
+  status       UserStatus @default(ACTIVE)
+  tenantId     String
+  tenant       Tenant     @relation(fields: [tenantId], references: [id])
+  createdAt    DateTime   @default(now())
+  lastLoginAt  DateTime?
+  auditLogs    AuditLog[]
+}
+
+model Project {
+  id        String   @id @default(uuid())
+  name      String
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  createdAt DateTime @default(now())
+  datasets  Dataset[]
+}
+
+model Quotas {
+  id                 String @id @default(uuid())
+  tenantId           String @unique
+  tenant             Tenant @relation(fields: [tenantId], references: [id])
+  maxProjects        Int    @default(5)
+  maxStorageBytes    BigInt @default(1073741824)
+  maxUploadsPerMonth Int    @default(50)
+  maxApiCallsPerMonth Int   @default(1000)
+}
+
+model FeatureFlags {
+  id        String   @id @default(uuid())
+  tenantId  String   @unique
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  flagsJson Json     @default("{}")
+  updatedAt DateTime @updatedAt
+}
+
+model Dataset {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  name        String
+  sourceType  String
+  activeVersionId String?
+  createdAt   DateTime @default(now())
+  
+  versions    DatasetVersion[]
+  uploads     Upload[]
+  jobs        Job[]
+  recipes     Recipe[]
+}
+
+model DatasetVersion {
+  id             String   @id @default(uuid())
+  datasetId      String
+  dataset        Dataset  @relation(fields: [datasetId], references: [id])
+  versionNumber  Int
+  parentVersionId String?
+  artifactS3Key  String
+  schemaJson     Json?
+  statsSummaryJson Json?
+  createdAt      DateTime @default(now())
+  createdBy      String?
+
+  jobs           Job[]
+  edaResults     EDAResult[]
+}
+
+model Upload {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  datasetId   String?
+  dataset     Dataset? @relation(fields: [datasetId], references: [id])
+  filename    String
+  contentType String
+  s3Key       String
+  status      UploadStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+}
+
+model Job {
+  id              String   @id @default(uuid())
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id])
+  datasetId       String?
+  dataset         Dataset? @relation(fields: [datasetId], references: [id])
+  datasetVersionId String?
+  datasetVersion  DatasetVersion? @relation(fields: [datasetVersionId], references: [id])
+  type            JobType
+  status          JobStatus @default(PENDING)
+  progress        Int       @default(0)
+  startedAt       DateTime?
+  finishedAt      DateTime?
+  errorJson       Json?
+  correlationId   String?
+}
+
+model EDAResult {
+  id               String   @id @default(uuid())
+  tenantId         String
+  tenant           Tenant   @relation(fields: [tenantId], references: [id])
+  datasetVersionId String
+  datasetVersion   DatasetVersion @relation(fields: [datasetVersionId], references: [id])
+  resultS3Key      String
+  summaryJson      Json?
+  createdAt        DateTime @default(now())
+}
+
+model Recipe {
+  id                 String   @id @default(uuid())
+  datasetId          String
+  dataset            Dataset  @relation(fields: [datasetId], references: [id])
+  tenantId           String
+  tenant             Tenant   @relation(fields: [tenantId], references: [id])
+  proposedForVersionId String
+  stepsJson          Json
+  status             String   @default("DRAFT")
+  approvalRequired   Boolean  @default(false)
+  approvedBy         String?
+  approvedAt         DateTime?
+  createdAt          DateTime @default(now())
+}
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id])
+  actorUserId   String?
+  actorUser     User?    @relation(fields: [actorUserId], references: [id])
+  action        String
+  entityType    String
+  entityId      String
+  ip            String?
+  userAgent     String?
+  diffJson      Json?
+  correlationId String?
+  createdAt     DateTime @default(now())
+}
+
+model ApiKey {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  name        String
+  keyHash     String
+  scopesJson  Json
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+  lastUsedAt  DateTime?
+}

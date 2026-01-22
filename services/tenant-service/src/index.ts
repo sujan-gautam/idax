@@ -1,0 +1,507 @@
+import express from 'express';
+import dotenv from 'dotenv';
+import { logger } from '@project-ida/logger';
+import { prisma } from '@project-ida/db';
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 8001;
+
+app.use(express.json());
+
+const s3Client = new S3Client({ region: process.env.AWS_REGION || 'us-east-1' });
+
+// Health Check
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', service: 'tenant' });
+});
+
+// ============================================================================
+// PROJECTS CRUD
+// ============================================================================
+
+// List all projects for tenant
+app.get('/projects', async (req, res) => {
+    try {
+        const tenantId = req.headers['x-tenant-id'] as string;
+
+        if (!tenantId) {
+            return res.status(400).json({ error: 'Missing tenant context' });
+        }
+
+        const projects = await prisma.project.findMany({
+            where: { tenantId },
+            include: {
+                _count: {
+                    select: { datasets: true }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        res.json(projects);
+    } catch (error) {
+        logger.error(error, 'Failed to list projects');
+        res.status(500).json({ error: 'Failed to list projects' });
+    }
+});
+
+// Get single project
+app.get('/projects/:id', async (req, res) => {
+    try {
+        const tenantId = req.headers['x-tenant-id'] as string;
+
+        if (!tenantId) {
+            return res.status(400).json({ error: 'Missing tenant context' });
+        }
+
+        const project = await prisma.project.findFirst({
+            where: {
+                id: req.params.id,
+                tenantId
+            },
+            include: {
+                datasets: {
+                    orderBy: { createdAt: 'desc' },
+                    take: 10
+                }
+            }
+        });
+
+        if (!project) {
+            return res.status(404).json({ error: 'Project not found' });
+        }
+
+        res.json(project);
+    } catch (error) {
+        logger.error(error, 'Failed to get project');
+        res.status(500).json({ error: 'Failed to get project' });
+    }
+});
+
+// Create project
+app.post('/projects', async (req, res) => {
+    try {
+        const tenantId = req.headers['x-tenant-id'] as string;
+        const { name, description } = req.body;
+
+        if (!tenantId) {
+            return res.status(400).json({ error: 'Missing tenant context' });
+        }
+
+        if (!name) {
+            return res.status(400).json({ error: 'Project name is required' });
+        }
+
+        const project = await prisma.project.create({
+            data: {
+                tenantId,
+                name,
+                description
+            }
+        });
+
+        logger.info({ projectId: project.id, tenantId }, 'Project created');
+        res.status(201).json(project);
+    } catch (error) {
+        logger.error(error, 'Failed to create project');
+        res.status(500).json({ error: 'Failed to create project' });
+    }
+});
+
+// Update project
+app.put('/projects/:id', async (req, res) => {
+    try {
+        const tenantId = req.headers['x-tenant-id'] as string;
+        const { name, description } = req.body;
+
+        if (!tenantId) {
+            return res.status(400).json({ error: 'Missing tenant context' });
+        }
+
+        // Verify ownership
+        const existing = await prisma.project.findFirst({
+            where: {
+                id: req.params.id,
+                tenantId
+            }
+        });
+
+        if (!existing) {
+            return res.status(404).json({ error: 'Project not found' });
+        }
+
+        const project = await prisma.project.update({
+            where: { id: req.params.id },
+            data: {
+                name: name || existing.name,
+                description: description !== undefined ? description : existing.description
+            }
+        });
+
+        logger.info({ projectId: project.id, tenantId }, 'Project updated');
+        res.json(project);
+    } catch (error) {
+        logger.error(error, 'Failed to update project');
+        res.status(500).json({ error: 'Failed to update project' });
+    }
+});
+
+// Delete project
+app.delete('/projects/:id', async (req, res) => {
+    try {
+        const tenantId = req.headers['x-tenant-id'] as string;
+
+        if (!tenantId) {
+            return res.status(400).json({ error: 'Missing tenant context' });
+        }
+
+        // Verify ownership
+        const existing = await prisma.project.findFirst({
+            where: {
+                id: req.params.id,
+                tenantId
+            }
+        });
+
+        if (!existing) {
+            return res.status(404).json({ error: 'Project not found' });
+        }
+
+        // Delete project (cascade will handle datasets)
+        await prisma.project.delete({
+            where: { id: req.params.id }
+        });
+
+        logger.info({ projectId: req.params.id, tenantId }, 'Project deleted');
+        res.json({ success: true });
+    } catch (error) {
+        logger.error(error, 'Failed to delete project');
+        res.status(500).json({ error: 'Failed to delete project' });
+    }
+});
+
+// ============================================================================
+// DATASETS
+// ============================================================================
+
+// List datasets (optionally filtered by project)
+app.get('/datasets', async (req, res) => {
+    try {
+        const tenantId = req.headers['x-tenant-id'] as string;
+        const projectId = req.query.projectId as string;
+
+        if (!tenantId) {
+            return res.status(400).json({ error: 'Missing tenant context' });
+        }
+
+        const where: any = { tenantId };
+        if (projectId) {
+            where.projectId = projectId;
+        }
+
+        const datasets = await prisma.dataset.findMany({
+            where,
+            include: {
+                project: {
+                    select: { id: true, name: true }
+                },
+                _count: {
+                    select: { versions: true }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        res.json(datasets);
+    } catch (error) {
+        logger.error(error, 'Failed to list datasets');
+        res.status(500).json({ error: 'Failed to list datasets' });
+    }
+});
+
+// Get dataset details
+app.get('/datasets/:id', async (req, res) => {
+    try {
+        const tenantId = req.headers['x-tenant-id'] as string;
+
+        if (!tenantId) {
+            return res.status(400).json({ error: 'Missing tenant context' });
+        }
+
+        const dataset = await prisma.dataset.findFirst({
+            where: {
+                id: req.params.id,
+                tenantId
+            },
+            include: {
+                project: true,
+                versions: {
+                    orderBy: { versionNumber: 'desc' },
+                    take: 10
+                }
+            }
+        });
+
+        if (!dataset) {
+            return res.status(404).json({ error: 'Dataset not found' });
+        }
+
+        res.json(dataset);
+    } catch (error) {
+        logger.error(error, 'Failed to get dataset');
+        res.status(500).json({ error: 'Failed to get dataset' });
+    }
+});
+
+// Get dataset versions
+app.get('/datasets/:id/versions', async (req, res) => {
+    try {
+        const tenantId = req.headers['x-tenant-id'] as string;
+
+        if (!tenantId) {
+            return res.status(400).json({ error: 'Missing tenant context' });
+        }
+
+        // Verify dataset ownership
+        const dataset = await prisma.dataset.findFirst({
+            where: {
+                id: req.params.id,
+                tenantId
+            }
+        });
+
+        if (!dataset) {
+            return res.status(404).json({ error: 'Dataset not found' });
+        }
+
+        const versions = await prisma.datasetVersion.findMany({
+            where: { datasetId: req.params.id },
+            orderBy: { versionNumber: 'desc' }
+        });
+
+        res.json(versions);
+    } catch (error) {
+        logger.error(error, 'Failed to get versions');
+        res.status(500).json({ error: 'Failed to get versions' });
+    }
+});
+
+// Rollback dataset to specific version
+app.post('/datasets/:id/rollback', async (req, res) => {
+    try {
+        const tenantId = req.headers['x-tenant-id'] as string;
+        const { versionId } = req.body;
+
+        if (!tenantId) {
+            return res.status(400).json({ error: 'Missing tenant context' });
+        }
+
+        if (!versionId) {
+            return res.status(400).json({ error: 'Version ID is required' });
+        }
+
+        // Verify dataset ownership
+        const dataset = await prisma.dataset.findFirst({
+            where: {
+                id: req.params.id,
+                tenantId
+            }
+        });
+
+        if (!dataset) {
+            return res.status(404).json({ error: 'Dataset not found' });
+        }
+
+        // Verify version exists
+        const version = await prisma.datasetVersion.findFirst({
+            where: {
+                id: versionId,
+                datasetId: req.params.id
+            }
+        });
+
+        if (!version) {
+            return res.status(404).json({ error: 'Version not found' });
+        }
+
+        // Update active version
+        const updated = await prisma.dataset.update({
+            where: { id: req.params.id },
+            data: { activeVersionId: versionId }
+        });
+
+        logger.info({
+            datasetId: req.params.id,
+            versionId,
+            tenantId
+        }, 'Dataset rolled back');
+
+        res.json(updated);
+    } catch (error) {
+        logger.error(error, 'Failed to rollback dataset');
+        res.status(500).json({ error: 'Failed to rollback dataset' });
+    }
+});
+
+// Get dataset preview
+app.get('/datasets/:id/preview', async (req, res) => {
+    try {
+        const tenantId = req.headers['x-tenant-id'] as string;
+
+        if (!tenantId) {
+            return res.status(400).json({ error: 'Missing tenant context' });
+        }
+
+        const dataset = await prisma.dataset.findFirst({
+            where: {
+                id: req.params.id,
+                tenantId
+            },
+            include: {
+                versions: {
+                    where: { id: req.query.versionId as string || undefined },
+                    orderBy: { versionNumber: 'desc' },
+                    take: 1
+                }
+            }
+        });
+
+        if (!dataset) {
+            return res.status(404).json({ error: 'Dataset not found' });
+        }
+
+        const version = dataset.versions[0];
+        if (!version) {
+            return res.json([]);
+        }
+
+        // Fetch S3 artifact
+        const command = new GetObjectCommand({
+            Bucket: process.env.S3_BUCKET_NAME || 'project-ida-uploads',
+            Key: version.artifactS3Key
+        });
+
+        const response = await s3Client.send(command);
+        const str = await response.Body?.transformToString();
+
+        if (!str) {
+            return res.json([]);
+        }
+
+        const data = JSON.parse(str);
+        const preview = Array.isArray(data) ? data.slice(0, 100) : data;
+
+        res.json(preview);
+    } catch (error) {
+        logger.error(error, 'Failed to get preview');
+        res.status(500).json({ error: 'Preview failed' });
+    }
+});
+
+// Get EDA results
+app.get('/datasets/:id/eda', async (req, res) => {
+    try {
+        const tenantId = req.headers['x-tenant-id'] as string;
+
+        if (!tenantId) {
+            return res.status(400).json({ error: 'Missing tenant context' });
+        }
+
+        const dataset = await prisma.dataset.findFirst({
+            where: {
+                id: req.params.id,
+                tenantId
+            }
+        });
+
+        if (!dataset || !dataset.activeVersionId) {
+            return res.status(404).json({ error: 'No active version' });
+        }
+
+        const versionId = (req.query.versionId as string) || dataset.activeVersionId;
+
+        const result = await prisma.eDAResult.findFirst({
+            where: {
+                datasetVersionId: versionId,
+                tenantId
+            }
+        });
+
+        if (!result) {
+            return res.status(404).json({ error: 'EDA not found' });
+        }
+
+        if (result.summaryJson) {
+            return res.json(result.summaryJson);
+        }
+
+        // Fetch from S3
+        const command = new GetObjectCommand({
+            Bucket: process.env.S3_BUCKET_NAME || 'project-ida-uploads',
+            Key: result.resultS3Key
+        });
+        const response = await s3Client.send(command);
+        const str = await response.Body?.transformToString();
+
+        res.send(str);
+    } catch (error) {
+        logger.error(error, 'Failed to get EDA');
+        res.status(500).json({ error: 'EDA fetch failed' });
+    }
+});
+
+// ============================================================================
+// TENANT MANAGEMENT (Admin)
+// ============================================================================
+
+app.post('/tenants', async (req, res) => {
+    try {
+        const { name, plan, userEmail } = req.body;
+
+        const tenant = await prisma.tenant.create({
+            data: {
+                name,
+                plan: plan || 'FREE',
+                users: {
+                    create: {
+                        email: userEmail,
+                        role: 'ADMIN',
+                        name: userEmail.split('@')[0],
+                    }
+                }
+            },
+            include: {
+                users: true
+            }
+        });
+
+        logger.info({ tenantId: tenant.id }, 'Tenant created');
+        res.json(tenant);
+    } catch (error) {
+        logger.error(error, 'Failed to create tenant');
+        res.status(500).json({ error: 'Failed to create tenant' });
+    }
+});
+
+app.get('/tenants/:id', async (req, res) => {
+    try {
+        const tenant = await prisma.tenant.findUnique({
+            where: { id: req.params.id }
+        });
+
+        if (!tenant) {
+            return res.status(404).json({ error: 'Tenant not found' });
+        }
+
+        res.json(tenant);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal error' });
+    }
+});
+
+app.listen(PORT, () => {
+    logger.info(`Tenant Service running on port ${PORT}`);
+});

@@ -1,0 +1,26 @@
+{
+  "name": "project-ida",
+  "version": "1.0.0",
+  "description": "Project IDA: Multi-tenant SaaS Data Analysis Platform",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"npm run dev -w @project-ida/web\" \"npm run dev -w gateway-service\" \"npm run dev -w auth-service\" \"npm run dev -w tenant-service\" \"npm run dev -w upload-service\" \"npm run dev -w parser-service\" \"npm run dev -w eda-service\"",
+    "db:push": "prisma db push --schema=packages/db/prisma/schema.prisma",
+    "generate": "prisma generate --schema=packages/db/prisma/schema.prisma"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.11",
+    "ts-node": "^10.9.2"
+  }
+}

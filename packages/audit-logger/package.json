@@ -1,0 +1,16 @@
+{
+    "name": "@project-ida/audit-logger",
+    "version": "1.0.0",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc"
+    },
+    "dependencies": {
+        "@project-ida/db": "*",
+        "@project-ida/logger": "*"
+    },
+    "devDependencies": {
+        "typescript": "^5.0.0"
+    }
+}
