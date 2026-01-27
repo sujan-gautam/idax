@@ -438,6 +438,11 @@ app.get('/datasets/:id/eda', async (req, res) => {
             return res.json(result.summaryJson);
         }
 
+        // Check if S3 key exists
+        if (!result.resultS3Key) {
+            return res.status(404).json({ error: 'EDA result not available' });
+        }
+
         // Fetch from S3
         const command = new GetObjectCommand({
             Bucket: process.env.S3_BUCKET_NAME || 'project-ida-uploads',
@@ -486,18 +491,30 @@ app.post('/tenants', async (req, res) => {
     }
 });
 
-app.get('/tenants/:id', async (req, res) => {
+app.get('/tenants/:id/metadata', async (req, res) => {
     try {
-        const tenant = await prisma.tenant.findUnique({
-            where: { id: req.params.id }
-        });
+        const [tenant, flags, quotas] = await Promise.all([
+            prisma.tenant.findUnique({ where: { id: req.params.id } }),
+            prisma.featureFlags.findUnique({ where: { tenantId: req.params.id } }),
+            prisma.quotas.findUnique({ where: { tenantId: req.params.id } })
+        ]);
 
         if (!tenant) {
             return res.status(404).json({ error: 'Tenant not found' });
         }
 
-        res.json(tenant);
+        // Get current project count for quota check
+        const projectCount = await prisma.project.count({ where: { tenantId: req.params.id } });
+
+        res.json({
+            flags: flags?.flagsJson || {},
+            quotas: quotas ? {
+                ...quotas,
+                currentProjects: projectCount
+            } : null
+        });
     } catch (error) {
+        logger.error(error, 'Metadata fetch failed');
         res.status(500).json({ error: 'Internal error' });
     }
 });

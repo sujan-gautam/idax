@@ -100,6 +100,10 @@ app.post('/jobs/parse', async (req, res) => {
 
         await s3Client.send(putCommand);
 
+        if (!upload.datasetId) {
+            throw new Error('Upload is not associated with a dataset');
+        }
+
         // Create dataset version
         const latestVersion = await prisma.datasetVersion.findFirst({
             where: { datasetId: upload.datasetId },

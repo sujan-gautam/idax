@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 8000;
 // Security middleware
 app.use(cors());
 app.use(helmet());
-app.use(express.json());
+// app.use(express.json()); // Global JSON parsing can cause proxy hangs
 
 // Correlation ID middleware - MUST be first
 app.use((req, res, next) => {

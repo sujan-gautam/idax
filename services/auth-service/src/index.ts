@@ -56,7 +56,7 @@ app.post('/register', async (req, res) => {
         // Hash password
         const passwordHash = await bcrypt.hash(password, 10);
 
-        // Create tenant + user in transaction
+        // Create tenant + user in transaction (PostgreSQL supports transactions natively)
         const result = await prisma.$transaction(async (tx) => {
             const tenant = await tx.tenant.create({
                 data: {

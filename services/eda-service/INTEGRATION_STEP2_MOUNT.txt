@@ -1,0 +1,5 @@
+// ADD THIS CODE IN services/eda-service/src/index.ts
+// After line 20 (after the health check endpoint)
+
+// Mount EDA API routes
+app.use('/eda', edaRoutes);

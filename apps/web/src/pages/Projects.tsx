@@ -1,239 +1,211 @@
-import React, { useState, useEffect } from 'react';
-import {
-    Box,
-    Typography,
-    Button,
-    Card,
-    CardContent,
-    CardActions,
-    Grid,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    TextField,
-    CircularProgress,
-    IconButton,
-    Chip
-} from '@mui/material';
-import { Add, Delete, Folder } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+/**
+ * PROJECT IDA - PROJECTS PAGE
+ * Professional projects management interface
+ * Design: Linear + Vercel inspired
+ */
+
+import React, { useEffect, useState } from 'react';
+import { Plus, Search, FolderTree } from 'lucide-react';
+import { useAuthStore } from '../store/useAuthStore';
 import { api } from '../services/api';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { PageHeader, EmptyState, LoadingState } from '../components/common';
+import { ProjectCard, CreateProjectDialog } from '../components/project';
 
 interface Project {
     id: string;
     name: string;
     description?: string;
+    datasetCount?: number;
     createdAt: string;
-    _count?: {
-        datasets: number;
-    };
+    updatedAt: string;
 }
 
 const Projects: React.FC = () => {
-    const navigate = useNavigate();
-    const { user, tenant } = useAuth();
+    const { tenant } = useAuthStore();
+
     const [projects, setProjects] = useState<Project[]>([]);
+    const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
-    const [createOpen, setCreateOpen] = useState(false);
-    const [newProjectName, setNewProjectName] = useState('');
-    const [newProjectDesc, setNewProjectDesc] = useState('');
-    const [creating, setCreating] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
     useEffect(() => {
         loadProjects();
-    }, []);
+    }, [tenant?.id]);
+
+    useEffect(() => {
+        // Filter projects based on search query
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            setFilteredProjects(
+                projects.filter(
+                    (project) =>
+                        project.name.toLowerCase().includes(query) ||
+                        project.description?.toLowerCase().includes(query)
+                )
+            );
+        } else {
+            setFilteredProjects(projects);
+        }
+    }, [searchQuery, projects]);
 
     const loadProjects = async () => {
+        if (!tenant?.id) return;
+
         try {
             setLoading(true);
+            setError(null);
+
             const response = await api.get('/projects', {
-                headers: { 'x-tenant-id': tenant?.id }
+                headers: { 'x-tenant-id': tenant.id },
             });
+
             setProjects(response.data);
-        } catch (error) {
-            console.error('Failed to load projects:', error);
+        } catch (err: any) {
+            console.error('Failed to load projects:', err);
+            setError(err.message || 'Failed to load projects');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleCreateProject = async () => {
-        if (!newProjectName.trim()) return;
+    const handleCreateProject = async (name: string, description?: string) => {
+        if (!tenant?.id) return;
 
-        try {
-            setCreating(true);
-            await api.post('/projects', {
-                name: newProjectName,
-                description: newProjectDesc
-            }, {
-                headers: { 'x-tenant-id': tenant?.id }
-            });
+        const response = await api.post(
+            '/projects',
+            { name, description },
+            { headers: { 'x-tenant-id': tenant.id } }
+        );
 
-            setCreateOpen(false);
-            setNewProjectName('');
-            setNewProjectDesc('');
-            loadProjects();
-        } catch (error) {
-            console.error('Failed to create project:', error);
-            alert('Failed to create project');
-        } finally {
-            setCreating(false);
-        }
+        // Add new project to list
+        setProjects([response.data, ...projects]);
     };
 
-    const handleDeleteProject = async (projectId: string) => {
-        if (!confirm('Are you sure you want to delete this project?')) return;
+    const handleDeleteProject = async (id: string) => {
+        if (!tenant?.id) return;
 
         try {
-            await api.delete(`/projects/${projectId}`, {
-                headers: { 'x-tenant-id': tenant?.id }
+            await api.delete(`/projects/${id}`, {
+                headers: { 'x-tenant-id': tenant.id },
             });
-            loadProjects();
-        } catch (error) {
-            console.error('Failed to delete project:', error);
-            alert('Failed to delete project');
+
+            // Remove from list
+            setProjects(projects.filter((p) => p.id !== id));
+        } catch (err: any) {
+            console.error('Failed to delete project:', err);
+            alert('Failed to delete project. Please try again.');
         }
     };
 
     if (loading) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-                <CircularProgress />
-            </Box>
+            <div className="space-y-6 animate-fade-in">
+                <div className="skeleton h-12 w-64" />
+                <div className="skeleton h-10 w-full max-w-md" />
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {[...Array(6)].map((_, i) => (
+                        <div key={i} className="skeleton h-48 rounded-lg" />
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <EmptyState
+                icon={FolderTree}
+                title="Failed to Load Projects"
+                description={error}
+                action={{
+                    label: 'Retry',
+                    onClick: loadProjects,
+                }}
+            />
         );
     }
 
     return (
-        <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-                <Box>
-                    <Typography variant="h4" gutterBottom>Projects</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        Organize your datasets into projects
-                    </Typography>
-                </Box>
-                <Button
-                    variant="contained"
-                    startIcon={<Add />}
-                    onClick={() => setCreateOpen(true)}
-                >
-                    New Project
-                </Button>
-            </Box>
-
-            {projects.length === 0 ? (
-                <Card sx={{ textAlign: 'center', py: 8 }}>
-                    <Folder sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-                    <Typography variant="h6" gutterBottom>No projects yet</Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                        Create your first project to get started
-                    </Typography>
-                    <Button
-                        variant="contained"
-                        startIcon={<Add />}
-                        onClick={() => setCreateOpen(true)}
-                    >
-                        Create Project
+        <div className="space-y-6 animate-fade-in">
+            {/* Page Header */}
+            <PageHeader
+                title="Projects"
+                description="Organize your datasets and analysis workflows into projects"
+                actions={
+                    <Button onClick={() => setCreateDialogOpen(true)}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        New Project
                     </Button>
-                </Card>
+                }
+            />
+
+            {/* Search and Filters */}
+            {projects.length > 0 && (
+                <div className="flex items-center gap-4">
+                    <div className="relative flex-1 max-w-md">
+                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
+                        <Input
+                            placeholder="Search projects..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="h-10 pl-10"
+                        />
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                        <span className="font-medium">{filteredProjects.length}</span>
+                        <span>
+                            {filteredProjects.length === 1 ? 'project' : 'projects'}
+                        </span>
+                    </div>
+                </div>
+            )}
+
+            {/* Projects Grid */}
+            {filteredProjects.length === 0 ? (
+                <EmptyState
+                    icon={FolderTree}
+                    title={
+                        searchQuery
+                            ? 'No projects found'
+                            : 'No projects yet'
+                    }
+                    description={
+                        searchQuery
+                            ? 'Try adjusting your search query'
+                            : 'Create your first project to get started with organizing your data analysis workflows'
+                    }
+                    action={
+                        !searchQuery
+                            ? {
+                                label: 'Create Project',
+                                onClick: () => setCreateDialogOpen(true),
+                            }
+                            : undefined
+                    }
+                />
             ) : (
-                <Grid container spacing={3}>
-                    {projects.map((project) => (
-                        <Grid item xs={12} sm={6} md={4} key={project.id}>
-                            <Card
-                                sx={{
-                                    height: '100%',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    cursor: 'pointer',
-                                    '&:hover': {
-                                        boxShadow: 6
-                                    }
-                                }}
-                                onClick={() => navigate(`/projects/${project.id}`)}
-                            >
-                                <CardContent sx={{ flexGrow: 1 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                        <Folder sx={{ mr: 1, color: 'primary.main' }} />
-                                        <Typography variant="h6" component="div">
-                                            {project.name}
-                                        </Typography>
-                                    </Box>
-                                    {project.description && (
-                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                            {project.description}
-                                        </Typography>
-                                    )}
-                                    <Chip
-                                        label={`${project._count?.datasets || 0} datasets`}
-                                        size="small"
-                                        color="primary"
-                                        variant="outlined"
-                                    />
-                                </CardContent>
-                                <CardActions>
-                                    <Button
-                                        size="small"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            navigate(`/projects/${project.id}`);
-                                        }}
-                                    >
-                                        Open
-                                    </Button>
-                                    <IconButton
-                                        size="small"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDeleteProject(project.id);
-                                        }}
-                                    >
-                                        <Delete fontSize="small" />
-                                    </IconButton>
-                                </CardActions>
-                            </Card>
-                        </Grid>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {filteredProjects.map((project) => (
+                        <ProjectCard
+                            key={project.id}
+                            project={project}
+                            onDelete={handleDeleteProject}
+                        />
                     ))}
-                </Grid>
+                </div>
             )}
 
             {/* Create Project Dialog */}
-            <Dialog open={createOpen} onClose={() => setCreateOpen(false)} maxWidth="sm" fullWidth>
-                <DialogTitle>Create New Project</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        label="Project Name"
-                        fullWidth
-                        value={newProjectName}
-                        onChange={(e) => setNewProjectName(e.target.value)}
-                        sx={{ mb: 2 }}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Description (optional)"
-                        fullWidth
-                        multiline
-                        rows={3}
-                        value={newProjectDesc}
-                        onChange={(e) => setNewProjectDesc(e.target.value)}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setCreateOpen(false)}>Cancel</Button>
-                    <Button
-                        onClick={handleCreateProject}
-                        variant="contained"
-                        disabled={!newProjectName.trim() || creating}
-                    >
-                        {creating ? 'Creating...' : 'Create'}
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </Box>
+            <CreateProjectDialog
+                open={createDialogOpen}
+                onOpenChange={setCreateDialogOpen}
+                onCreateProject={handleCreateProject}
+            />
+        </div>
     );
 };
 

@@ -1,43 +1,25 @@
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { Box, CircularProgress } from '@mui/material';
+import { useAuthStore } from '../store/useAuthStore';
 
 interface ProtectedRouteProps {
-    children: ReactNode;
-    requiredRole?: string[];
+    children: React.ReactNode;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-    children,
-    requiredRole
-}) => {
-    const { isAuthenticated, isLoading, user } = useAuth();
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+    const { user, isLoading } = useAuthStore();
     const location = useLocation();
 
     if (isLoading) {
         return (
-            <Box
-                sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: '100vh'
-                }}
-            >
-                <CircularProgress />
-            </Box>
+            <div className="flex h-screen w-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            </div>
         );
     }
 
-    if (!isAuthenticated) {
-        // Redirect to login, preserving the attempted location
+    if (!user) {
         return <Navigate to="/login" state={{ from: location }} replace />;
-    }
-
-    // Check role if required
-    if (requiredRole && user && !requiredRole.includes(user.role)) {
-        return <Navigate to="/unauthorized" replace />;
     }
 
     return <>{children}</>;

@@ -1,0 +1,4 @@
+// ADD THIS IMPORT AT THE TOP OF services/eda-service/src/index.ts
+// After line 5 (after other imports)
+
+import edaRoutes from './routes';
