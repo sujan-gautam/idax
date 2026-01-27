@@ -13,6 +13,10 @@ const PORT = process.env.PORT || 8002;
 
 app.use(express.json());
 
+// Initialize S3 Bucket
+import { initS3 } from './s3';
+initS3();
+
 // Health Check
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', service: 'upload' });

@@ -13,7 +13,15 @@ const PORT = process.env.PORT || 8003;
 
 app.use(express.json());
 
-const s3Client = new S3Client({ region: process.env.AWS_REGION || 'us-east-1' });
+const s3Client = new S3Client({
+    region: process.env.AWS_REGION || 'us-east-1',
+    endpoint: process.env.AWS_S3_ENDPOINT,
+    forcePathStyle: true,
+    credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'test',
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'password'
+    }
+});
 const BUCKET = process.env.S3_BUCKET_NAME || 'project-ida-uploads';
 
 // Health Check

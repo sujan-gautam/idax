@@ -10,8 +10,8 @@ const s3Client = new S3Client({
     endpoint: process.env.AWS_S3_ENDPOINT,
     forcePathStyle: true,
     credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || ''
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'test',
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'password'
     }
 });
 const BUCKET = process.env.S3_BUCKET_NAME || 'project-ida-uploads';
