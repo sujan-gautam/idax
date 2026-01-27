@@ -37,7 +37,10 @@ app.post('/uploads/presigned', authMiddleware, async (req: AuthRequest, res) => 
         const fileKey = `tenants/${tenantId}/raw/${uuidv4()}/${sanitizedFilename}`;
 
         // Create Presigned URL
-        const url = await generatePresignedUploadUrl(fileKey, contentType);
+        const finalContentType = contentType || 'application/octet-stream';
+        const url = await generatePresignedUploadUrl(fileKey, finalContentType);
+
+        logger.info({ fileKey, contentType: finalContentType }, 'Generated presigned upload URL');
 
         // Ensure Dataset exists
         let targetDatasetId = datasetId;

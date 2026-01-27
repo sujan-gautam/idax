@@ -76,18 +76,36 @@ api.interceptors.response.use(
 
 // Upload file with presigned URL
 export const uploadFile = async (file: File, tenantId: string, projectId: string) => {
+    const contentType = file.type || 'application/octet-stream';
+
     // 1. Get Presigned URL
     const { data: presigned } = await api.post('/uploads/presigned', {
         filename: file.name,
-        contentType: file.type,
+        contentType: contentType,
         tenantId,
         projectId
     });
 
-    // 2. Upload to S3
-    await axios.put(presigned.url, file, {
-        headers: { 'Content-Type': file.type }
+    console.log('Got presigned URL, uploading...', presigned.url);
+
+    // 2. Upload to S3 using fetch (cleaner for presigned URLs)
+    const uploadRes = await fetch(presigned.url, {
+        method: 'PUT',
+        body: file,
+        headers: {
+            'Content-Type': contentType
+        }
     });
+
+    if (!uploadRes.ok) {
+        const errorText = await uploadRes.text();
+        console.error('S3 Upload Failed:', {
+            status: uploadRes.status,
+            statusText: uploadRes.statusText,
+            body: errorText
+        });
+        throw new Error(`Upload to storage failed: ${uploadRes.status} ${errorText}`);
+    }
 
     // 3. Finalize
     const { data: uploadCtx } = await api.post('/uploads/finalize', {
