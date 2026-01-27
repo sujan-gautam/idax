@@ -1,12 +1,13 @@
+import dotenv from 'dotenv';
+import path from 'path';
+dotenv.config({ path: path.join(__dirname, '../../../.env') });
+
 import express from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import cors from 'cors';
 import helmet from 'helmet';
-import dotenv from 'dotenv';
 import { logger } from '@project-ida/logger';
 import { v4 as uuidv4 } from 'uuid';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 8000;
