@@ -93,7 +93,7 @@ export const CorrelationsTab: React.FC<CorrelationsTabProps> = ({ datasetId }) =
         );
     }
 
-    if (!correlations || correlations.correlations.length === 0) {
+    if (!correlations || !correlations.correlations || correlations.correlations.length === 0) {
         return (
             <div className="flex min-h-[400px] items-center justify-center">
                 <div className="text-center">

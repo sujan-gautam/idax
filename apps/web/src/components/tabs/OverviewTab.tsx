@@ -95,14 +95,18 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ datasetId }) => {
 
     const qualityBadge = getQualityBadge(overview.quality_score);
 
-    const typeBreakdown = overview.columns.reduce((acc, col) => {
+    // Defensive check to avoid crash if API returns error structure instead of OverviewData
+    const columns = overview.columns || [];
+    const shape = overview.shape || { rows: 0, columns: 0 };
+
+    const typeBreakdown = columns.reduce((acc, col) => {
         acc[col.type] = (acc[col.type] || 0) + 1;
         return acc;
     }, {} as Record<string, number>);
 
-    const totalMissing = overview.columns.reduce((sum, col) => sum + col.missing, 0);
-    const totalCells = overview.shape.rows * overview.shape.columns;
-    const missingPercentage = ((totalMissing / totalCells) * 100).toFixed(1);
+    const totalMissing = columns.reduce((sum, col) => sum + col.missing, 0);
+    const totalCells = shape.rows * shape.columns;
+    const missingPercentage = totalCells > 0 ? ((totalMissing / totalCells) * 100).toFixed(1) : '0.0';
 
     return (
         <div className="space-y-6 animate-fade-in">

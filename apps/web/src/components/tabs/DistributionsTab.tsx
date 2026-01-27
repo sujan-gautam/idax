@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { BarChart3, TrendingUp, Lock, Crown } from 'lucide-react';
+import { BarChart3, TrendingUp, Lock, Crown, AlertCircle } from 'lucide-react';
 import { api } from '../../services/api';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -102,8 +102,16 @@ export const DistributionsTab: React.FC<DistributionsTabProps> = ({ datasetId })
         );
     }
 
-    if (!distributions) {
-        return <ProPaywall />;
+    if (!distributions || !distributions.distributions) {
+        return (
+            <div className="flex min-h-[400px] items-center justify-center">
+                <div className="text-center">
+                    <AlertCircle className="mx-auto h-12 w-12 text-neutral-400" />
+                    <h3 className="mt-4 text-lg font-medium">Distribution data not available</h3>
+                    <p className="mt-2 text-neutral-600">This could be due to an error in analysis or missing dataset versions.</p>
+                </div>
+            </div>
+        );
     }
 
     const columns = Object.keys(distributions.distributions);
