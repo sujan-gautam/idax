@@ -2,6 +2,7 @@ import express from 'express';
 import { logger } from '@project-ida/logger';
 import { prisma } from '@project-ida/db';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { authMiddleware, AuthRequest } from '@project-ida/auth-middleware';
 
 const router = express.Router();
 
@@ -428,14 +429,10 @@ async function getEDAResults(datasetId: string, tenantId: string) {
 }
 
 // GET /eda/overview - Dataset overview statistics
-router.get('/overview', async (req, res) => {
+router.get('/overview', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const datasetId = req.query.datasetId as string;
-        const tenantId = req.headers['x-tenant-id'] as string;
-
-        if (!tenantId) {
-            return res.status(400).json({ error: 'Missing tenant context' });
-        }
+        const tenantId = req.tenantId!; // Set by authMiddleware
 
         if (!datasetId) {
             return res.status(400).json({ error: 'Dataset ID required' });
@@ -492,14 +489,10 @@ router.get('/overview', async (req, res) => {
 });
 
 // GET /eda/distributions - Distribution analysis
-router.get('/distributions', async (req, res) => {
+router.get('/distributions', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const datasetId = req.query.datasetId as string;
-        const tenantId = req.headers['x-tenant-id'] as string;
-
-        if (!tenantId) {
-            return res.status(400).json({ error: 'Missing tenant context' });
-        }
+        const tenantId = req.tenantId!;
 
         if (!datasetId) {
             return res.status(400).json({ error: 'Dataset ID required' });
@@ -553,15 +546,11 @@ router.get('/distributions', async (req, res) => {
 });
 
 // GET /eda/correlations - Correlation analysis
-router.get('/correlations', async (req, res) => {
+router.get('/correlations', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const datasetId = req.query.datasetId as string;
         const method = (req.query.method as string) || 'pearson';
-        const tenantId = req.headers['x-tenant-id'] as string;
-
-        if (!tenantId) {
-            return res.status(400).json({ error: 'Missing tenant context' });
-        }
+        const tenantId = req.tenantId!;
 
         if (!datasetId) {
             return res.status(400).json({ error: 'Dataset ID required' });
@@ -626,14 +615,10 @@ router.get('/correlations', async (req, res) => {
 });
 
 // POST /eda/analyze - Trigger EDA analysis
-router.post('/analyze', async (req, res) => {
+router.post('/analyze', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const { datasetId } = req.body;
-        const tenantId = req.headers['x-tenant-id'] as string;
-
-        if (!tenantId) {
-            return res.status(400).json({ error: 'Missing tenant context' });
-        }
+        const tenantId = req.tenantId!;
 
         if (!datasetId) {
             return res.status(400).json({ error: 'Dataset ID required' });
