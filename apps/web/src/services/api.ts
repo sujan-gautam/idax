@@ -88,13 +88,12 @@ export const uploadFile = async (file: File, tenantId: string, projectId: string
 
     console.log('Got presigned URL, uploading...', presigned.url);
 
-    // 2. Upload to S3 using fetch (cleaner for presigned URLs)
+    // 2. Upload to S3 using fetch
+    // IMPORTANT: Do NOT send custom headers like Content-Type unless they are signed.
+    // If SignedHeaders=host, sending Content-Type will cause a SignatureDoesNotMatch error.
     const uploadRes = await fetch(presigned.url, {
         method: 'PUT',
-        body: file,
-        headers: {
-            'Content-Type': contentType
-        }
+        body: file
     });
 
     if (!uploadRes.ok) {

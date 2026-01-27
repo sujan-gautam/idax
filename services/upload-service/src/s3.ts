@@ -59,13 +59,10 @@ export const initS3 = async () => {
     }
 };
 
-export const generatePresignedUploadUrl = async (key: string, contentType: string) => {
+export const generatePresignedUploadUrl = async (key: string, _contentType: string) => {
     const command = new PutObjectCommand({
         Bucket: BUCKET_NAME,
         Key: key,
-        ContentType: contentType,
-        // Optional: set ACL if using AWS
-        // ACL: 'public-read',
     });
     return getSignedUrl(s3Client, command, { expiresIn: 3600 });
 };
