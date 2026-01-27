@@ -12,15 +12,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { FeatureGate } from '../FeatureGate';
 import { cn } from '../../lib/utils';
-import {
-    ScatterChart,
-    Scatter,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-} from 'recharts';
 
 interface CorrelationsTabProps {
     datasetId: string;

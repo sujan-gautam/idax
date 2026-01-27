@@ -80,6 +80,24 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ datasetId }) => {
 
     if (!overview) return null;
 
+    if ((overview as any).error) {
+        return (
+            <div className="flex min-h-[400px] items-center justify-center">
+                <div className="text-center">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
+                        <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-neutral-900 dark:text-neutral-0">
+                        Analysis Results Unavailable
+                    </h3>
+                    <p className="mt-2 max-w-xs text-neutral-600 dark:text-neutral-400">
+                        {(overview as any).error || 'We couldn\'t load the EDA results for this dataset version.'}
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
     const getQualityColor = (score: number) => {
         if (score >= 90) return 'text-green-600';
         if (score >= 70) return 'text-yellow-600';
