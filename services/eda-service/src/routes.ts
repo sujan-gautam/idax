@@ -415,7 +415,7 @@ async function getEDAResults(datasetId: string, tenantId: string) {
         }
 
         const data = JSON.parse(content);
-        const edaResults = runEDA(data, version.schemaJson);
+        const edaResults = runEDA(data, version.schemaJson as any);
 
         logger.info({ datasetId, rowCount: data.length }, 'Generated EDA on-the-fly');
 
@@ -457,7 +457,7 @@ router.get('/overview', async (req, res) => {
             }
         });
 
-        const schema = dataset?.versions[0]?.schemaJson;
+        const schema = dataset?.versions[0]?.schemaJson as any;
         const columns = schema?.columns || [];
 
         const overview = {

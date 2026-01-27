@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { logger } from '@project-ida/logger';
 import { prisma } from '@project-ida/db';
 import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import edaRoutes from './routes';
 
 dotenv.config();
 
@@ -18,6 +19,9 @@ const BUCKET = process.env.S3_BUCKET_NAME || 'project-ida-uploads';
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', service: 'eda' });
 });
+
+// Mount EDA API routes
+app.use('/eda', edaRoutes);
 
 // ============================================================================
 // EDA JOB - REAL STATISTICAL ALGORITHMS

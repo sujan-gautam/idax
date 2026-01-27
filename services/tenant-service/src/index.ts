@@ -458,6 +458,64 @@ app.get('/datasets/:id/eda', async (req, res) => {
     }
 });
 
+// Forward EDA overview to EDA service
+app.get('/datasets/:id/eda/overview', async (req, res) => {
+    try {
+        const tenantId = req.headers['x-tenant-id'] as string;
+        if (!tenantId) return res.status(400).json({ error: 'Missing tenant context' });
+
+        const edaServiceUrl = process.env.EDA_SERVICE_URL || 'http://localhost:8004';
+        const response = await fetch(`${edaServiceUrl}/eda/overview?datasetId=${req.params.id}`, {
+            headers: { 'x-tenant-id': tenantId }
+        });
+
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        logger.error(error, 'Failed to get EDA overview');
+        res.status(500).json({ error: 'Failed to get overview' });
+    }
+});
+
+// Forward EDA distributions to EDA service
+app.get('/datasets/:id/eda/distributions', async (req, res) => {
+    try {
+        const tenantId = req.headers['x-tenant-id'] as string;
+        if (!tenantId) return res.status(400).json({ error: 'Missing tenant context' });
+
+        const edaServiceUrl = process.env.EDA_SERVICE_URL || 'http://localhost:8004';
+        const response = await fetch(`${edaServiceUrl}/eda/distributions?datasetId=${req.params.id}`, {
+            headers: { 'x-tenant-id': tenantId }
+        });
+
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        logger.error(error, 'Failed to get distributions');
+        res.status(500).json({ error: 'Failed to get distributions' });
+    }
+});
+
+// Forward EDA correlations to EDA service
+app.get('/datasets/:id/eda/correlations', async (req, res) => {
+    try {
+        const tenantId = req.headers['x-tenant-id'] as string;
+        const method = req.query.method || 'pearson';
+        if (!tenantId) return res.status(400).json({ error: 'Missing tenant context' });
+
+        const edaServiceUrl = process.env.EDA_SERVICE_URL || 'http://localhost:8004';
+        const response = await fetch(`${edaServiceUrl}/eda/correlations?datasetId=${req.params.id}&method=${method}`, {
+            headers: { 'x-tenant-id': tenantId }
+        });
+
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        logger.error(error, 'Failed to get correlations');
+        res.status(500).json({ error: 'Failed to get correlations' });
+    }
+});
+
 // ============================================================================
 // TENANT MANAGEMENT (Admin)
 // ============================================================================
