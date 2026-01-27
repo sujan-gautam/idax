@@ -409,6 +409,54 @@ app.get('/datasets/:id/preview', async (req, res) => {
     }
 });
 
+// Get dataset processing status
+app.get('/datasets/:id/status', async (req, res) => {
+    try {
+        const tenantId = req.headers['x-tenant-id'] as string;
+        if (!tenantId) return res.status(400).json({ error: 'Missing tenant context' });
+
+        const dataset = await prisma.dataset.findFirst({
+            where: { id: req.params.id, tenantId },
+            include: {
+                versions: {
+                    orderBy: { versionNumber: 'desc' },
+                    take: 1
+                },
+                uploads: {
+                    orderBy: { createdAt: 'desc' },
+                    take: 1
+                }
+            }
+        });
+
+        if (!dataset) return res.status(404).json({ error: 'Dataset not found' });
+
+        const latestUpload = dataset.uploads[0];
+        const latestVersion = dataset.versions[0];
+
+        // Check EDA status
+        let hasEDA = false;
+        if (latestVersion) {
+            const eda = await prisma.eDAResult.findFirst({
+                where: { datasetVersionId: latestVersion.id }
+            });
+            hasEDA = !!eda;
+        }
+
+        res.json({
+            id: dataset.id,
+            isParsed: !!dataset.activeVersionId,
+            hasEDA,
+            uploadStatus: latestUpload?.status || 'NONE',
+            versionCount: dataset.versions.length,
+            latestVersionId: latestVersion?.id
+        });
+    } catch (error) {
+        logger.error(error, 'Failed to get dataset status');
+        res.status(500).json({ error: 'Status check failed' });
+    }
+});
+
 // Get EDA results
 app.get('/datasets/:id/eda', async (req, res) => {
     try {

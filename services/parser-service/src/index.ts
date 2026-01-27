@@ -63,11 +63,19 @@ app.post('/jobs/parse', async (req, res) => {
             Key: upload.s3Key
         });
 
-        const s3Response = await s3Client.send(getCommand);
+        let s3Response;
+        try {
+            s3Response = await s3Client.send(getCommand);
+        } catch (s3Err: any) {
+            logger.error({ s3Err, s3Key: upload.s3Key, bucket: BUCKET }, 'Failed to download from S3');
+            throw new Error(`S3 download failed: ${s3Err.message}`);
+        }
+
         const fileBuffer = await s3Response.Body?.transformToByteArray();
 
         if (!fileBuffer) {
-            throw new Error('Failed to download file from S3');
+            logger.error({ s3Key: upload.s3Key }, 'S3 response body is empty');
+            throw new Error('Failed to download file from S3: Body is empty');
         }
 
         // Parse based on content type
@@ -87,7 +95,13 @@ app.post('/jobs/parse', async (req, res) => {
             parsedData = result.data;
             schema = result.schema;
         } else {
+            logger.error({ contentType: upload.contentType, filename: upload.filename }, 'Unsupported file type');
             throw new Error(`Unsupported file type: ${upload.contentType}`);
+        }
+
+        if (!parsedData || parsedData.length === 0) {
+            logger.warn({ uploadId }, 'Parsed data is empty');
+            // We can still create a version with 0 rows
         }
 
         logger.info({
@@ -106,7 +120,13 @@ app.post('/jobs/parse', async (req, res) => {
             ContentType: 'application/json'
         });
 
-        await s3Client.send(putCommand);
+        try {
+            await s3Client.send(putCommand);
+            logger.info({ artifactKey }, 'Parsed data stored in S3');
+        } catch (putErr: any) {
+            logger.error({ putErr, artifactKey }, 'Failed to store parsed data in S3');
+            throw new Error(`S3 upload failed: ${putErr.message}`);
+        }
 
         if (!upload.datasetId) {
             throw new Error('Upload is not associated with a dataset');
@@ -274,12 +294,14 @@ function inferSchema(data: any[], columnNames: string[]): any {
         const total = data.length - nullCount;
         let inferredType = 'string';
 
-        if (types.number > total * 0.8) {
-            inferredType = 'number';
-        } else if (types.boolean > total * 0.8) {
-            inferredType = 'boolean';
-        } else if (types.date > total * 0.8) {
-            inferredType = 'date';
+        if (total > 0) {
+            if (types.number > total * 0.8) {
+                inferredType = 'number';
+            } else if (types.boolean > total * 0.8) {
+                inferredType = 'boolean';
+            } else if (types.date > total * 0.8) {
+                inferredType = 'date';
+            }
         }
 
         // Calculate statistics

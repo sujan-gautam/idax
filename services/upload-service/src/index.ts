@@ -90,25 +90,25 @@ app.post('/uploads/finalize', authMiddleware, async (req: AuthRequest, res) => {
 
         if (!upload) return res.status(404).json({ error: 'Upload not found' });
 
-        // Update status
-        await prisma.upload.update({
+        // Update status and return updated upload
+        const updatedUpload = await prisma.upload.update({
             where: { id: uploadId },
-            data: { status: 'COMPLETED' } // Realistically verify S3 existence here
+            data: { status: 'COMPLETED' }
         });
 
         // Trigger Parser Job
         const parserUrl = process.env.PARSER_SERVICE_URL || 'http://localhost:8003';
+
+        logger.info({ uploadId, parserUrl }, 'Triggering parser service');
 
         // Fire and forget (don't await response to unblock client)
         fetch(`${parserUrl}/jobs/parse`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ uploadId })
-        }).catch(err => logger.error({ err }, 'Failed to trigger parser service'));
+        }).catch(err => logger.error({ err, uploadId }, 'Failed to trigger parser service'));
 
-        logger.info({ uploadId }, 'Upload finalized, trigger sent to parser');
-
-        res.json({ status: 'ok', upload });
+        res.json({ status: 'ok', upload: updatedUpload });
     } catch (error) {
         logger.error(error, 'Failed to finalize upload');
         res.status(500).json({ error: 'Internal error' });

@@ -34,11 +34,19 @@ const DatasetDetails: React.FC = () => {
         }
     });
 
-    // EDA status - disabled for now as endpoint doesn't exist
-    // TODO: Implement /datasets/:id/eda/status endpoint in backend
-    const edaStatus: { status?: string; error_message?: string } | undefined = undefined;
-    const statusLoading = false;
-    const refetchStatus = () => { };
+    // Fetch dataset processing status with polling
+    const { data: status, refetch: refetchStatus } = useQuery({
+        queryKey: ['dataset-status', id],
+        queryFn: async () => {
+            const response = await api.get(`/datasets/${id}/status`);
+            return response.data;
+        },
+        refetchInterval: (query) => {
+            const data = query.state.data as any;
+            return (data && data.isParsed) ? false : 3000; // Poll every 3s until parsed
+        },
+        enabled: !!id
+    });
 
     // Trigger EDA analysis
     const [triggeringEDA, setTriggeringEDA] = useState(false);
@@ -49,23 +57,30 @@ const DatasetDetails: React.FC = () => {
         setTriggeringEDA(true);
         try {
             await api.post(`/eda/analyze`, { datasetId: id });
-            // Refetch dataset to get updated EDA info
-            // refetchStatus();
+            // Re-fetch status to update the UI
+            refetchStatus();
         } catch (error) {
             console.error('Failed to trigger EDA:', error);
-            alert('Failed to start analysis. Please try again.');
+            // alert('Failed to start analysis. Please try again.');
         } finally {
             setTriggeringEDA(false);
         }
     };
 
-    if (datasetLoading || statusLoading) {
+    // Auto-trigger EDA if parsed but not analyzed
+    useEffect(() => {
+        if (status?.isParsed && !status?.hasEDA && !triggeringEDA) {
+            handleTriggerEDA();
+        }
+    }, [status?.isParsed, status?.hasEDA]);
+
+    if (datasetLoading) {
         return (
-            <div className="flex min-h-screen items-center justify-center">
+            <div className="flex min-h-screen items-center justify-center bg-neutral-50 dark:bg-neutral-950">
                 <div className="text-center">
                     <Loader2 className="mx-auto h-12 w-12 animate-spin text-indigo-600" />
                     <p className="mt-4 text-lg font-medium text-neutral-700 dark:text-neutral-300">
-                        Loading dataset...
+                        Loading dataset info...
                     </p>
                 </div>
             </div>
@@ -74,7 +89,7 @@ const DatasetDetails: React.FC = () => {
 
     if (!dataset) {
         return (
-            <div className="flex min-h-screen items-center justify-center">
+            <div className="flex min-h-screen items-center justify-center bg-neutral-50 dark:bg-neutral-950">
                 <div className="text-center">
                     <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
                     <p className="mt-4 text-lg font-medium text-neutral-900 dark:text-neutral-0">
@@ -88,92 +103,57 @@ const DatasetDetails: React.FC = () => {
         );
     }
 
-    // Show EDA trigger if not started
-    if (edaStatus?.status === 'not_started') {
+    // Show processing screen if not parsed yet
+    if (status && !status.isParsed) {
         return (
-            <div className="space-y-6 p-6">
-                {/* Header */}
-                <div className="flex items-center gap-4">
+            <div className="flex min-h-screen items-center justify-center bg-neutral-50 dark:bg-neutral-950">
+                <div className="max-w-md text-center">
+                    <div className="relative mx-auto mb-8 h-24 w-24">
+                        <div className="absolute inset-0 animate-ping rounded-full bg-indigo-500/20"></div>
+                        <div className="relative flex h-full w-full items-center justify-center rounded-full bg-white shadow-lg dark:bg-neutral-900">
+                            <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
+                        </div>
+                    </div>
+                    <h2 className="mb-2 text-2xl font-bold text-neutral-900 dark:text-neutral-0">
+                        Processing Your Data
+                    </h2>
+                    <p className="mb-6 text-neutral-600 dark:text-neutral-400">
+                        We're currently parsing your file and preparing the analysis engine. This usually takes less than a minute.
+                    </p>
+                    <div className="space-y-3">
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
+                            <div className="h-full animate-pulse bg-indigo-600" style={{ width: '60%' }}></div>
+                        </div>
+                        <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                            Step: Parsing & Schema Inference...
+                        </p>
+                    </div>
                     <Button
                         variant="ghost"
-                        size="sm"
+                        className="mt-8"
                         onClick={() => navigate('/datasets')}
-                        className="gap-2"
                     >
-                        <ChevronLeft className="h-4 w-4" />
-                        Back
+                        <ChevronLeft className="mr-2 h-4 w-4" />
+                        Back to My Datasets
                     </Button>
-                    <div>
-                        <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-0">
-                            {dataset.name}
-                        </h1>
-                        <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                            {dataset.description || 'No description'}
-                        </p>
-                    </div>
-                </div>
-
-                {/* Trigger EDA */}
-                <div className="flex min-h-[500px] items-center justify-center">
-                    <div className="max-w-md text-center">
-                        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600">
-                            <Play className="h-10 w-10 text-white" />
-                        </div>
-                        <h3 className="mb-3 text-2xl font-bold text-neutral-900 dark:text-neutral-0">
-                            Start Analysis
-                        </h3>
-                        <p className="mb-6 text-neutral-600 dark:text-neutral-400">
-                            Run exploratory data analysis to unlock insights about your dataset
-                        </p>
-                        <Button
-                            onClick={handleTriggerEDA}
-                            disabled={triggeringEDA}
-                            className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
-                        >
-                            {triggeringEDA ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Starting Analysis...
-                                </>
-                            ) : (
-                                <>
-                                    <Play className="mr-2 h-4 w-4" />
-                                    Start Analysis
-                                </>
-                            )}
-                        </Button>
-                    </div>
                 </div>
             </div>
         );
     }
 
-    // Show loading if analysis is running
-    if (edaStatus?.status === 'pending' || edaStatus?.status === 'running') {
+    // Analysis in progress (if we have a version but no EDA results yet)
+    if (status?.isParsed && !status?.hasEDA) {
         return (
             <div className="space-y-6 p-6">
-                {/* Header */}
                 <div className="flex items-center gap-4">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate('/datasets')}
-                        className="gap-2"
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => navigate('/datasets')} className="gap-2">
                         <ChevronLeft className="h-4 w-4" />
                         Back
                     </Button>
                     <div>
-                        <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-0">
-                            {dataset.name}
-                        </h1>
-                        <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                            {dataset.description || 'No description'}
-                        </p>
+                        <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-0">{dataset.name}</h1>
                     </div>
                 </div>
-
-                {/* Analysis in progress */}
                 <div className="flex min-h-[500px] items-center justify-center">
                     <div className="text-center">
                         <Loader2 className="mx-auto h-16 w-16 animate-spin text-indigo-600" />
@@ -181,7 +161,7 @@ const DatasetDetails: React.FC = () => {
                             Analyzing your dataset...
                         </p>
                         <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
-                            This may take a few moments depending on dataset size
+                            Performing statistical calculations and quality checks.
                         </p>
                     </div>
                 </div>
@@ -189,48 +169,7 @@ const DatasetDetails: React.FC = () => {
         );
     }
 
-    // Show error if analysis failed
-    if (edaStatus?.status === 'failed') {
-        return (
-            <div className="space-y-6 p-6">
-                {/* Header */}
-                <div className="flex items-center gap-4">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate('/datasets')}
-                        className="gap-2"
-                    >
-                        <ChevronLeft className="h-4 w-4" />
-                        Back
-                    </Button>
-                    <div>
-                        <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-0">
-                            {dataset.name}
-                        </h1>
-                    </div>
-                </div>
-
-                {/* Error state */}
-                <div className="flex min-h-[500px] items-center justify-center">
-                    <div className="max-w-md text-center">
-                        <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
-                        <p className="mt-4 text-lg font-medium text-neutral-900 dark:text-neutral-0">
-                            Analysis Failed
-                        </p>
-                        <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
-                            {edaStatus.error_message || 'An error occurred during analysis'}
-                        </p>
-                        <Button onClick={handleTriggerEDA} className="mt-6">
-                            Retry Analysis
-                        </Button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    // Show tabs if analysis is complete
+    // Main view with tabs
     return (
         <div className="space-y-6 p-6 animate-fade-in">
             {/* Header */}
@@ -273,7 +212,7 @@ const DatasetDetails: React.FC = () => {
 
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                <TabsList className="grid w-full grid-cols-8 lg:w-auto">
+                <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 lg:w-auto">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
                     <TabsTrigger value="preview">Preview</TabsTrigger>
                     <TabsTrigger value="distributions">Distributions</TabsTrigger>
