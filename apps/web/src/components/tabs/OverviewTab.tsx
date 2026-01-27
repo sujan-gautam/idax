@@ -136,7 +136,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ datasetId }) => {
                                     Total Rows
                                 </p>
                                 <p className="mt-2 text-3xl font-bold text-neutral-900 dark:text-neutral-0">
-                                    {overview.shape.rows.toLocaleString()}
+                                    {(shape.rows || 0).toLocaleString()}
                                 </p>
                             </div>
                             <div className="rounded-full bg-blue-100 p-3 dark:bg-blue-900/20">
@@ -154,7 +154,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ datasetId }) => {
                                     Columns
                                 </p>
                                 <p className="mt-2 text-3xl font-bold text-neutral-900 dark:text-neutral-0">
-                                    {overview.shape.columns}
+                                    {shape.columns || 0}
                                 </p>
                             </div>
                             <div className="rounded-full bg-purple-100 p-3 dark:bg-purple-900/20">
@@ -171,8 +171,8 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ datasetId }) => {
                                 <p className="text-xs font-medium uppercase tracking-wider text-neutral-500">
                                     Quality Score
                                 </p>
-                                <p className={cn('mt-2 text-3xl font-bold', getQualityColor(overview.quality_score))}>
-                                    {overview.quality_score.toFixed(1)}
+                                <p className={cn('mt-2 text-3xl font-bold', getQualityColor(overview.quality_score || 0))}>
+                                    {(overview.quality_score || 0).toFixed(1)}
                                 </p>
                                 <p className="text-xs text-neutral-500">out of 100</p>
                             </div>
@@ -191,7 +191,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ datasetId }) => {
                                     Completeness
                                 </p>
                                 <p className="mt-2 text-3xl font-bold text-neutral-900 dark:text-neutral-0">
-                                    {overview.completeness.toFixed(1)}%
+                                    {(overview.completeness || 0).toFixed(1)}%
                                 </p>
                                 <p className="text-xs text-neutral-500">{missingPercentage}% missing</p>
                             </div>
