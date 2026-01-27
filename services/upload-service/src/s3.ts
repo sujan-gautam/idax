@@ -52,6 +52,7 @@ export const initS3 = async () => {
             }
         }));
         logger.info({ bucket: BUCKET_NAME }, 'S3 CORS policy applied');
+        logger.info('S3 Gateway Initialization Complete');
 
     } catch (error) {
         logger.error({ error, bucket: BUCKET_NAME }, 'Failed to initialize S3');

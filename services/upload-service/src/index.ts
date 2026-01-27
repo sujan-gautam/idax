@@ -15,7 +15,6 @@ app.use(express.json());
 
 // Initialize S3 Bucket
 import { initS3 } from './s3';
-initS3();
 
 // Health Check
 app.get('/health', (req, res) => {
@@ -32,8 +31,10 @@ app.post('/uploads/presigned', authMiddleware, async (req: AuthRequest, res) => 
             return res.status(400).json({ error: 'Missing filename or contentType' });
         }
 
-        // Generate Key: tenants/{tenantId}/raw/{random}/{filename}
-        const fileKey = `tenants/${tenantId}/raw/${uuidv4()}/${filename}`;
+        // SANITIZE FILENAME for S3 Key to avoid 403 Signature Mismatch
+        // Spaces and special characters in keys often cause signing issues in browsers
+        const sanitizedFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const fileKey = `tenants/${tenantId}/raw/${uuidv4()}/${sanitizedFilename}`;
 
         // Create Presigned URL
         const url = await generatePresignedUploadUrl(fileKey, contentType);
@@ -115,6 +116,11 @@ app.post('/uploads/finalize', authMiddleware, async (req: AuthRequest, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    logger.info(`Upload Service running on port ${PORT}`);
-});
+const startServer = async () => {
+    await initS3();
+    app.listen(PORT, () => {
+        logger.info(`Upload Service running on port ${PORT}`);
+    });
+};
+
+startServer();
