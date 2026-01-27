@@ -1,10 +1,10 @@
-import express from 'express';
 import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
 import { logger } from '@project-ida/logger';
 import { prisma } from '@project-ida/db';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 8001;

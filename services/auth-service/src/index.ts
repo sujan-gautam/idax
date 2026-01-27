@@ -1,11 +1,11 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
 import { logger } from '@project-ida/logger';
 import { prisma } from '@project-ida/db';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.AUTH_SERVICE_PORT || 8006;

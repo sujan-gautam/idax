@@ -1,12 +1,12 @@
-import express from 'express';
 import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
 import { logger } from '@project-ida/logger';
 import { prisma } from '@project-ida/db';
 import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 8003;

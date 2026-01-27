@@ -1,12 +1,12 @@
-import express from 'express';
 import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '@project-ida/logger';
 import { prisma } from '@project-ida/db';
 import { authMiddleware, AuthRequest } from '@project-ida/auth-middleware';
 import { generatePresignedUploadUrl } from './s3';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 8002;
