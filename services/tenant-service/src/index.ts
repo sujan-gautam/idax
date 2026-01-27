@@ -5,6 +5,7 @@ dotenv.config({ path: path.join(__dirname, '../../../.env') });
 import express from 'express';
 import { logger } from '@project-ida/logger';
 import { prisma } from '@project-ida/db';
+import { authMiddleware, AuthRequest } from '@project-ida/auth-middleware';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 
 const app = express();
@@ -411,10 +412,9 @@ app.get('/datasets/:id/preview', async (req, res) => {
 });
 
 // Get dataset processing status
-app.get('/datasets/:id/status', async (req, res) => {
+app.get('/datasets/:id/status', authMiddleware, async (req: AuthRequest, res) => {
     try {
-        const tenantId = req.headers['x-tenant-id'] as string;
-        if (!tenantId) return res.status(400).json({ error: 'Missing tenant context' });
+        const tenantId = req.tenantId!;
 
         const dataset = await prisma.dataset.findFirst({
             where: { id: req.params.id, tenantId },
@@ -516,14 +516,15 @@ app.get('/datasets/:id/eda', async (req, res) => {
 });
 
 // Forward EDA overview to EDA service
-app.get('/datasets/:id/eda/overview', async (req, res) => {
+app.get('/datasets/:id/eda/overview', authMiddleware, async (req: AuthRequest, res) => {
     try {
-        const tenantId = req.headers['x-tenant-id'] as string;
-        if (!tenantId) return res.status(400).json({ error: 'Missing tenant context' });
-
+        const tenantId = req.tenantId!;
         const edaServiceUrl = process.env.EDA_SERVICE_URL || 'http://localhost:8004';
         const response = await fetch(`${edaServiceUrl}/eda/overview?datasetId=${req.params.id}`, {
-            headers: { 'x-tenant-id': tenantId }
+            headers: {
+                'x-tenant-id': tenantId,
+                'Authorization': req.headers.authorization!
+            }
         });
 
         const data = await response.json();
@@ -535,14 +536,15 @@ app.get('/datasets/:id/eda/overview', async (req, res) => {
 });
 
 // Forward EDA distributions to EDA service
-app.get('/datasets/:id/eda/distributions', async (req, res) => {
+app.get('/datasets/:id/eda/distributions', authMiddleware, async (req: AuthRequest, res) => {
     try {
-        const tenantId = req.headers['x-tenant-id'] as string;
-        if (!tenantId) return res.status(400).json({ error: 'Missing tenant context' });
-
+        const tenantId = req.tenantId!;
         const edaServiceUrl = process.env.EDA_SERVICE_URL || 'http://localhost:8004';
         const response = await fetch(`${edaServiceUrl}/eda/distributions?datasetId=${req.params.id}`, {
-            headers: { 'x-tenant-id': tenantId }
+            headers: {
+                'x-tenant-id': tenantId,
+                'Authorization': req.headers.authorization!
+            }
         });
 
         const data = await response.json();
@@ -554,15 +556,16 @@ app.get('/datasets/:id/eda/distributions', async (req, res) => {
 });
 
 // Forward EDA correlations to EDA service
-app.get('/datasets/:id/eda/correlations', async (req, res) => {
+app.get('/datasets/:id/eda/correlations', authMiddleware, async (req: AuthRequest, res) => {
     try {
-        const tenantId = req.headers['x-tenant-id'] as string;
+        const tenantId = req.tenantId!;
         const method = req.query.method || 'pearson';
-        if (!tenantId) return res.status(400).json({ error: 'Missing tenant context' });
-
         const edaServiceUrl = process.env.EDA_SERVICE_URL || 'http://localhost:8004';
         const response = await fetch(`${edaServiceUrl}/eda/correlations?datasetId=${req.params.id}&method=${method}`, {
-            headers: { 'x-tenant-id': tenantId }
+            headers: {
+                'x-tenant-id': tenantId,
+                'Authorization': req.headers.authorization!
+            }
         });
 
         const data = await response.json();
