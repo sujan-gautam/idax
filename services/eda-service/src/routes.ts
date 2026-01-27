@@ -411,6 +411,7 @@ async function getEDAResults(datasetId: string, tenantId: string) {
         const content = await s3Response.Body?.transformToString();
 
         if (!content) {
+            logger.warn({ versionId: version.id }, 'Artifact content is empty');
             return null;
         }
 
@@ -420,9 +421,9 @@ async function getEDAResults(datasetId: string, tenantId: string) {
         logger.info({ datasetId, rowCount: data.length }, 'Generated EDA on-the-fly');
 
         return edaResults;
-    } catch (error) {
-        logger.error({ error }, 'Failed to generate EDA');
-        return null;
+    } catch (error: any) {
+        logger.error({ error: error.message, stack: error.stack }, 'Failed to generate EDA on-the-fly');
+        throw error; // Throw so the caller knows it failed
     }
 }
 
@@ -639,10 +640,11 @@ router.post('/analyze', async (req, res) => {
         }
 
         // Trigger analysis by getting results (will generate if not exists)
+        logger.info({ datasetId, tenantId }, 'Manually triggering EDA analysis');
         const results = await getEDAResults(datasetId, tenantId);
 
         if (!results) {
-            return res.status(404).json({ error: 'Dataset not found' });
+            return res.status(404).json({ error: 'Dataset version not found or no data available' });
         }
 
         res.json({
