@@ -106,6 +106,50 @@ const Admin: React.FC = () => {
 
                                 <div className="flex items-center justify-between space-x-4 rounded-lg border p-4">
                                     <div className="flex-1 space-y-1">
+                                        <p className="text-sm font-medium leading-none">Statistical Distributions</p>
+                                        <p className="text-xs text-slate-500">Enable histogram and frequency analysis tabs.</p>
+                                    </div>
+                                    <Switch
+                                        checked={localFlags.distributions ?? false}
+                                        onCheckedChange={() => toggleFlag('distributions')}
+                                    />
+                                </div>
+
+                                <div className="flex items-center justify-between space-x-4 rounded-lg border p-4">
+                                    <div className="flex-1 space-y-1">
+                                        <p className="text-sm font-medium leading-none">Relationship Correlations</p>
+                                        <p className="text-xs text-slate-500">Enable heatmaps and linear dependency matrix.</p>
+                                    </div>
+                                    <Switch
+                                        checked={localFlags.correlations ?? false}
+                                        onCheckedChange={() => toggleFlag('correlations')}
+                                    />
+                                </div>
+
+                                <div className="flex items-center justify-between space-x-4 rounded-lg border p-4">
+                                    <div className="flex-1 space-y-1">
+                                        <p className="text-sm font-medium leading-none">Outlier Detection</p>
+                                        <p className="text-xs text-slate-500">Identify extreme statistical anomalies for manual review.</p>
+                                    </div>
+                                    <Switch
+                                        checked={localFlags.outliers ?? false}
+                                        onCheckedChange={() => toggleFlag('outliers')}
+                                    />
+                                </div>
+
+                                <div className="flex items-center justify-between space-x-4 rounded-lg border p-4">
+                                    <div className="flex-1 space-y-1">
+                                        <p className="text-sm font-medium leading-none">Data Quality Scores</p>
+                                        <p className="text-xs text-slate-500">Show health assessment metrics and recommendations.</p>
+                                    </div>
+                                    <Switch
+                                        checked={localFlags.quality ?? false}
+                                        onCheckedChange={() => toggleFlag('quality')}
+                                    />
+                                </div>
+
+                                <div className="flex items-center justify-between space-x-4 rounded-lg border p-4">
+                                    <div className="flex-1 space-y-1">
                                         <p className="text-sm font-medium leading-none">Advanced Cleansing</p>
                                         <p className="text-xs text-slate-500">Access to AI-driven data imputation techniques.</p>
                                     </div>

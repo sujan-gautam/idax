@@ -225,7 +225,21 @@ app.post('/refresh', async (req, res) => {
             role: user.role
         });
 
-        res.json({ accessToken: newAccessToken });
+        res.json({
+            accessToken: newAccessToken,
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role: user.role,
+                tenantId: user.tenantId
+            },
+            tenant: {
+                id: user.tenant.id,
+                name: user.tenant.name,
+                plan: user.tenant.plan
+            }
+        });
 
     } catch (error) {
         logger.error(error, 'Token refresh failed');

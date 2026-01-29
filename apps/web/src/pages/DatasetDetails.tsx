@@ -3,22 +3,28 @@
  * 8 investigative tabs with backend integration
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
     ChevronLeft,
-    Play,
     Loader2,
     AlertCircle,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { OverviewTab } from '../components/tabs/OverviewTab';
-import { DistributionsTab } from '../components/tabs/DistributionsTab';
-import { CorrelationsTab } from '../components/tabs/CorrelationsTab';
-import { cn } from '../lib/utils';
+import { LoadingState } from '../components/common/LoadingState';
+
+// Lazy load heavy tab components
+const OverviewTab = lazy(() => import('../components/tabs/OverviewTab').then(m => ({ default: m.OverviewTab })));
+const DistributionsTab = lazy(() => import('../components/tabs/DistributionsTab').then(m => ({ default: m.DistributionsTab })));
+const CorrelationsTab = lazy(() => import('../components/tabs/CorrelationsTab').then(m => ({ default: m.CorrelationsTab })));
+const PreviewTab = lazy(() => import('../components/tabs/PreviewTab').then(m => ({ default: m.PreviewTab })));
+const OutliersTab = lazy(() => import('../components/tabs/OutliersTab').then(m => ({ default: m.OutliersTab })));
+const DataQualityTab = lazy(() => import('../components/tabs/DataQualityTab').then(m => ({ default: m.DataQualityTab })));
+const PreprocessingTab = lazy(() => import('../components/tabs/PreprocessingTab').then(m => ({ default: m.PreprocessingTab })));
+const VersionsTab = lazy(() => import('../components/tabs/VersionsTab').then(m => ({ default: m.VersionsTab })));
 
 const DatasetDetails: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -212,68 +218,92 @@ const DatasetDetails: React.FC = () => {
 
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 lg:w-auto">
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="preview">Preview</TabsTrigger>
-                    <TabsTrigger value="distributions">Distributions</TabsTrigger>
-                    <TabsTrigger value="correlations">Correlations</TabsTrigger>
-                    <TabsTrigger value="outliers">Outliers</TabsTrigger>
-                    <TabsTrigger value="quality">Quality</TabsTrigger>
-                    <TabsTrigger value="preprocessing">Preprocessing</TabsTrigger>
-                    <TabsTrigger value="versions">Versions</TabsTrigger>
-                </TabsList>
+                <div className="overflow-x-auto pb-2 scrollbar-hide">
+                    <TabsList className="flex w-max shrink-0 bg-transparent p-0 gap-2">
+                        <TabsTrigger
+                            value="overview"
+                            className="rounded-full px-6 py-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white bg-neutral-100 dark:bg-neutral-800"
+                        >
+                            Overview
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="preview"
+                            className="rounded-full px-6 py-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white bg-neutral-100 dark:bg-neutral-800"
+                        >
+                            Preview
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="distributions"
+                            className="rounded-full px-6 py-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white bg-neutral-100 dark:bg-neutral-800"
+                        >
+                            Distributions
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="correlations"
+                            className="rounded-full px-6 py-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white bg-neutral-100 dark:bg-neutral-800"
+                        >
+                            Correlations
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="outliers"
+                            className="rounded-full px-6 py-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white bg-neutral-100 dark:bg-neutral-800"
+                        >
+                            Outliers
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="quality"
+                            className="rounded-full px-6 py-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white bg-neutral-100 dark:bg-neutral-800"
+                        >
+                            Quality
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="preprocessing"
+                            className="rounded-full px-6 py-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white bg-neutral-100 dark:bg-neutral-800"
+                        >
+                            Preprocessing
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="versions"
+                            className="rounded-full px-6 py-2 data-[state=active]:bg-indigo-600 data-[state=active]:text-white bg-neutral-100 dark:bg-neutral-800"
+                        >
+                            Versions
+                        </TabsTrigger>
+                    </TabsList>
+                </div>
 
-                <TabsContent value="overview">
-                    <OverviewTab datasetId={id!} />
-                </TabsContent>
+                <Suspense fallback={<LoadingState variant="page" message="Loading tab..." />}>
+                    <TabsContent value="overview">
+                        <OverviewTab datasetId={id!} />
+                    </TabsContent>
 
-                <TabsContent value="preview">
-                    <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-12 text-center dark:border-neutral-800 dark:bg-neutral-900">
-                        <p className="text-neutral-600 dark:text-neutral-400">
-                            Preview tab coming soon
-                        </p>
-                    </div>
-                </TabsContent>
+                    <TabsContent value="preview">
+                        <PreviewTab datasetId={id!} />
+                    </TabsContent>
 
-                <TabsContent value="distributions">
-                    <DistributionsTab datasetId={id!} />
-                </TabsContent>
+                    <TabsContent value="distributions">
+                        <DistributionsTab datasetId={id!} />
+                    </TabsContent>
 
-                <TabsContent value="correlations">
-                    <CorrelationsTab datasetId={id!} />
-                </TabsContent>
+                    <TabsContent value="correlations">
+                        <CorrelationsTab datasetId={id!} />
+                    </TabsContent>
 
-                <TabsContent value="outliers">
-                    <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-12 text-center dark:border-neutral-800 dark:bg-neutral-900">
-                        <p className="text-neutral-600 dark:text-neutral-400">
-                            Outliers tab coming soon
-                        </p>
-                    </div>
-                </TabsContent>
+                    <TabsContent value="outliers">
+                        <OutliersTab datasetId={id!} />
+                    </TabsContent>
 
-                <TabsContent value="quality">
-                    <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-12 text-center dark:border-neutral-800 dark:bg-neutral-900">
-                        <p className="text-neutral-600 dark:text-neutral-400">
-                            Data Quality tab coming soon
-                        </p>
-                    </div>
-                </TabsContent>
+                    <TabsContent value="quality">
+                        <DataQualityTab datasetId={id!} />
+                    </TabsContent>
 
-                <TabsContent value="preprocessing">
-                    <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-12 text-center dark:border-neutral-800 dark:bg-neutral-900">
-                        <p className="text-neutral-600 dark:text-neutral-400">
-                            Preprocessing tab coming soon
-                        </p>
-                    </div>
-                </TabsContent>
+                    <TabsContent value="preprocessing">
+                        <PreprocessingTab />
+                    </TabsContent>
 
-                <TabsContent value="versions">
-                    <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-12 text-center dark:border-neutral-800 dark:bg-neutral-900">
-                        <p className="text-neutral-600 dark:text-neutral-400">
-                            Versions tab coming soon
-                        </p>
-                    </div>
-                </TabsContent>
+                    <TabsContent value="versions">
+                        <VersionsTab datasetId={id!} />
+                    </TabsContent>
+                </Suspense>
             </Tabs>
         </div>
     );

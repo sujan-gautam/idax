@@ -1,167 +1,111 @@
+/**
+ * PREPROCESSING TAB - Data Transformation & Cleaning
+ * ENTERPRISE feature
+ */
+
 import React from 'react';
-import {
-    Wand2,
-    Play,
-    History,
-    CheckCircle2,
-    Sparkles,
-    Zap,
-    Info,
-    ShieldCheck,
-    ChevronRight,
-    Loader2
-} from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
+import { Settings2, Wand2, ArrowRight, Table, Sparkles, Filter, ChevronRight } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { cn } from '../../lib/utils';
 
-interface PreprocessingTabProps {
-    datasetId: string;
-}
-
-const PreprocessingTab: React.FC<PreprocessingTabProps> = ({ datasetId }) => {
-    const recipes = [
-        {
-            id: 1,
-            name: 'Impute Missing Features',
-            description: 'Automatically fill missing numerical values using Median and categorical using Mode.',
-            impact: 'Affects 240 rows',
-            type: 'CLEANING',
-            confidence: 98
-        },
-        {
-            id: 2,
-            name: 'Encoding Pipeline',
-            description: 'Convert categorical strings into machine-learning ready numeric encodings.',
-            impact: 'Adds 12 new features',
-            type: 'FEATURE_ENG',
-            confidence: 94
-        },
-        {
-            id: 3,
-            name: 'Outlier Clipping',
-            description: 'Cap extreme values at the 1st and 99th percentiles to reduce model noise.',
-            impact: 'Modifies 15 outliers',
-            type: 'STABILIZATION',
-            confidence: 91
-        },
-    ];
-
+export const PreprocessingTab: React.FC = () => {
     return (
-        <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="space-y-1">
-                    <h2 className="text-xl font-bold tracking-tight">Preprocessing Recipes</h2>
-                    <p className="text-sm text-slate-500">Apply AI-driven transformations to prepare your data for modeling.</p>
+        <div className="space-y-6 animate-fade-in">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-0">Active Transformations</h2>
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                        View and manage cleaning steps applied to this dataset version
+                    </p>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
-                        <History className="mr-2 h-4 w-4" /> Audit Log
-                    </Button>
-                    <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
-                        <Zap className="mr-2 h-4 w-4" /> Run All Recipes
-                    </Button>
-                </div>
+                <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700">
+                    <Sparkles className="h-4 w-4" />
+                    Auto-Clean Dataset
+                </Button>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                {/* Main Recipe List */}
-                <div className="lg:col-span-2 space-y-4">
-                    <Card className="border-none shadow-sm bg-indigo-600 text-white overflow-hidden relative">
-                        <div className="absolute top-0 right-0 p-8 opacity-20 rotate-12">
-                            <Sparkles className="h-32 w-32" />
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <Card className="border-none bg-white dark:bg-neutral-900">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-base font-semibold">Parser Logic</CardTitle>
+                        <Table className="h-5 w-5 text-neutral-400" />
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-4">
+                            Original file format converted to internal JSON representation with schema inference.
+                        </p>
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-xs font-medium text-green-600 dark:text-green-400">
+                                <ChevronRight className="h-3 w-3" />
+                                Date normalization (ISO 8601)
+                            </div>
+                            <div className="flex items-center gap-2 text-xs font-medium text-green-600 dark:text-green-400">
+                                <ChevronRight className="h-3 w-3" />
+                                Trimmed whitespace from strings
+                            </div>
                         </div>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Wand2 className="h-5 w-5" />
-                                Smart Recommendations
-                            </CardTitle>
-                            <CardDescription className="text-indigo-100">
-                                IDA has analyzed your dataset quality and suggests these recipes to improve model performance.
-                            </CardDescription>
-                        </CardHeader>
-                    </Card>
+                    </CardContent>
+                </Card>
 
-                    <div className="space-y-3">
-                        {recipes.map((recipe) => (
-                            <Card key={recipe.id} className="border-none shadow-sm hover:shadow-md transition-all group overflow-hidden">
-                                <CardContent className="p-0">
-                                    <div className="flex flex-col md:flex-row">
-                                        <div className="w-full md:w-1.5 bg-indigo-500" />
-                                        <div className="flex-1 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                            <div className="space-y-1">
-                                                <div className="flex items-center gap-2">
-                                                    <h4 className="font-bold text-slate-900 dark:text-slate-100">{recipe.name}</h4>
-                                                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 font-bold uppercase tracking-tighter text-slate-500">
-                                                        {recipe.type}
-                                                    </span>
-                                                </div>
-                                                <p className="text-sm text-slate-500 leading-relaxed max-w-lg">
-                                                    {recipe.description}
-                                                </p>
-                                                <div className="flex items-center gap-4 pt-2">
-                                                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
-                                                        <CheckCircle2 className="h-3 w-3" /> {recipe.impact}
-                                                    </div>
-                                                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-indigo-600 uppercase tracking-wider">
-                                                        <ShieldCheck className="h-3 w-3" /> {recipe.confidence}% Confidence
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <Button className="shrink-0">
-                                                <Play className="mr-2 h-3.5 w-3.5 fill-current" /> Apply
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                </div>
+                <Card className="border-none bg-white dark:bg-neutral-900 opacity-60">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-base font-semibold">Missing Value Handling</CardTitle>
+                        <Wand2 className="h-5 w-5 text-neutral-400" />
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                            No active imputation detected. Missing values are currently preserved as nulls.
+                        </p>
+                    </CardContent>
+                </Card>
 
-                {/* Recipe Summary / Custom Recipe */}
-                <div className="space-y-4">
-                    <Card className="border-none shadow-sm h-full">
-                        <CardHeader>
-                            <CardTitle className="text-sm font-bold uppercase tracking-widest text-slate-500">Recipe Summary</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-slate-500">Applied Steps</span>
-                                    <span className="font-bold">0</span>
-                                </div>
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-slate-500">Pending Approvals</span>
-                                    <span className="font-bold">3</span>
-                                </div>
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-slate-500">Est. Accuracy Gain</span>
-                                    <span className="font-bold text-emerald-500">+4.2%</span>
-                                </div>
-                            </div>
-
-                            <div className="pt-6 border-t space-y-4">
-                                <h5 className="text-xs font-bold uppercase tracking-wider">Custom Transformation</h5>
-                                <p className="text-xs text-slate-500">Define your own python or SQL based transformations.</p>
-                                <Button variant="outline" className="w-full justify-between">
-                                    Create Custom Step
-                                    <ChevronRight className="h-4 w-4" />
-                                </Button>
-                            </div>
-
-                            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border flex items-start gap-3">
-                                <Info className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
-                                <p className="text-[10px] text-slate-500 leading-relaxed">
-                                    All transformations create a new immutable version of your dataset. You can rollback at any time from the Versions tab.
-                                </p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+                <Card className="border-none bg-white dark:bg-neutral-900 opacity-60">
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-base font-semibold">Feature Scaling</CardTitle>
+                        <Settings2 className="h-5 w-5 text-neutral-400" />
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                            No scaling (Standard/Min-Max) transformations applied to this version.
+                        </p>
+                    </CardContent>
+                </Card>
             </div>
+
+            {/* Pipeline Visualization */}
+            <Card className="border-none bg-white dark:bg-neutral-900">
+                <CardHeader>
+                    <CardTitle className="text-base font-semibold">Transformation Pipeline</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex items-center gap-4 py-8">
+                        <div className="flex flex-col items-center gap-2">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700">
+                                <Table className="h-6 w-6 text-neutral-600 dark:text-neutral-400" />
+                            </div>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Source</span>
+                        </div>
+
+                        <ArrowRight className="h-5 w-5 text-neutral-300" />
+
+                        <div className="flex flex-col items-center gap-2">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-900/50">
+                                <Settings2 className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                            </div>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Parser</span>
+                        </div>
+
+                        <ArrowRight className="h-5 w-5 text-neutral-300" />
+
+                        <div className="flex flex-col items-center gap-2">
+                            <div className="flex h-12 w-24 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900/50">
+                                <span className="text-xs font-bold text-blue-600 dark:text-blue-400">Active Ver.</span>
+                            </div>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Output</span>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
 };
-
-export default PreprocessingTab;

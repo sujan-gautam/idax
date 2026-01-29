@@ -113,20 +113,20 @@ export const useAuthStore = create<AuthState>()(
                     return
                 }
 
+                set({ isLoading: true })
                 try {
                     const response = await api.post('/auth/refresh', { refreshToken })
-                    const { accessToken } = response.data
+                    const { accessToken, user, tenant } = response.data
 
                     localStorage.setItem('accessToken', accessToken)
                     api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
-
-                    const userResponse = await api.get('/auth/me')
-                    const { user, tenant } = userResponse.data
 
                     set({ user, tenant, accessToken, error: null })
                 } catch (error) {
                     get().clearAuth()
                     throw error
+                } finally {
+                    set({ isLoading: false })
                 }
             }
         }),

@@ -1,183 +1,203 @@
-import React, { useState, useEffect } from 'react';
-import {
-    AlertCircle,
-    AlertTriangle,
-    Info,
-    CheckCircle2,
-    Loader2,
-    ArrowRight,
-    ShieldCheck,
-    Search,
-    Filter
-} from 'lucide-react';
-import { useAuthStore } from '../../store/useAuthStore';
+/**
+ * DATA QUALITY TAB - Issue Summary & Health Checks
+ * Professional Tier Feature
+ */
+
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { BadgeCheck, ShieldAlert, AlertCircle, CheckCircle2, Crown, Lock } from 'lucide-react';
 import { api } from '../../services/api';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { FeatureGate } from '../FeatureGate';
 import { Button } from '../ui/button';
-import { Input } from '../ui/input';
 import { cn } from '../../lib/utils';
 
 interface DataQualityTabProps {
     datasetId: string;
 }
 
-const DataQualityTab: React.FC<DataQualityTabProps> = ({ datasetId }) => {
-    const { tenant } = useAuthStore();
-    const [data, setData] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [filter, setFilter] = useState<string>('all');
+interface QualityIssue {
+    column: string;
+    type: string;
+    severity: 'high' | 'medium' | 'low';
+    message: string;
+    recommendation: string;
+}
 
-    useEffect(() => {
-        loadDataQuality();
-    }, [datasetId, tenant?.id]);
-
-    const loadDataQuality = async () => {
-        if (!tenant?.id) return;
-        try {
-            setLoading(true);
-            setError(null);
-            const response = await api.get(`/datasets/${datasetId}/eda`, {
-                headers: { 'x-tenant-id': tenant.id }
-            });
-            setData(response.data);
-        } catch (err: any) {
-            setError(err.response?.data?.error || 'Failed to load data quality analysis');
-        } finally {
-            setLoading(false);
-        }
+interface QualitySummary {
+    totalIssues: number;
+    summary: {
+        high: number;
+        medium: number;
+        low: number;
     };
+    issues: QualityIssue[];
+}
 
-    if (loading) {
+export const DataQualityTab: React.FC<DataQualityTabProps> = ({ datasetId }) => {
+    const { data: quality, isLoading } = useQuery<QualitySummary>({
+        queryKey: ['eda-quality', datasetId],
+        queryFn: async () => {
+            const response = await api.get(`/datasets/${datasetId}/eda/quality`);
+            return response.data;
+        }
+    });
+
+    if (isLoading) {
         return (
-            <div className="flex h-[400px] items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="space-y-4">
+                <div className="skeleton-loader h-8 w-64" />
+                <div className="grid gap-4 md:grid-cols-3">
+                    {[...Array(3)].map((_, i) => (
+                        <div key={i} className="skeleton-loader h-32" />
+                    ))}
+                </div>
+                <div className="skeleton-loader h-96 w-full" />
             </div>
         );
     }
 
-    if (error || !data?.dataQuality) {
+    if (!quality || quality.totalIssues === 0) {
         return (
-            <Card className="border-dashed py-24 text-center bg-transparent">
-                <CardContent className="flex flex-col items-center gap-4">
-                    <div className="h-16 w-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                        <ShieldCheck className="h-8 w-8 text-slate-400" />
-                    </div>
-                    <h3 className="text-lg font-semibold">Quality analysis not available</h3>
-                    <p className="text-sm text-slate-500 max-w-sm">
-                        Please run an EDA job to generate data quality assessments.
-                    </p>
-                </CardContent>
-            </Card>
+            <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
+                    <BadgeCheck className="h-10 w-10 text-green-600 dark:text-green-500" />
+                </div>
+                <h3 className="mt-6 text-2xl font-bold text-neutral-900 dark:text-neutral-0">Dataset looks healthy!</h3>
+                <p className="mt-2 text-neutral-600 dark:text-neutral-400">We didn't find any significant data quality issues.</p>
+            </div>
         );
     }
 
-    const { dataQuality: quality } = data;
-
-    const filteredIssues = quality.issues.filter((issue: any) =>
-        filter === 'all' || issue.severity === filter
-    );
-
-    return (
-        <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="space-y-1">
-                    <h2 className="text-xl font-bold tracking-tight">Data Quality Assessment</h2>
-                    <p className="text-sm text-slate-500">Identified issues and suggested remediations.</p>
+    const ProPaywall = () => (
+        <div className="flex min-h-[500px] items-center justify-center">
+            <div className="max-w-md text-center">
+                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600">
+                    <Lock className="h-10 w-10 text-white" />
                 </div>
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant={filter === 'all' ? 'secondary' : 'ghost'}
-                        size="sm"
-                        onClick={() => setFilter('all')}
-                    >
-                        All ({quality.totalIssues})
-                    </Button>
-                    <Button
-                        variant={filter === 'high' ? 'secondary' : 'ghost'}
-                        size="sm"
-                        onClick={() => setFilter('high')}
-                        className={cn(filter === 'high' && "text-red-600 bg-red-50 dark:bg-red-900/20")}
-                    >
-                        High ({quality.summary.high})
-                    </Button>
-                    <Button
-                        variant={filter === 'medium' ? 'secondary' : 'ghost'}
-                        size="sm"
-                        onClick={() => setFilter('medium')}
-                        className={cn(filter === 'medium' && "text-amber-600 bg-amber-50 dark:bg-amber-900/20")}
-                    >
-                        Medium ({quality.summary.medium})
-                    </Button>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6">
-                {filteredIssues.length === 0 ? (
-                    <Card className="border-none shadow-sm bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/20">
-                        <CardContent className="flex flex-col items-center justify-center py-12 gap-3">
-                            <CheckCircle2 className="h-12 w-12 text-emerald-500" />
-                            <div className="text-center">
-                                <h3 className="text-lg font-bold text-emerald-900 dark:text-emerald-100">No issues detected</h3>
-                                <p className="text-sm text-emerald-700 dark:text-emerald-400">
-                                    {filter === 'all' ? "Your dataset meets all quality standards." : `No issues with ${filter} severity found.`}
-                                </p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ) : (
-                    <div className="space-y-3">
-                        {filteredIssues.map((issue: any, idx: number) => (
-                            <Card key={idx} className="border-none shadow-sm hover:shadow-md transition-shadow overflow-hidden group">
-                                <div className={cn(
-                                    "absolute left-0 top-0 bottom-0 w-1",
-                                    issue.severity === 'high' ? "bg-red-500" :
-                                        issue.severity === 'medium' ? "bg-amber-500" : "bg-blue-500"
-                                )} />
-                                <CardContent className="p-5">
-                                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                                        <div className="flex gap-4">
-                                            <div className={cn(
-                                                "h-10 w-10 rounded-full flex items-center justify-center shrink-0",
-                                                issue.severity === 'high' ? "bg-red-50 dark:bg-red-900/20 text-red-600" :
-                                                    issue.severity === 'medium' ? "bg-amber-50 dark:bg-amber-900/20 text-amber-600" :
-                                                        "bg-blue-50 dark:bg-blue-900/20 text-blue-600"
-                                            )}>
-                                                {issue.severity === 'high' ? <AlertCircle className="h-5 w-5" /> :
-                                                    issue.severity === 'medium' ? <AlertTriangle className="h-5 w-5" /> :
-                                                        <Info className="h-5 w-5" />}
-                                            </div>
-                                            <div className="space-y-1">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-bold text-slate-900 dark:text-slate-100">{issue.column || 'Dataset'}</span>
-                                                    <span className={cn(
-                                                        "text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider",
-                                                        issue.severity === 'high' ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300" :
-                                                            issue.severity === 'medium' ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" :
-                                                                "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
-                                                    )}>
-                                                        {issue.type.replace('_', ' ')}
-                                                    </span>
-                                                </div>
-                                                <p className="text-sm text-slate-600 dark:text-slate-400">{issue.message}</p>
-                                                <div className="pt-2 flex items-center gap-2 text-primary text-xs font-semibold group-hover:translate-x-1 transition-transform cursor-pointer">
-                                                    <ArrowRight className="h-3 w-3" />
-                                                    <span>Recommendation: {issue.recommendation}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <Button variant="outline" size="sm" className="shrink-0">
-                                            Apply Fix
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                )}
+                <h3 className="mb-3 text-2xl font-bold text-neutral-900 dark:text-neutral-0">
+                    Smarter Data Quality
+                </h3>
+                <p className="mb-6 text-neutral-600 dark:text-neutral-400">
+                    Get automated health scores and repair recommendations with PRO tier quality scans
+                </p>
+                <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+                    <Crown className="mr-2 h-4 w-4" />
+                    Upgrade to PRO
+                </Button>
             </div>
         </div>
     );
-};
 
-export default DataQualityTab;
+    const { summary, issues } = quality;
+
+    return (
+        <FeatureGate feature="quality" fallback={<ProPaywall />}>
+            <div className="space-y-6 animate-fade-in">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h2 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-0">Data Quality Report</h2>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                            Automated scan result highlighting structural and statistical anomalies
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 px-4 py-2 dark:from-blue-900/20 dark:to-indigo-900/20">
+                        <Crown className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        <span className="text-sm font-medium text-blue-900 dark:text-blue-100">PRO Feature</span>
+                    </div>
+                </div>
+
+                {/* Severity Cards */}
+                <div className="grid gap-4 md:grid-cols-3">
+                    <Card className="border-l-4 border-l-red-500 bg-white dark:bg-neutral-900">
+                        <CardContent className="p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-widest text-red-500">Critical Issues</p>
+                                    <p className="mt-1 text-3xl font-bold text-neutral-900 dark:text-neutral-0">{summary.high}</p>
+                                </div>
+                                <ShieldAlert className="h-8 w-8 text-red-500" />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="border-l-4 border-l-orange-500 bg-white dark:bg-neutral-900">
+                        <CardContent className="p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-widest text-orange-500">Moderate Issues</p>
+                                    <p className="mt-1 text-3xl font-bold text-neutral-900 dark:text-neutral-0">{summary.medium}</p>
+                                </div>
+                                <AlertCircle className="h-8 w-8 text-orange-500" />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="border-l-4 border-l-blue-500 bg-white dark:bg-neutral-900">
+                        <CardContent className="p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-widest text-blue-500">Advice / Info</p>
+                                    <p className="mt-1 text-3xl font-bold text-neutral-900 dark:text-neutral-0">{summary.low}</p>
+                                </div>
+                                <CheckCircle2 className="h-8 w-8 text-blue-500" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Issues Table */}
+                <Card className="border-none bg-white dark:bg-neutral-900 overflow-hidden">
+                    <CardHeader className="border-b border-neutral-200 dark:border-neutral-800">
+                        <CardTitle className="text-base font-semibold">Identified Quality Issues</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                        <div className="overflow-x-auto">
+                            <table className="data-table w-full text-left">
+                                <thead>
+                                    <tr>
+                                        <th className="px-6 py-4">Severity</th>
+                                        <th className="px-6 py-4">Column / Area</th>
+                                        <th className="px-6 py-4">Issue Type</th>
+                                        <th className="px-6 py-4">Message</th>
+                                        <th className="px-6 py-4">Action Recommendation</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
+                                    {issues.map((issue, idx) => (
+                                        <tr key={idx} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <span className={cn(
+                                                    "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
+                                                    issue.severity === 'high' ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-900/50" :
+                                                        issue.severity === 'medium' ? "bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400 border border-orange-200 dark:border-orange-900/50" :
+                                                            "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50"
+                                                )}>
+                                                    {issue.severity}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 font-semibold text-neutral-900 dark:text-neutral-0">
+                                                {issue.column}
+                                            </td>
+                                            <td className="px-6 py-4 text-neutral-600 dark:text-neutral-400">
+                                                {issue.type.split('_').join(' ')}
+                                            </td>
+                                            <td className="px-6 py-4 text-neutral-600 dark:text-neutral-400">
+                                                {issue.message}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                                                    {issue.recommendation}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </FeatureGate>
+    );
+};

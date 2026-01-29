@@ -58,25 +58,33 @@ app.post('/jobs/parse', async (req, res) => {
 
         logger.info({ uploadId, s3Key: upload.s3Key }, 'Starting parse job');
 
-        // Download file from S3
-        const getCommand = new GetObjectCommand({
-            Bucket: BUCKET,
-            Key: upload.s3Key
-        });
-
-        let s3Response;
+        // Download file from S3 with local fallback
+        let fileBuffer: Uint8Array | undefined;
         try {
-            s3Response = await s3Client.send(getCommand);
+            const getCommand = new GetObjectCommand({
+                Bucket: BUCKET,
+                Key: upload.s3Key
+            });
+            const s3Response = await s3Client.send(getCommand);
+            fileBuffer = await s3Response.Body?.transformToByteArray();
+            logger.info({ s3Key: upload.s3Key }, 'Downloaded from S3');
         } catch (s3Err: any) {
-            logger.error({ s3Err, s3Key: upload.s3Key, bucket: BUCKET }, 'Failed to download from S3');
-            throw new Error(`S3 download failed: ${s3Err.message}`);
+            logger.warn({ s3Key: upload.s3Key }, 'S3 download failed, trying local fallback');
+            try {
+                // Try to get from upload-service local storage
+                const uploadUrl = process.env.UPLOAD_SERVICE_URL || 'http://localhost:8002';
+                const localRes = await fetch(`${uploadUrl}/local-s3/${upload.s3Key}`);
+                if (!localRes.ok) throw new Error(`Local fallback failed: ${localRes.statusText}`);
+                fileBuffer = new Uint8Array(await localRes.arrayBuffer());
+                logger.info({ s3Key: upload.s3Key }, 'Downloaded from local storage fallback');
+            } catch (fallbackErr: any) {
+                logger.error({ fallbackErr }, 'Local fallback also failed');
+                throw new Error(`S3 download and local fallback failed: ${s3Err.message}`);
+            }
         }
 
-        const fileBuffer = await s3Response.Body?.transformToByteArray();
-
         if (!fileBuffer) {
-            logger.error({ s3Key: upload.s3Key }, 'S3 response body is empty');
-            throw new Error('Failed to download file from S3: Body is empty');
+            throw new Error('Failed to download file: Body is empty');
         }
 
         // Parse based on content type
@@ -102,7 +110,6 @@ app.post('/jobs/parse', async (req, res) => {
 
         if (!parsedData || parsedData.length === 0) {
             logger.warn({ uploadId }, 'Parsed data is empty');
-            // We can still create a version with 0 rows
         }
 
         logger.info({
@@ -111,22 +118,32 @@ app.post('/jobs/parse', async (req, res) => {
             columnCount: schema.columns.length
         }, 'File parsed successfully');
 
-        // Store parsed data in S3
+        // Store parsed data in S3 with local fallback
         const artifactKey = `tenants/${upload.tenantId}/parsed/${upload.datasetId}/${Date.now()}.json`;
 
-        const putCommand = new PutObjectCommand({
-            Bucket: BUCKET,
-            Key: artifactKey,
-            Body: JSON.stringify(parsedData),
-            ContentType: 'application/json'
-        });
-
         try {
+            const putCommand = new PutObjectCommand({
+                Bucket: BUCKET,
+                Key: artifactKey,
+                Body: JSON.stringify(parsedData),
+                ContentType: 'application/json'
+            });
             await s3Client.send(putCommand);
             logger.info({ artifactKey }, 'Parsed data stored in S3');
         } catch (putErr: any) {
-            logger.error({ putErr, artifactKey }, 'Failed to store parsed data in S3');
-            throw new Error(`S3 upload failed: ${putErr.message}`);
+            logger.warn({ artifactKey }, 'S3 store failed, trying local fallback');
+            try {
+                const uploadUrl = process.env.UPLOAD_SERVICE_URL || 'http://localhost:8002';
+                const localRes = await fetch(`${uploadUrl}/local-s3/${artifactKey}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(parsedData)
+                });
+                if (!localRes.ok) throw new Error(`Local store failed: ${localRes.statusText}`);
+                logger.info({ artifactKey }, 'Parsed data stored in local storage fallback');
+            } catch (fallbackErr: any) {
+                logger.error({ fallbackErr }, 'Local store fallback failed');
+                throw new Error(`S3 store and local fallback failed: ${putErr.message}`);
+            }
         }
 
         if (!upload.datasetId) {

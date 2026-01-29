@@ -3,12 +3,14 @@ import { Box, Typography, LinearProgress, Alert } from '@mui/material';
 import { CloudUpload } from '@mui/icons-material';
 import { uploadFile } from '../services/api.ts';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/useAuthStore';
 
 const UploadComponent: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
+    const { tenant } = useAuthStore();
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -18,9 +20,9 @@ const UploadComponent: React.FC = () => {
         setError(null);
 
         try {
-            // Mock tenant/project IDs for MVP
-            const tenantId = 'tenant-123';
-            const projectId = 'proj-abc';
+            if (!tenant?.id) throw new Error('Tenant context not found');
+            const tenantId = tenant.id;
+            const projectId = 'default'; // Or get from actual project context
 
             const result = await uploadFile(file, tenantId, projectId);
             console.log('Upload complete:', result);

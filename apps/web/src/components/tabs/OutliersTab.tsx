@@ -1,197 +1,172 @@
-import React, { useState, useEffect } from 'react';
-import {
-    AlertTriangle,
-    Info,
-    Loader2,
-    Search,
-    ArrowRight,
-    ShieldAlert,
-    HelpCircle,
-    Eye
-} from 'lucide-react';
-import { useAuthStore } from '../../store/useAuthStore';
+/**
+ * OUTLIERS TAB - Anomaly & Extreme Value Detection
+ * ADVANCED tier feature
+ */
+
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { ShieldAlert, AlertTriangle, Info, Crown, Lock } from 'lucide-react';
 import { api } from '../../services/api';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { FeatureGate } from '../FeatureGate';
 import { Button } from '../ui/button';
-import { Input } from '../ui/input';
 import { cn } from '../../lib/utils';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "../ui/tooltip";
 
 interface OutliersTabProps {
     datasetId: string;
 }
 
-const OutliersTab: React.FC<OutliersTabProps> = ({ datasetId }) => {
-    const { tenant } = useAuthStore();
-    const [data, setData] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [searchQuery, setSearchQuery] = useState('');
+interface OutlierInfo {
+    method: string;
+    count: number;
+    percentage: number;
+    lowerBound: number;
+    upperBound: number;
+    examples: number[];
+}
 
-    useEffect(() => {
-        loadOutliers();
-    }, [datasetId, tenant?.id]);
-
-    const loadOutliers = async () => {
-        if (!tenant?.id) return;
-        try {
-            setLoading(true);
-            setError(null);
-            const response = await api.get(`/datasets/${datasetId}/eda`, {
-                headers: { 'x-tenant-id': tenant.id }
-            });
-            setData(response.data);
-        } catch (err: any) {
-            setError(err.response?.data?.error || 'Failed to load outliers');
-        } finally {
-            setLoading(false);
+export const OutliersTab: React.FC<OutliersTabProps> = ({ datasetId }) => {
+    const { data: outliers, isLoading } = useQuery<Record<string, OutlierInfo>>({
+        queryKey: ['eda-outliers', datasetId],
+        queryFn: async () => {
+            const response = await api.get(`/datasets/${datasetId}/eda/outliers`);
+            return response.data;
         }
-    };
+    });
 
-    if (loading) {
+    if (isLoading) {
         return (
-            <div className="flex h-[400px] items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="space-y-4">
+                <div className="skeleton-loader h-8 w-64" />
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {[...Array(6)].map((_, i) => (
+                        <div key={i} className="skeleton-loader h-48" />
+                    ))}
+                </div>
             </div>
         );
     }
 
-    if (error || !data?.outliers || Object.keys(data.outliers).length === 0) {
+    if (!outliers || Object.keys(outliers).length === 0) {
         return (
-            <Card className="border-dashed py-24 text-center bg-transparent">
-                <CardContent className="flex flex-col items-center gap-4">
-                    <div className="h-16 w-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                        <ShieldAlert className="h-8 w-8 text-slate-400" />
-                    </div>
-                    <h3 className="text-lg font-semibold">No outlier data available</h3>
-                    <p className="text-sm text-slate-500 max-w-sm">
-                        Outlier detection requires numeric columns and an executed analysis job.
-                    </p>
-                </CardContent>
-            </Card>
+            <div className="flex h-64 items-center justify-center rounded-xl bg-neutral-100 dark:bg-neutral-800">
+                <div className="text-center">
+                    <ShieldAlert className="mx-auto h-12 w-12 text-neutral-400" />
+                    <p className="mt-4 text-neutral-600 dark:text-neutral-400">No outliers detected in the dataset</p>
+                </div>
+            </div>
         );
     }
 
-    const outliers = data.outliers;
-    const columns = Object.keys(outliers).filter(col =>
-        col.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-    return (
-        <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="space-y-1">
-                    <h2 className="text-xl font-bold tracking-tight">Outlier Detection</h2>
-                    <p className="text-sm text-slate-500">Statistical anomalies identified via the IQR method.</p>
+    const ProPaywall = () => (
+        <div className="flex min-h-[500px] items-center justify-center">
+            <div className="max-w-md text-center">
+                <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-red-600">
+                    <Lock className="h-10 w-10 text-white" />
                 </div>
-                <div className="relative w-full md:w-64">
-                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
-                    <Input
-                        placeholder="Filter columns..."
-                        className="pl-9 h-9"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                </div>
-            </div>
-
-            <Card className="border-none shadow-sm bg-white dark:bg-slate-900 overflow-hidden">
-                <CardContent className="p-0 overflow-x-auto no-scrollbar">
-                    <table className="w-full border-collapse">
-                        <thead>
-                            <tr className="bg-slate-50 dark:bg-slate-800 text-left">
-                                <th className="py-3 px-6 text-[10px] font-bold uppercase tracking-wider text-slate-400">Column</th>
-                                <th className="py-3 px-6 text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Anomalies</th>
-                                <th className="py-3 px-6 text-[10px] font-bold uppercase tracking-wider text-slate-400">Percentage</th>
-                                <th className="py-3 px-6 text-[10px] font-bold uppercase tracking-wider text-slate-400 decoration-dotted underline cursor-help">
-                                    <TooltipProvider>
-                                        <Tooltip>
-                                            <TooltipTrigger>Bounds (Lower / Upper)</TooltipTrigger>
-                                            <TooltipContent>
-                                                Calculated as Q1 - 1.5IQR and Q3 + 1.5IQR
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
-                                </th>
-                                <th className="py-3 px-6 text-[10px] font-bold uppercase tracking-wider text-slate-400">Anomalous Points (Examples)</th>
-                                <th className="py-3 px-6 text-[10px] font-bold uppercase tracking-wider text-slate-400 text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y">
-                            {columns.map((col) => {
-                                const outlier = outliers[col];
-                                return (
-                                    <tr key={col} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group">
-                                        <td className="py-4 px-6">
-                                            <div className="flex items-center gap-2">
-                                                <div className={cn(
-                                                    "h-1.5 w-1.5 rounded-full shrink-0",
-                                                    outlier.count > 0 ? "bg-amber-500 animate-pulse" : "bg-emerald-500"
-                                                )} />
-                                                <span className="font-semibold text-slate-700 dark:text-slate-300">{col}</span>
-                                            </div>
-                                        </td>
-                                        <td className="py-4 px-6 text-sm font-medium">
-                                            {outlier.count.toLocaleString()}
-                                        </td>
-                                        <td className="py-4 px-6">
-                                            <div className={cn(
-                                                "inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tight",
-                                                outlier.percentage > 10 ? "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400" :
-                                                    outlier.percentage > 5 ? "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
-                                                        "bg-slate-50 text-slate-500 dark:bg-slate-800"
-                                            )}>
-                                                {outlier.percentage}%
-                                            </div>
-                                        </td>
-                                        <td className="py-4 px-6 text-xs text-slate-500 font-mono">
-                                            {outlier.lowerBound} <span className="mx-1">/</span> {outlier.upperBound}
-                                        </td>
-                                        <td className="py-4 px-6">
-                                            <div className="flex flex-wrap gap-1">
-                                                {outlier.examples.slice(0, 3).map((val: number, i: number) => (
-                                                    <div key={i} className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-medium font-mono">
-                                                        {val}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </td>
-                                        <td className="py-4 px-6 text-right">
-                                            <Button variant="ghost" size="sm" className="h-8 text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Eye className="h-3 w-3 mr-2" /> View Rows
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </CardContent>
-            </Card>
-
-            <div className="rounded-xl bg-slate-900 p-6 text-white overflow-hidden relative">
-                <div className="absolute top-0 right-0 p-8 opacity-10">
-                    <HelpCircle className="h-32 w-32" />
-                </div>
-                <div className="relative z-10 space-y-2">
-                    <h4 className="text-sm font-bold flex items-center gap-2">
-                        <Info className="h-4 w-4 text-blue-400" />
-                        How are outliers detected?
-                    </h4>
-                    <p className="text-xs text-slate-400 max-w-2xl leading-relaxed">
-                        IDA uses the standard <strong>Interquartile Range (IQR)</strong> method. We calculate the spread of the middle 50% of your data (the IQR = Q3 - Q1).
-                        Any points falling below Q1 - 1.5×IQR or above Q3 + 1.5×IQR are statistically classified as outliers.
-                        High outlier counts ( {'>'} 5% ) often indicate data entry errors or extreme variability that may require scaling.
-                    </p>
-                </div>
+                <h3 className="mb-3 text-2xl font-bold text-neutral-900 dark:text-neutral-0">
+                    Unlock Outlier Detection
+                </h3>
+                <p className="mb-6 text-neutral-600 dark:text-neutral-400">
+                    Identify extreme values and data anomalies with advanced statistical methods
+                </p>
+                <Button className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700">
+                    <Crown className="mr-2 h-4 w-4" />
+                    Upgrade to PRO
+                </Button>
             </div>
         </div>
     );
-};
 
-export default OutliersTab;
+    return (
+        <FeatureGate feature="outliers" fallback={<ProPaywall />}>
+            <div className="space-y-6 animate-fade-in">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h2 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-0">Outlier Detection</h2>
+                        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                            Identification of extreme values using the IQR (Interquartile Range) method
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-100 to-red-100 px-4 py-2 dark:from-orange-900/20 dark:to-red-900/20">
+                        <Crown className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                        <span className="text-sm font-medium text-orange-900 dark:text-orange-100">PRO Feature</span>
+                    </div>
+                </div>
+
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {Object.entries(outliers).map(([column, info]) => (
+                        <Card key={column} className={cn(
+                            "border-none transition-all hover:scale-[1.02]",
+                            info.count > 0 ? "bg-white dark:bg-neutral-900 shadow-md" : "bg-neutral-50 dark:bg-neutral-900/40 opacity-70"
+                        )}>
+                            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                <CardTitle className="text-base font-bold text-neutral-900 dark:text-neutral-0">
+                                    {column}
+                                </CardTitle>
+                                {info.count > 0 ? (
+                                    <AlertTriangle className="h-5 w-5 text-orange-500" />
+                                ) : (
+                                    <ShieldAlert className="h-5 w-5 text-green-500" />
+                                )}
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-3xl font-bold text-neutral-900 dark:text-neutral-0">
+                                        {info.count}
+                                    </span>
+                                    <span className="text-sm font-medium text-neutral-500">outliers</span>
+                                </div>
+                                <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
+                                    <div
+                                        className={cn("h-full transition-all", info.count > 0 ? "bg-orange-500" : "bg-green-500")}
+                                        style={{ width: `${Math.min(info.percentage * 5, 100)}%` }}
+                                    />
+                                </div>
+                                <p className="mt-1 text-xs text-neutral-500 font-medium">
+                                    {info.percentage.toFixed(2)}% of data points
+                                </p>
+
+                                <div className="mt-4 space-y-2">
+                                    <div className="flex justify-between text-xs border-b border-neutral-100 dark:border-neutral-800 pb-1">
+                                        <span className="text-neutral-500">Normal Range:</span>
+                                        <span className="font-semibold text-neutral-700 dark:text-neutral-300">
+                                            [{info.lowerBound}, {info.upperBound}]
+                                        </span>
+                                    </div>
+                                    {info.examples.length > 0 && (
+                                        <div>
+                                            <p className="text-[10px] uppercase tracking-wider font-bold text-neutral-400 mb-1">
+                                                Extreme Value Examples
+                                            </p>
+                                            <div className="flex flex-wrap gap-1">
+                                                {info.examples.map((ex, i) => (
+                                                    <span key={i} className="px-2 py-0.5 rounded bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 text-xs font-medium">
+                                                        {ex}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+
+                <Card className="bg-blue-50 border-none dark:bg-blue-900/10">
+                    <CardContent className="p-4 flex gap-3">
+                        <Info className="h-5 w-5 text-blue-600 shrink-0" />
+                        <div>
+                            <p className="text-sm font-semibold text-blue-900 dark:text-blue-300">How outliers are detected</p>
+                            <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">
+                                We use the IQR method: values falling below Q1 - 1.5*IQR or above Q3 + 1.5*IQR are flagged as outliers.
+                                Outliers often represent measurement errors, data entry issues, or rare but significant events.
+                            </p>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </FeatureGate>
+    );
+};

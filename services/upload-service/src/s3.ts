@@ -17,49 +17,63 @@ const s3Client = new S3Client({
 
 const BUCKET_NAME = process.env.S3_BUCKET_NAME || 'project-ida-uploads';
 
+export let s3Available = true;
+
 /**
  * INITIALIZE BUCKET - Create if not exists and set CORS
  */
 export const initS3 = async () => {
     try {
-        // Check if bucket exists
-        try {
-            await s3Client.send(new HeadBucketCommand({ Bucket: BUCKET_NAME }));
-            logger.info({ bucket: BUCKET_NAME }, 'S3 Bucket already exists');
-        } catch (err: any) {
-            if (err.name === 'NotFound' || err.$metadata?.httpStatusCode === 404) {
-                logger.info({ bucket: BUCKET_NAME }, 'S3 Bucket not found, creating...');
+        // Test connection
+        await s3Client.send(new HeadBucketCommand({ Bucket: BUCKET_NAME }));
+        logger.info({ bucket: BUCKET_NAME }, 'S3 Bucket connected');
+        s3Available = true;
+    } catch (err: any) {
+        if (err.name === 'NotFound' || err.$metadata?.httpStatusCode === 404) {
+            try {
                 await s3Client.send(new CreateBucketCommand({ Bucket: BUCKET_NAME }));
-                logger.info({ bucket: BUCKET_NAME }, 'S3 Bucket created successfully');
-            } else {
-                throw err;
+                logger.info({ bucket: BUCKET_NAME }, 'S3 Bucket created');
+                s3Available = true;
+            } catch (createErr) {
+                logger.error({ createErr }, 'S3 Bucket creation failed. Falling back to local storage.');
+                s3Available = false;
             }
+        } else {
+            logger.error({ err }, 'S3 is not available. Falling back to local storage.');
+            s3Available = false;
         }
+    }
 
-        // Set CORS policy (Crucial for browser uploads)
-        await s3Client.send(new PutBucketCorsCommand({
-            Bucket: BUCKET_NAME,
-            CORSConfiguration: {
-                CORSRules: [
-                    {
-                        AllowedHeaders: ['*'],
-                        AllowedMethods: ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'],
-                        AllowedOrigins: ['*'], // In production, restrict this to your domain
-                        ExposeHeaders: ['ETag'],
-                        MaxAgeSeconds: 3600
-                    }
-                ]
-            }
-        }));
-        logger.info({ bucket: BUCKET_NAME }, 'S3 CORS policy applied');
-        logger.info('S3 Gateway Initialization Complete');
-
-    } catch (error) {
-        logger.error({ error, bucket: BUCKET_NAME }, 'Failed to initialize S3');
+    if (s3Available) {
+        try {
+            // Set CORS policy (Crucial for browser uploads)
+            await s3Client.send(new PutBucketCorsCommand({
+                Bucket: BUCKET_NAME,
+                CORSConfiguration: {
+                    CORSRules: [
+                        {
+                            AllowedHeaders: ['*'],
+                            AllowedMethods: ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'],
+                            AllowedOrigins: ['*'], // In production, restrict this to your domain
+                            ExposeHeaders: ['ETag'],
+                            MaxAgeSeconds: 3600
+                        }
+                    ]
+                }
+            }));
+            logger.info({ bucket: BUCKET_NAME }, 'S3 CORS policy applied');
+            logger.info('S3 Gateway Initialization Complete');
+        } catch (error) {
+            logger.error({ error, bucket: BUCKET_NAME }, 'Failed to initialize S3 CORS');
+        }
     }
 };
 
 export const generatePresignedUploadUrl = async (key: string, _contentType: string) => {
+    if (!s3Available) {
+        // Fallback to local upload endpoint provided by this service
+        return `http://localhost:8002/local-s3/${key}`;
+    }
     const command = new PutObjectCommand({
         Bucket: BUCKET_NAME,
         Key: key,
@@ -68,6 +82,9 @@ export const generatePresignedUploadUrl = async (key: string, _contentType: stri
 };
 
 export const generatePresignedDownloadUrl = async (key: string) => {
+    if (!s3Available) {
+        return `http://localhost:8002/local-s3/${key}`;
+    }
     const command = new GetObjectCommand({
         Bucket: BUCKET_NAME,
         Key: key

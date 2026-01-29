@@ -3,16 +3,52 @@ import path from 'path';
 dotenv.config({ path: path.join(__dirname, '../../../.env') });
 
 import express from 'express';
+import cors from 'cors';
+import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '@project-ida/logger';
 import { prisma } from '@project-ida/db';
 import { authMiddleware, AuthRequest } from '@project-ida/auth-middleware';
-import { generatePresignedUploadUrl } from './s3';
+import { generatePresignedUploadUrl, s3Available } from './s3';
 
 const app = express();
 const PORT = process.env.PORT || 8002;
 
+app.use(cors());
+
+// Local storage directory if S3 is down
+const LOCAL_STORAGE_DIR = path.join(__dirname, '../../../.local-storage');
+if (!fs.existsSync(LOCAL_STORAGE_DIR)) {
+    fs.mkdirSync(LOCAL_STORAGE_DIR, { recursive: true });
+}
+
 app.use(express.json());
+
+// Mock S3 endpoint for local development without Docker
+app.put('/local-s3/*', express.raw({ type: '*/*', limit: '100mb' }), (req, res) => {
+    const fileKey = (req.params as any)[0];
+    const filePath = path.join(LOCAL_STORAGE_DIR, fileKey);
+    const dirPath = path.dirname(filePath);
+
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+    }
+
+    fs.writeFileSync(filePath, req.body);
+    logger.info({ fileKey, filePath }, 'Stored file in local storage fallback');
+    res.status(200).send('OK');
+});
+
+// GET endpoint to serve local files to parser-service
+app.get('/local-s3/*', (req, res) => {
+    const fileKey = (req.params as any)[0];
+    const filePath = path.join(LOCAL_STORAGE_DIR, fileKey);
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        res.status(404).send('Not Found');
+    }
+});
 
 // Initialize S3 Bucket
 import { initS3 } from './s3';

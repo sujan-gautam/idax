@@ -388,14 +388,29 @@ app.get('/datasets/:id/preview', async (req, res) => {
             return res.json([]);
         }
 
-        // Fetch S3 artifact
-        const command = new GetObjectCommand({
-            Bucket: process.env.S3_BUCKET_NAME || 'project-ida-uploads',
-            Key: version.artifactS3Key
-        });
-
-        const response = await s3Client.send(command);
-        const str = await response.Body?.transformToString();
+        // Fetch S3 artifact with local fallback
+        let str: string | undefined;
+        try {
+            const command = new GetObjectCommand({
+                Bucket: process.env.S3_BUCKET_NAME || 'project-ida-uploads',
+                Key: version.artifactS3Key
+            });
+            const response = await s3Client.send(command);
+            str = await response.Body?.transformToString();
+            logger.info({ s3Key: version.artifactS3Key }, 'Preview data fetched from S3');
+        } catch (s3Err: any) {
+            logger.warn({ s3Key: version.artifactS3Key }, 'S3 preview fetch failed, trying local fallback');
+            try {
+                const uploadUrl = process.env.UPLOAD_SERVICE_URL || 'http://localhost:8002';
+                const localRes = await fetch(`${uploadUrl}/local-s3/${version.artifactS3Key}`);
+                if (!localRes.ok) throw new Error(`Local fallback failed: ${localRes.statusText}`);
+                str = await localRes.text();
+                logger.info({ s3Key: version.artifactS3Key }, 'Preview data fetched from local storage');
+            } catch (fallbackErr: any) {
+                logger.error({ fallbackErr }, 'Preview fallback failed');
+                return res.json([]);
+            }
+        }
 
         if (!str) {
             return res.json([]);
@@ -500,13 +515,29 @@ app.get('/datasets/:id/eda', async (req, res) => {
             return res.status(404).json({ error: 'EDA result not available' });
         }
 
-        // Fetch from S3
-        const command = new GetObjectCommand({
-            Bucket: process.env.S3_BUCKET_NAME || 'project-ida-uploads',
-            Key: result.resultS3Key
-        });
-        const response = await s3Client.send(command);
-        const str = await response.Body?.transformToString();
+        // Fetch from S3 with local fallback
+        let str: string | undefined;
+        try {
+            const command = new GetObjectCommand({
+                Bucket: process.env.S3_BUCKET_NAME || 'project-ida-uploads',
+                Key: result.resultS3Key
+            });
+            const response = await s3Client.send(command);
+            str = await response.Body?.transformToString();
+            logger.info({ s3Key: result.resultS3Key }, 'EDA data fetched from S3');
+        } catch (s3Err: any) {
+            logger.warn({ s3Key: result.resultS3Key }, 'S3 EDA fetch failed, trying local fallback');
+            try {
+                const uploadUrl = process.env.UPLOAD_SERVICE_URL || 'http://localhost:8002';
+                const localRes = await fetch(`${uploadUrl}/local-s3/${result.resultS3Key}`);
+                if (!localRes.ok) throw new Error(`Local fallback failed: ${localRes.statusText}`);
+                str = await localRes.text();
+                logger.info({ s3Key: result.resultS3Key }, 'EDA data fetched from local storage');
+            } catch (fallbackErr: any) {
+                logger.error({ fallbackErr }, 'EDA fallback failed');
+                return res.status(500).json({ error: 'Failed to fetch EDA data' });
+            }
+        }
 
         res.send(str);
     } catch (error) {
@@ -576,6 +607,46 @@ app.get('/datasets/:id/eda/correlations', authMiddleware, async (req: AuthReques
     }
 });
 
+// Forward EDA outliers to EDA service
+app.get('/datasets/:id/eda/outliers', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const tenantId = req.tenantId!;
+        const edaServiceUrl = process.env.EDA_SERVICE_URL || 'http://localhost:8004';
+        const response = await fetch(`${edaServiceUrl}/eda/outliers?datasetId=${req.params.id}`, {
+            headers: {
+                'x-tenant-id': tenantId,
+                'Authorization': req.headers.authorization!
+            }
+        });
+
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        logger.error(error, 'Failed to get outliers');
+        res.status(500).json({ error: 'Failed to get outliers' });
+    }
+});
+
+// Forward EDA quality to EDA service
+app.get('/datasets/:id/eda/quality', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const tenantId = req.tenantId!;
+        const edaServiceUrl = process.env.EDA_SERVICE_URL || 'http://localhost:8004';
+        const response = await fetch(`${edaServiceUrl}/eda/quality?datasetId=${req.params.id}`, {
+            headers: {
+                'x-tenant-id': tenantId,
+                'Authorization': req.headers.authorization!
+            }
+        });
+
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        logger.error(error, 'Failed to get quality');
+        res.status(500).json({ error: 'Failed to get quality' });
+    }
+});
+
 // ============================================================================
 // TENANT MANAGEMENT (Admin)
 // ============================================================================
@@ -624,8 +695,18 @@ app.get('/tenants/:id/metadata', async (req, res) => {
         // Get current project count for quota check
         const projectCount = await prisma.project.count({ where: { tenantId: req.params.id } });
 
+        // Default flags for all users
+        const defaultFlags = {
+            distributions: true,
+            correlations: true,
+            outliers: true,
+            quality: true,
+            advancedCleansing: false,
+            exportReports: false
+        };
+
         res.json({
-            flags: flags?.flagsJson || {},
+            flags: { ...defaultFlags, ...(flags?.flagsJson as object || {}) },
             quotas: quotas ? {
                 ...quotas,
                 currentProjects: projectCount
