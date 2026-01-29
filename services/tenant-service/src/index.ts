@@ -627,7 +627,7 @@ app.get('/datasets/:id/eda/outliers', authMiddleware, async (req: AuthRequest, r
     }
 });
 
-// Forward EDA quality to EDA service
+// Forward EDA quality
 app.get('/datasets/:id/eda/quality', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const tenantId = req.tenantId!;
@@ -644,6 +644,32 @@ app.get('/datasets/:id/eda/quality', authMiddleware, async (req: AuthRequest, re
     } catch (error) {
         logger.error(error, 'Failed to get quality');
         res.status(500).json({ error: 'Failed to get quality' });
+    }
+});
+
+// Forward EDA clean
+app.post('/datasets/:id/eda/clean', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const tenantId = req.tenantId!;
+        const edaServiceUrl = process.env.EDA_SERVICE_URL || 'http://localhost:8004';
+        const response = await fetch(`${edaServiceUrl}/eda/clean`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-tenant-id': tenantId,
+                'Authorization': req.headers.authorization!
+            },
+            body: JSON.stringify({
+                datasetId: req.params.id,
+                options: req.body.options
+            })
+        });
+
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        logger.error(error, 'Failed to perform auto-clean');
+        res.status(500).json({ error: 'Auto-clean failed' });
     }
 });
 

@@ -297,7 +297,7 @@ const DatasetDetails: React.FC = () => {
                     </TabsContent>
 
                     <TabsContent value="preprocessing">
-                        <PreprocessingTab />
+                        <PreprocessingTab datasetId={id!} />
                     </TabsContent>
 
                     <TabsContent value="versions">

@@ -4,6 +4,7 @@ import { prisma } from '@project-ida/db';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { authMiddleware, AuthRequest } from '@project-ida/auth-middleware';
 import { runEDA } from './eda_logic';
+import { runAutoClean } from './clean_logic';
 
 const router = express.Router();
 
@@ -240,6 +241,68 @@ router.get('/quality', authMiddleware, async (req: AuthRequest, res) => {
         res.json(edaResults.dataQuality);
     } catch (error: any) {
         res.status(500).json({ error: error.message });
+    }
+});
+
+router.post('/clean', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const { datasetId, options } = req.body;
+        const tenantId = req.user?.tenantId;
+
+        if (!datasetId || !tenantId) {
+            return res.status(400).json({ error: 'DatasetId and tenant session required' });
+        }
+
+        const dataset = await prisma.dataset.findFirst({
+            where: { id: datasetId, tenantId },
+            include: {
+                versions: {
+                    orderBy: { versionNumber: 'desc' },
+                    take: 1
+                }
+            }
+        });
+
+        if (!dataset || !dataset.versions[0]) {
+            return res.status(404).json({ error: 'Dataset version not found' });
+        }
+
+        const version = dataset.versions[0];
+
+        // Fetch data
+        let content: string | undefined;
+        try {
+            const getCommand = new GetObjectCommand({
+                Bucket: BUCKET,
+                Key: version.artifactS3Key
+            });
+            const s3Response = await s3Client.send(getCommand);
+            content = await s3Response.Body?.transformToString();
+        } catch (s3Err) {
+            const uploadUrl = process.env.UPLOAD_SERVICE_URL || 'http://localhost:8002';
+            const localRes = await fetch(`${uploadUrl}/local-s3/${version.artifactS3Key}`);
+            if (localRes.ok) content = await localRes.text();
+        }
+
+        if (!content) {
+            return res.status(404).json({ error: 'Dataset content not found' });
+        }
+
+        const data = JSON.parse(content);
+        const { data: cleanedData, summary } = runAutoClean(data, version.schemaJson as any, options);
+
+        logger.info({ datasetId, tenantId }, 'Auto-clean completed');
+
+        // Note: In a real system, we'd save this as a NEW VERSION in S3 and DB.
+        // For this demo/task, we return the summary and first 10 rows of cleaned data.
+        res.json({
+            summary,
+            preview: cleanedData.slice(0, 10),
+            full_data_length: cleanedData.length
+        });
+    } catch (error: any) {
+        logger.error({ error: error.message }, 'Auto-clean failed');
+        res.status(500).json({ error: 'Auto-clean failed', message: error.message });
     }
 });
 
