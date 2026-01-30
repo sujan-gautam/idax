@@ -13,9 +13,11 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 import { Button } from '../components/ui/button';
+import { cn } from '../lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { LoadingState } from '../components/common/LoadingState';
 import AiChat from '../components/analytics/AiChat';
+import { Sparkles } from 'lucide-react';
 
 // Lazy load heavy tab components
 const OverviewTab = lazy(() => import('../components/tabs/OverviewTab').then(m => ({ default: m.OverviewTab })));
@@ -31,6 +33,7 @@ const DatasetDetails: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('overview');
+    const [isAiOpen, setIsAiOpen] = useState(false);
 
     // Fetch dataset info
     const { data: dataset, isLoading: datasetLoading } = useQuery({
@@ -140,28 +143,40 @@ const DatasetDetails: React.FC = () => {
             </div>
         );
     }
-
     return (
-        <div className="p-6 space-y-6 animate-fade-in">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" onClick={() => navigate('/datasets')}><ChevronLeft className="h-4 w-4" /></Button>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100">{dataset.name}</h1>
-                            <div className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider">Indexed</div>
+        <div className="relative min-h-screen bg-white dark:bg-neutral-950 overflow-x-hidden">
+            {/* Main Content Area */}
+            <div className={cn(
+                "p-6 space-y-6 transition-all duration-500 ease-in-out",
+                isAiOpen ? "lg:pr-0 lg:mr-[400px]" : "mr-0"
+            )}>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <Button variant="ghost" size="sm" onClick={() => navigate('/datasets')}><ChevronLeft className="h-4 w-4" /></Button>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100">{dataset.name}</h1>
+                                <div className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wider">Indexed</div>
+                            </div>
+                            <p className="text-sm text-slate-500 mt-0.5">{dataset.description || 'Exploratory Data Analysis Report'}</p>
                         </div>
-                        <p className="text-sm text-slate-500 mt-0.5">{dataset.description || 'Exploratory Data Analysis Report'}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            onClick={() => setIsAiOpen(true)}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 font-bold shadow-lg shadow-indigo-500/20 px-4"
+                        >
+                            <Sparkles className="h-4 w-4" />
+                            Ask IDA AI
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={handleTriggerEDA} disabled={triggeringEDA} className="text-xs h-10">
+                            {triggeringEDA && <Loader2 className="h-3 w-3 animate-spin mr-2" />}
+                            {triggeringEDA ? 'Syncing...' : 'Force Re-analyze'}
+                        </Button>
                     </div>
                 </div>
-                <Button variant="outline" size="sm" onClick={handleTriggerEDA} disabled={triggeringEDA} className="text-xs">
-                    {triggeringEDA && <Loader2 className="h-3 w-3 animate-spin mr-2" />}
-                    {triggeringEDA ? 'Syncing...' : 'Force Re-analyze'}
-                </Button>
-            </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-                <div className="lg:col-span-3 space-y-6">
+                <div className="space-y-6">
                     <Tabs value={activeTab} onValueChange={setActiveTab}>
                         <div className="overflow-x-auto pb-4 scrollbar-hide">
                             <TabsList className="bg-slate-100/50 dark:bg-slate-900/50 p-1 rounded-full w-fit flex gap-1 border border-slate-200 dark:border-slate-800">
@@ -184,10 +199,39 @@ const DatasetDetails: React.FC = () => {
                         </div>
                     </Tabs>
                 </div>
-                <div className="lg:col-span-1 sticky top-6">
-                    <AiChat datasetId={id} compact={false} />
+            </div>
+
+            {/* AI Floating Sidebar (Professional Drawer Style) */}
+            <div className={cn(
+                "fixed top-0 right-0 h-full w-full lg:w-[400px] z-50 bg-white dark:bg-slate-900 shadow-2xl transition-all duration-500 ease-in-out transform border-l border-slate-200 dark:border-slate-800",
+                isAiOpen ? "translate-x-0" : "translate-x-full"
+            )}>
+                <div className="h-full flex flex-col">
+                    {/* Drawer Header Controls */}
+                    <div className="absolute left-[-48px] top-24 hidden lg:block">
+                        {!isAiOpen && (
+                            <Button
+                                onClick={() => setIsAiOpen(true)}
+                                className="h-12 w-12 rounded-l-2xl rounded-r-none bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl animate-pulse-subtle"
+                            >
+                                <Sparkles className="h-5 w-5" />
+                            </Button>
+                        )}
+                    </div>
+
+                    <div className="flex-1 flex flex-col overflow-hidden h-full">
+                        <AiChat datasetId={id} onClose={() => setIsAiOpen(false)} />
+                    </div>
                 </div>
             </div>
+
+            {/* Backdrop for mobile */}
+            {isAiOpen && (
+                <div
+                    className="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-40 lg:hidden"
+                    onClick={() => setIsAiOpen(false)}
+                />
+            )}
         </div>
     );
 };

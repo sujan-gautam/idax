@@ -463,6 +463,24 @@
     }
 }
 
+@keyframes pulseSubtle {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.85;
+        transform: scale(1.02);
+    }
+}
+
+.animate-pulse-subtle {
+    animation: pulseSubtle 3s infinite ease-in-out;
+}
+
 /* ===== PRINT STYLES ===== */
 
 @media print {

@@ -1,0 +1,11 @@
+Order ID,Table,Items,Total,Status,Placed,Archived
+56,5,CHICKEN PIZZA (2 pcs) (x2),$10.98 ,Completed,"3/21/2025, 08:49 PM",No
+55,5,Spicy Chicken Burger (x3),$27.98 ,Cancelled,"3/21/2025, 08:48 PM",No
+54,5,Spicy Chicken Burger (x3),$27.98 ,Completed,"3/21/2025, 08:46 PM",No
+53,5,Spicy Chicken Burger (x3),$27.98 ,Completed,"3/21/2025, 08:44 PM",No
+52,5,Spicy Chicken Burger (x3),$27.98 ,Completed,"3/21/2025, 08:42 PM",No
+51,4,CHICKEN PIZZA (2 pcs) (x2),$10.98 ,Completed,"3/21/2025, 08:40 PM",Yes
+50,4,SPRITE  (x2),$31.98 ,Completed,"3/21/2025, 08:39 PM",Yes
+49,2,STEAMED CHICKEN MOMO (x2),$26.98 ,Completed,"3/21/2025, 08:30 PM",No
+48,2,Spicy Chicken Burger (x3),$27.98 ,Completed,"3/21/2025, 08:23 PM",Yes
+47,1,COCA COLA (x1),$13.99 ,Completed,"3/21/2025, 06:54 PM",Yes
