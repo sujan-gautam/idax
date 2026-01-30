@@ -1,0 +1,3515 @@
+[
+  {
+    "id": "525bf8c9-621a-4cdc-b17a-1e76b84376b6",
+    "datasetId": "e5bb748d-0b36-43be-a113-849bb2c3f47c",
+    "versionNumber": 1,
+    "parentVersionId": null,
+    "artifactS3Key": "tenants/91ebf6ad-1100-41ab-8dc2-c7d54a5ab58b/parsed/e5bb748d-0b36-43be-a113-849bb2c3f47c/1769741375955.json",
+    "schemaJson": {
+      "columns": [
+        {
+          "name": "Serial No.",
+          "type": "number",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 21,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            701,
+            702,
+            703,
+            704,
+            705
+          ]
+        },
+        {
+          "name": "Student Name",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 21,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "Ananda Kumar",
+            "Ayusha Kumar",
+            "Bibek Shekroma",
+            "Anish Pariyar",
+            "Anisha Kumar"
+          ]
+        },
+        {
+          "name": "Subject",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 4.76,
+          "sampleValues": [
+            "Nepali"
+          ]
+        },
+        {
+          "name": "Signature",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 19,
+          "uniqueRatio": 90.48,
+          "sampleValues": [
+            "AP",
+            "PI",
+            "A1",
+            "Anisha",
+            "Angali"
+          ]
+        },
+        {
+          "name": "Marks",
+          "type": "number",
+          "nullable": true,
+          "nullCount": 4,
+          "nullRatio": 19.05,
+          "cardinality": 12,
+          "uniqueRatio": 70.59,
+          "sampleValues": [
+            5,
+            7.5,
+            15,
+            10,
+            1
+          ]
+        },
+        {
+          "name": "Grade",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 5,
+          "uniqueRatio": 23.81,
+          "sampleValues": [
+            "20+22",
+            "20+24",
+            "22+25",
+            "22+22",
+            "20+25"
+          ]
+        }
+      ],
+      "rowCount": 21,
+      "columnCount": 6
+    },
+    "statsSummaryJson": null,
+    "sourceType": "UPLOAD",
+    "sourceId": "bffe57cf-0968-4221-b9b4-26ef32174e53",
+    "rowCount": 21,
+    "columnCount": 6,
+    "createdAt": "2026-01-30T02:49:36.328Z",
+    "createdBy": null,
+    "dataset": {
+      "id": "e5bb748d-0b36-43be-a113-849bb2c3f47c",
+      "tenantId": "91ebf6ad-1100-41ab-8dc2-c7d54a5ab58b",
+      "projectId": "6cb0306a-2574-4685-9171-6c9054b4c389",
+      "name": "student_data.json",
+      "sourceType": "UPLOAD",
+      "activeVersionId": "525bf8c9-621a-4cdc-b17a-1e76b84376b6",
+      "createdAt": "2026-01-30T02:49:34.292Z"
+    },
+    "edaResults": [
+      {
+        "id": "c29255ad-6281-4eb4-9533-7f5b8770f8b5",
+        "tenantId": "91ebf6ad-1100-41ab-8dc2-c7d54a5ab58b",
+        "datasetVersionId": "525bf8c9-621a-4cdc-b17a-1e76b84376b6",
+        "resultS3Key": "tenants/91ebf6ad-1100-41ab-8dc2-c7d54a5ab58b/eda/525bf8c9-621a-4cdc-b17a-1e76b84376b6/1769741378322.json",
+        "summaryJson": {
+          "overview": {
+            "rowCount": 21,
+            "totalCells": 126,
+            "columnCount": 6,
+            "columnTypes": {
+              "number": 2,
+              "string": 4
+            },
+            "missingCells": 4,
+            "missingRatio": 3.17,
+            "duplicateRows": 0,
+            "duplicateRatio": 0
+          },
+          "qualitySummary": {
+            "low": 1,
+            "high": 0,
+            "medium": 1
+          }
+        },
+        "status": "completed",
+        "results": null,
+        "errorMessage": null,
+        "createdAt": "2026-01-30T02:49:37.455Z"
+      }
+    ]
+  },
+  {
+    "id": "1b24f9a3-17cc-4c6f-af80-884fba239860",
+    "datasetId": "04468b83-4fdf-47de-b793-657253812213",
+    "versionNumber": 1,
+    "parentVersionId": null,
+    "artifactS3Key": "tenants/3f96438f-1bf1-4ddd-9eca-25aeacf7dd32/parsed/04468b83-4fdf-47de-b793-657253812213/1769726495958.json",
+    "schemaJson": {
+      "columns": [
+        {
+          "name": "_id",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "696eae434e4519250d176e40"
+          ]
+        },
+        {
+          "name": "userId",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "6917c5f0c30cdce064258f00"
+          ]
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "student_data"
+          ]
+        },
+        {
+          "name": "fileName",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "student_data.xlsx"
+          ]
+        },
+        {
+          "name": "fileSize",
+          "type": "number",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            6308
+          ]
+        },
+        {
+          "name": "mimeType",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          ]
+        },
+        {
+          "name": "rawData",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            [
+              {
+                "Grade": "20+22",
+                "Marks": 5,
+                "Subject": "Nepali",
+                "Signature": "AP",
+                "Serial No.": 701,
+                "Student Name": "Ananda Kumar"
+              },
+              {
+                "Grade": "20+24",
+                "Marks": 7.5,
+                "Subject": "Nepali",
+                "Signature": "PI",
+                "Serial No.": 702,
+                "Student Name": "Ayusha Kumar"
+              },
+              {
+                "Grade": "20+24",
+                "Marks": 7.5,
+                "Subject": "Nepali",
+                "Signature": "A1",
+                "Serial No.": 703,
+                "Student Name": "Bibek Shekroma"
+              },
+              {
+                "Grade": "22+25",
+                "Marks": 15,
+                "Subject": "Nepali",
+                "Signature": "A1",
+                "Serial No.": 704,
+                "Student Name": "Anish Pariyar"
+              },
+              {
+                "Grade": "22+25",
+                "Marks": 10,
+                "Subject": "Nepali",
+                "Signature": "Anisha",
+                "Serial No.": 705,
+                "Student Name": "Anisha Kumar"
+              },
+              {
+                "Grade": "22+22",
+                "Marks": 1,
+                "Subject": "Nepali",
+                "Signature": "Angali",
+                "Serial No.": 706,
+                "Student Name": "Angali Kumari"
+              },
+              {
+                "Grade": "20+22",
+                "Marks": 5.5,
+                "Subject": "Nepali",
+                "Signature": "Asmita",
+                "Serial No.": 707,
+                "Student Name": "Asmita Pariyar"
+              },
+              {
+                "Grade": "20+22",
+                "Marks": 5.5,
+                "Subject": "Nepali",
+                "Signature": "Babita",
+                "Serial No.": 708,
+                "Student Name": "Babita Nepali"
+              },
+              {
+                "Grade": "22+25",
+                "Marks": 17.5,
+                "Subject": "Nepali",
+                "Signature": "Bardan",
+                "Serial No.": 709,
+                "Student Name": "Bardan Aryal"
+              },
+              {
+                "Grade": "20+22",
+                "Subject": "Nepali",
+                "Signature": "Bibek",
+                "Serial No.": 710,
+                "Student Name": "Bibek Darji"
+              },
+              {
+                "Grade": "20+22",
+                "Subject": "Nepali",
+                "Signature": "Bipin",
+                "Serial No.": 711,
+                "Student Name": "Bipin Nepali"
+              },
+              {
+                "Grade": "20+25",
+                "Marks": 14.5,
+                "Subject": "Nepali",
+                "Signature": "Bishwash",
+                "Serial No.": 712,
+                "Student Name": "Bishwash Kumar"
+              },
+              {
+                "Grade": "22+25",
+                "Marks": 17.5,
+                "Subject": "Nepali",
+                "Signature": "Dipendra",
+                "Serial No.": 714,
+                "Student Name": "Dipendra Kumar"
+              },
+              {
+                "Grade": "20+22",
+                "Subject": "Nepali",
+                "Signature": "Eak",
+                "Serial No.": 715,
+                "Student Name": "Eak Bahadur"
+              },
+              {
+                "Grade": "20+22",
+                "Marks": 5.5,
+                "Subject": "Nepali",
+                "Signature": "Ganga",
+                "Serial No.": 716,
+                "Student Name": "Ganga Kumar"
+              },
+              {
+                "Grade": "22+22",
+                "Marks": 10.5,
+                "Subject": "Nepali",
+                "Signature": "Ganga",
+                "Serial No.": 717,
+                "Student Name": "Ganga Thapa"
+              },
+              {
+                "Grade": "20+22",
+                "Subject": "Nepali",
+                "Signature": "Immanuel",
+                "Serial No.": 718,
+                "Student Name": "Immanuel Kumar"
+              },
+              {
+                "Grade": "22+22",
+                "Marks": 10.5,
+                "Subject": "Nepali",
+                "Signature": "Indira",
+                "Serial No.": 719,
+                "Student Name": "Indira Kumar"
+              },
+              {
+                "Grade": "20+25",
+                "Marks": 14,
+                "Subject": "Nepali",
+                "Signature": "Jenny",
+                "Serial No.": 720,
+                "Student Name": "Jenny Gurung"
+              },
+              {
+                "Grade": "22+22",
+                "Marks": 9.5,
+                "Subject": "Nepali",
+                "Signature": "Jyoti",
+                "Serial No.": 722,
+                "Student Name": "Jyoti Kumari"
+              },
+              {
+                "Grade": "20+22",
+                "Marks": 7,
+                "Subject": "Nepali",
+                "Signature": "Karan",
+                "Serial No.": 723,
+                "Student Name": "Karan Budhathoki"
+              }
+            ]
+          ]
+        },
+        {
+          "name": "analysis",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            {
+              "columns": {
+                "Grade": {
+                  "type": "numeric",
+                  "stats": {
+                    "q1": "0.00",
+                    "q3": "3.00",
+                    "iqr": "3.00",
+                    "max": "4.00",
+                    "min": "0.00",
+                    "std": "1.43",
+                    "mean": "1.43",
+                    "count": 21,
+                    "median": "1.00",
+                    "outliers": 0,
+                    "skewness": "0.39"
+                  },
+                  "unique": 5,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Marks": {
+                  "type": "numeric",
+                  "stats": {
+                    "q1": "-0.63",
+                    "q3": "0.21",
+                    "iqr": "0.85",
+                    "max": "1.90",
+                    "min": "-2.08",
+                    "std": "1.00",
+                    "mean": "-0.00",
+                    "count": 21,
+                    "median": "-0.00",
+                    "outliers": 3,
+                    "skewness": "0.24"
+                  },
+                  "unique": 13,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Subject": {
+                  "type": "numeric",
+                  "stats": {
+                    "q1": "0.00",
+                    "q3": "0.00",
+                    "iqr": "0.00",
+                    "max": "0.00",
+                    "min": "0.00",
+                    "std": "0.00",
+                    "mean": "0.00",
+                    "count": 21,
+                    "median": "0.00",
+                    "outliers": 0,
+                    "skewness": "NaN"
+                  },
+                  "unique": 1,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Signature": {
+                  "type": "text",
+                  "stats": null,
+                  "unique": 19,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Serial No.": {
+                  "type": "numeric",
+                  "stats": {
+                    "q1": "-0.83",
+                    "q3": "0.83",
+                    "iqr": "1.66",
+                    "max": "1.73",
+                    "min": "-1.59",
+                    "std": "1.00",
+                    "mean": "0.00",
+                    "count": 21,
+                    "median": "-0.08",
+                    "outliers": 0,
+                    "skewness": "0.10"
+                  },
+                  "unique": 21,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Student Name": {
+                  "type": "text",
+                  "stats": null,
+                  "unique": 21,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                }
+              },
+              "rowCount": 21,
+              "columnCount": 6,
+              "dateColumns": [],
+              "correlations": [
+                {
+                  "col1": "Marks",
+                  "col2": "Grade",
+                  "correlation": "0.441"
+                },
+                {
+                  "col1": "Serial No.",
+                  "col2": "Marks",
+                  "correlation": "0.217"
+                },
+                {
+                  "col1": "Serial No.",
+                  "col2": "Grade",
+                  "correlation": "0.217"
+                },
+                {
+                  "col1": "Serial No.",
+                  "col2": "Subject",
+                  "correlation": "0.000"
+                },
+                {
+                  "col1": "Subject",
+                  "col2": "Marks",
+                  "correlation": "0.000"
+                },
+                {
+                  "col1": "Subject",
+                  "col2": "Grade",
+                  "correlation": "0.000"
+                }
+              ],
+              "duplicateStats": {
+                "Grade": {
+                  "totalValues": 21,
+                  "uniqueValues": 5,
+                  "topDuplicates": [
+                    {
+                      "count": 9,
+                      "value": "0"
+                    },
+                    {
+                      "count": 4,
+                      "value": "2"
+                    },
+                    {
+                      "count": 4,
+                      "value": "3"
+                    },
+                    {
+                      "count": 2,
+                      "value": "1"
+                    },
+                    {
+                      "count": 2,
+                      "value": "4"
+                    }
+                  ],
+                  "duplicateCount": 16,
+                  "duplicatePercentage": "76.2"
+                },
+                "Marks": {
+                  "totalValues": 21,
+                  "uniqueValues": 13,
+                  "topDuplicates": [
+                    {
+                      "count": 4,
+                      "value": "-4.2887329155961366e-16"
+                    },
+                    {
+                      "count": 3,
+                      "value": "-0.9941408214999444"
+                    },
+                    {
+                      "count": 2,
+                      "value": "-0.5112724224856858"
+                    },
+                    {
+                      "count": 2,
+                      "value": "1.903069572585607"
+                    },
+                    {
+                      "count": 2,
+                      "value": "0.21303017603570198"
+                    }
+                  ],
+                  "duplicateCount": 8,
+                  "duplicatePercentage": "38.1"
+                },
+                "Subject": {
+                  "totalValues": 21,
+                  "uniqueValues": 1,
+                  "topDuplicates": [
+                    {
+                      "count": 21,
+                      "value": "0"
+                    }
+                  ],
+                  "duplicateCount": 20,
+                  "duplicatePercentage": "95.2"
+                },
+                "Signature": {
+                  "totalValues": 21,
+                  "uniqueValues": 19,
+                  "topDuplicates": [
+                    {
+                      "count": 2,
+                      "value": "A1"
+                    },
+                    {
+                      "count": 2,
+                      "value": "Ganga"
+                    }
+                  ],
+                  "duplicateCount": 2,
+                  "duplicatePercentage": "9.5"
+                }
+              },
+              "numericColumns": [
+                "Serial No.",
+                "Subject",
+                "Marks",
+                "Grade"
+              ],
+              "hasInfiniteValues": false,
+              "categoricalColumns": []
+            }
+          ]
+        },
+        {
+          "name": "preprocessedData",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            [
+              {
+                "Grade": 0,
+                "Marks": -1.114857921253509,
+                "Subject": 0,
+                "Signature": "AP",
+                "Serial No.": -1.585462131317065,
+                "Student Name": "Ananda Kumar"
+              },
+              {
+                "Grade": 1,
+                "Marks": -0.5112724224856858,
+                "Subject": 0,
+                "Signature": "PI",
+                "Serial No.": -1.434807358657977,
+                "Student Name": "Ayusha Kumar"
+              },
+              {
+                "Grade": 1,
+                "Marks": -0.5112724224856858,
+                "Subject": 0,
+                "Signature": "A1",
+                "Serial No.": -1.28415258599889,
+                "Student Name": "Bibek Shekroma"
+              },
+              {
+                "Grade": 2,
+                "Marks": 1.299484073817784,
+                "Subject": 0,
+                "Signature": "A1",
+                "Serial No.": -1.133497813339802,
+                "Student Name": "Anish Pariyar"
+              },
+              {
+                "Grade": 2,
+                "Marks": 0.09231307628213734,
+                "Subject": 0,
+                "Signature": "Anisha",
+                "Serial No.": -0.9828430406807144,
+                "Student Name": "Anisha Kumar"
+              },
+              {
+                "Grade": 3,
+                "Marks": -2.080594719282026,
+                "Subject": 0,
+                "Signature": "Angali",
+                "Serial No.": -0.8321882680216266,
+                "Student Name": "Angali Kumari"
+              },
+              {
+                "Grade": 0,
+                "Marks": -0.9941408214999444,
+                "Subject": 0,
+                "Signature": "Asmita",
+                "Serial No.": -0.6815334953625389,
+                "Student Name": "Asmita Pariyar"
+              },
+              {
+                "Grade": 0,
+                "Marks": -0.9941408214999444,
+                "Subject": 0,
+                "Signature": "Babita",
+                "Serial No.": -0.5308787227034512,
+                "Student Name": "Babita Nepali"
+              },
+              {
+                "Grade": 2,
+                "Marks": 1.903069572585607,
+                "Subject": 0,
+                "Signature": "Bardan",
+                "Serial No.": -0.3802239500443634,
+                "Student Name": "Bardan Aryal"
+              },
+              {
+                "Grade": 0,
+                "Marks": -4.288732915596137e-16,
+                "Subject": 0,
+                "Signature": "Bibek",
+                "Serial No.": -0.2295691773852757,
+                "Student Name": "Bibek Darji"
+              },
+              {
+                "Grade": 0,
+                "Marks": -4.288732915596137e-16,
+                "Subject": 0,
+                "Signature": "Bipin",
+                "Serial No.": -0.07891440472618799,
+                "Student Name": "Bipin Nepali"
+              },
+              {
+                "Grade": 4,
+                "Marks": 1.178766974064219,
+                "Subject": 0,
+                "Signature": "Bishwash",
+                "Serial No.": 0.07174036793289973,
+                "Student Name": "Bishwash Kumar"
+              },
+              {
+                "Grade": 2,
+                "Marks": 1.903069572585607,
+                "Subject": 0,
+                "Signature": "Dipendra",
+                "Serial No.": 0.3730499132510752,
+                "Student Name": "Dipendra Kumar"
+              },
+              {
+                "Grade": 0,
+                "Marks": -4.288732915596137e-16,
+                "Subject": 0,
+                "Signature": "Eak",
+                "Serial No.": 0.523704685910163,
+                "Student Name": "Eak Bahadur"
+              },
+              {
+                "Grade": 0,
+                "Marks": -0.9941408214999444,
+                "Subject": 0,
+                "Signature": "Ganga",
+                "Serial No.": 0.6743594585692506,
+                "Student Name": "Ganga Kumar"
+              },
+              {
+                "Grade": 3,
+                "Marks": 0.213030176035702,
+                "Subject": 0,
+                "Signature": "Ganga",
+                "Serial No.": 0.8250142312283384,
+                "Student Name": "Ganga Thapa"
+              },
+              {
+                "Grade": 0,
+                "Marks": -4.288732915596137e-16,
+                "Subject": 0,
+                "Signature": "Immanuel",
+                "Serial No.": 0.9756690038874261,
+                "Student Name": "Immanuel Kumar"
+              },
+              {
+                "Grade": 3,
+                "Marks": 0.213030176035702,
+                "Subject": 0,
+                "Signature": "Indira",
+                "Serial No.": 1.126323776546514,
+                "Student Name": "Indira Kumar"
+              },
+              {
+                "Grade": 4,
+                "Marks": 1.058049874310655,
+                "Subject": 0,
+                "Signature": "Jenny",
+                "Serial No.": 1.276978549205602,
+                "Student Name": "Jenny Gurung"
+              },
+              {
+                "Grade": 3,
+                "Marks": -0.0284040234714273,
+                "Subject": 0,
+                "Signature": "Jyoti",
+                "Serial No.": 1.578288094523777,
+                "Student Name": "Jyoti Kumari"
+              },
+              {
+                "Grade": 0,
+                "Marks": -0.6319895222392505,
+                "Subject": 0,
+                "Signature": "Karan",
+                "Serial No.": 1.728942867182865,
+                "Student Name": "Karan Budhathoki"
+              }
+            ]
+          ]
+        },
+        {
+          "name": "preprocessingSteps",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            [
+              "Handled missing values: fillMean",
+              "Applied Encoding: label",
+              "Applied Normalization: standard"
+            ]
+          ]
+        },
+        {
+          "name": "preGeneratedSummary",
+          "type": "string",
+          "nullable": true,
+          "nullCount": 1,
+          "nullRatio": 100,
+          "cardinality": 0,
+          "uniqueRatio": null,
+          "sampleValues": []
+        },
+        {
+          "name": "threads",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            [
+              {
+                "role": "user",
+                "content": "Data quality issues?",
+                "timestamp": "2026-01-20T02:24:19.396Z"
+              },
+              {
+                "role": "assistant",
+                "content": "⚠️ **AI Service Temporarily Unavailable**\n\nI'm having trouble connecting to the AI service right now. Here's what I can tell you about your data:\n\n📊 **Dataset Structure**\n- **Total Rows:** 21\n- **Total Columns:** 6\n- **Numeric Columns:** 2\n- **Categorical Columns:** 2\n\n📈 **Data Quality**\n- **Missing Values:** 0\n- **Completeness:** N/A%\n- **Infinite Values:** No ✓\n\n💡 **Quick Recommendations:**\n- Consider encoding categorical variables\n- Normalize/standardize numeric features\n\n\nPlease try your question again in a moment when the AI service is available.",
+                "timestamp": "2026-01-20T02:24:19.396Z"
+              },
+              {
+                "role": "user",
+                "content": "hey",
+                "timestamp": "2026-01-20T03:14:13.393Z"
+              },
+              {
+                "role": "assistant",
+                "content": "⚠️ **AI Service Temporarily Unavailable**\n\nI'm having trouble connecting to the AI service right now. Here's what I can tell you about your data:\n\n📊 **Dataset Structure**\n- **Total Rows:** 21\n- **Total Columns:** 6\n- **Numeric Columns:** 4\n- **Categorical Columns:** 0\n\n📈 **Data Quality**\n- **Missing Values:** 0\n- **Completeness:** N/A%\n- **Infinite Values:** No ✓\n\n💡 **Quick Recommendations:**\n- Normalize/standardize numeric features\n\n\nPlease try your question again in a moment when the AI service is available.",
+                "timestamp": "2026-01-20T03:14:13.393Z"
+              },
+              {
+                "role": "user",
+                "content": "hey",
+                "timestamp": "2026-01-20T03:14:19.395Z"
+              },
+              {
+                "role": "assistant",
+                "content": "⚠️ **AI Service Temporarily Unavailable**\n\nI'm having trouble connecting to the AI service right now. Here's what I can tell you about your data:\n\n📊 **Dataset Structure**\n- **Total Rows:** 21\n- **Total Columns:** 6\n- **Numeric Columns:** 4\n- **Categorical Columns:** 0\n\n📈 **Data Quality**\n- **Missing Values:** 0\n- **Completeness:** N/A%\n- **Infinite Values:** No ✓\n\n💡 **Quick Recommendations:**\n- Normalize/standardize numeric features\n\n\nPlease try your question again in a moment when the AI service is available.",
+                "timestamp": "2026-01-20T03:14:19.395Z"
+              },
+              {
+                "role": "user",
+                "content": "hey",
+                "timestamp": "2026-01-20T17:35:07.044Z"
+              },
+              {
+                "role": "assistant",
+                "content": "⚠️ **AI Service Temporarily Unavailable**\n\nI'm having trouble connecting to the AI service right now. Here's what I can tell you about your data:\n\n📊 **Dataset Structure**\n- **Total Rows:** 21\n- **Total Columns:** 6\n- **Numeric Columns:** 4\n- **Categorical Columns:** 0\n\n📈 **Data Quality**\n- **Missing Values:** 0\n- **Completeness:** N/A%\n- **Infinite Values:** No ✓\n\n💡 **Quick Recommendations:**\n- Normalize/standardize numeric features\n\n\nPlease try your question again in a moment when the AI service is available.",
+                "timestamp": "2026-01-20T17:35:07.044Z"
+              }
+            ]
+          ]
+        },
+        {
+          "name": "createdAt",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "2026-01-19T22:20:51.357Z"
+          ]
+        },
+        {
+          "name": "updatedAt",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "2026-01-20T17:35:07.089Z"
+          ]
+        },
+        {
+          "name": "__v",
+          "type": "number",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            0
+          ]
+        }
+      ],
+      "rowCount": 1,
+      "columnCount": 15
+    },
+    "statsSummaryJson": null,
+    "sourceType": "UPLOAD",
+    "sourceId": "31c95a19-60dc-4bfc-835e-f015732d619d",
+    "rowCount": 1,
+    "columnCount": 15,
+    "createdAt": "2026-01-29T22:41:36.206Z",
+    "createdBy": null,
+    "dataset": {
+      "id": "04468b83-4fdf-47de-b793-657253812213",
+      "tenantId": "3f96438f-1bf1-4ddd-9eca-25aeacf7dd32",
+      "projectId": "4faf5ee4-f4b6-4ffd-9bd0-07d4a744e6ee",
+      "name": "student_data.json",
+      "sourceType": "UPLOAD",
+      "activeVersionId": "1b24f9a3-17cc-4c6f-af80-884fba239860",
+      "createdAt": "2026-01-29T22:41:35.315Z"
+    },
+    "edaResults": [
+      {
+        "id": "2941aa2e-4a8a-40dd-8659-ba1fa5766b7e",
+        "tenantId": "3f96438f-1bf1-4ddd-9eca-25aeacf7dd32",
+        "datasetVersionId": "1b24f9a3-17cc-4c6f-af80-884fba239860",
+        "resultS3Key": "tenants/3f96438f-1bf1-4ddd-9eca-25aeacf7dd32/eda/1b24f9a3-17cc-4c6f-af80-884fba239860/1769726496769.json",
+        "summaryJson": {
+          "overview": {
+            "rowCount": 1,
+            "totalCells": 15,
+            "columnCount": 15,
+            "columnTypes": {
+              "number": 2,
+              "string": 13
+            },
+            "missingCells": 1,
+            "missingRatio": 6.67,
+            "duplicateRows": 0,
+            "duplicateRatio": 0
+          },
+          "qualitySummary": {
+            "low": 0,
+            "high": 1,
+            "medium": 14
+          }
+        },
+        "status": "pending",
+        "results": null,
+        "errorMessage": null,
+        "createdAt": "2026-01-29T22:41:37.172Z"
+      }
+    ]
+  },
+  {
+    "id": "5b509dd7-824c-41cd-9059-5639516ffcb8",
+    "datasetId": "828e548f-6bef-4af7-98d4-051b8b37fcb3",
+    "versionNumber": 1,
+    "parentVersionId": null,
+    "artifactS3Key": "tenants/3f96438f-1bf1-4ddd-9eca-25aeacf7dd32/parsed/828e548f-6bef-4af7-98d4-051b8b37fcb3/1769726368015.json",
+    "schemaJson": {
+      "columns": [
+        {
+          "name": "_id",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "696eae434e4519250d176e40"
+          ]
+        },
+        {
+          "name": "userId",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "6917c5f0c30cdce064258f00"
+          ]
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "student_data"
+          ]
+        },
+        {
+          "name": "fileName",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "student_data.xlsx"
+          ]
+        },
+        {
+          "name": "fileSize",
+          "type": "number",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            6308
+          ]
+        },
+        {
+          "name": "mimeType",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          ]
+        },
+        {
+          "name": "rawData",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            [
+              {
+                "Grade": "20+22",
+                "Marks": 5,
+                "Subject": "Nepali",
+                "Signature": "AP",
+                "Serial No.": 701,
+                "Student Name": "Ananda Kumar"
+              },
+              {
+                "Grade": "20+24",
+                "Marks": 7.5,
+                "Subject": "Nepali",
+                "Signature": "PI",
+                "Serial No.": 702,
+                "Student Name": "Ayusha Kumar"
+              },
+              {
+                "Grade": "20+24",
+                "Marks": 7.5,
+                "Subject": "Nepali",
+                "Signature": "A1",
+                "Serial No.": 703,
+                "Student Name": "Bibek Shekroma"
+              },
+              {
+                "Grade": "22+25",
+                "Marks": 15,
+                "Subject": "Nepali",
+                "Signature": "A1",
+                "Serial No.": 704,
+                "Student Name": "Anish Pariyar"
+              },
+              {
+                "Grade": "22+25",
+                "Marks": 10,
+                "Subject": "Nepali",
+                "Signature": "Anisha",
+                "Serial No.": 705,
+                "Student Name": "Anisha Kumar"
+              },
+              {
+                "Grade": "22+22",
+                "Marks": 1,
+                "Subject": "Nepali",
+                "Signature": "Angali",
+                "Serial No.": 706,
+                "Student Name": "Angali Kumari"
+              },
+              {
+                "Grade": "20+22",
+                "Marks": 5.5,
+                "Subject": "Nepali",
+                "Signature": "Asmita",
+                "Serial No.": 707,
+                "Student Name": "Asmita Pariyar"
+              },
+              {
+                "Grade": "20+22",
+                "Marks": 5.5,
+                "Subject": "Nepali",
+                "Signature": "Babita",
+                "Serial No.": 708,
+                "Student Name": "Babita Nepali"
+              },
+              {
+                "Grade": "22+25",
+                "Marks": 17.5,
+                "Subject": "Nepali",
+                "Signature": "Bardan",
+                "Serial No.": 709,
+                "Student Name": "Bardan Aryal"
+              },
+              {
+                "Grade": "20+22",
+                "Subject": "Nepali",
+                "Signature": "Bibek",
+                "Serial No.": 710,
+                "Student Name": "Bibek Darji"
+              },
+              {
+                "Grade": "20+22",
+                "Subject": "Nepali",
+                "Signature": "Bipin",
+                "Serial No.": 711,
+                "Student Name": "Bipin Nepali"
+              },
+              {
+                "Grade": "20+25",
+                "Marks": 14.5,
+                "Subject": "Nepali",
+                "Signature": "Bishwash",
+                "Serial No.": 712,
+                "Student Name": "Bishwash Kumar"
+              },
+              {
+                "Grade": "22+25",
+                "Marks": 17.5,
+                "Subject": "Nepali",
+                "Signature": "Dipendra",
+                "Serial No.": 714,
+                "Student Name": "Dipendra Kumar"
+              },
+              {
+                "Grade": "20+22",
+                "Subject": "Nepali",
+                "Signature": "Eak",
+                "Serial No.": 715,
+                "Student Name": "Eak Bahadur"
+              },
+              {
+                "Grade": "20+22",
+                "Marks": 5.5,
+                "Subject": "Nepali",
+                "Signature": "Ganga",
+                "Serial No.": 716,
+                "Student Name": "Ganga Kumar"
+              },
+              {
+                "Grade": "22+22",
+                "Marks": 10.5,
+                "Subject": "Nepali",
+                "Signature": "Ganga",
+                "Serial No.": 717,
+                "Student Name": "Ganga Thapa"
+              },
+              {
+                "Grade": "20+22",
+                "Subject": "Nepali",
+                "Signature": "Immanuel",
+                "Serial No.": 718,
+                "Student Name": "Immanuel Kumar"
+              },
+              {
+                "Grade": "22+22",
+                "Marks": 10.5,
+                "Subject": "Nepali",
+                "Signature": "Indira",
+                "Serial No.": 719,
+                "Student Name": "Indira Kumar"
+              },
+              {
+                "Grade": "20+25",
+                "Marks": 14,
+                "Subject": "Nepali",
+                "Signature": "Jenny",
+                "Serial No.": 720,
+                "Student Name": "Jenny Gurung"
+              },
+              {
+                "Grade": "22+22",
+                "Marks": 9.5,
+                "Subject": "Nepali",
+                "Signature": "Jyoti",
+                "Serial No.": 722,
+                "Student Name": "Jyoti Kumari"
+              },
+              {
+                "Grade": "20+22",
+                "Marks": 7,
+                "Subject": "Nepali",
+                "Signature": "Karan",
+                "Serial No.": 723,
+                "Student Name": "Karan Budhathoki"
+              }
+            ]
+          ]
+        },
+        {
+          "name": "analysis",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            {
+              "columns": {
+                "Grade": {
+                  "type": "numeric",
+                  "stats": {
+                    "q1": "0.00",
+                    "q3": "3.00",
+                    "iqr": "3.00",
+                    "max": "4.00",
+                    "min": "0.00",
+                    "std": "1.43",
+                    "mean": "1.43",
+                    "count": 21,
+                    "median": "1.00",
+                    "outliers": 0,
+                    "skewness": "0.39"
+                  },
+                  "unique": 5,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Marks": {
+                  "type": "numeric",
+                  "stats": {
+                    "q1": "-0.63",
+                    "q3": "0.21",
+                    "iqr": "0.85",
+                    "max": "1.90",
+                    "min": "-2.08",
+                    "std": "1.00",
+                    "mean": "-0.00",
+                    "count": 21,
+                    "median": "-0.00",
+                    "outliers": 3,
+                    "skewness": "0.24"
+                  },
+                  "unique": 13,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Subject": {
+                  "type": "numeric",
+                  "stats": {
+                    "q1": "0.00",
+                    "q3": "0.00",
+                    "iqr": "0.00",
+                    "max": "0.00",
+                    "min": "0.00",
+                    "std": "0.00",
+                    "mean": "0.00",
+                    "count": 21,
+                    "median": "0.00",
+                    "outliers": 0,
+                    "skewness": "NaN"
+                  },
+                  "unique": 1,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Signature": {
+                  "type": "text",
+                  "stats": null,
+                  "unique": 19,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Serial No.": {
+                  "type": "numeric",
+                  "stats": {
+                    "q1": "-0.83",
+                    "q3": "0.83",
+                    "iqr": "1.66",
+                    "max": "1.73",
+                    "min": "-1.59",
+                    "std": "1.00",
+                    "mean": "0.00",
+                    "count": 21,
+                    "median": "-0.08",
+                    "outliers": 0,
+                    "skewness": "0.10"
+                  },
+                  "unique": 21,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Student Name": {
+                  "type": "text",
+                  "stats": null,
+                  "unique": 21,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                }
+              },
+              "rowCount": 21,
+              "columnCount": 6,
+              "dateColumns": [],
+              "correlations": [
+                {
+                  "col1": "Marks",
+                  "col2": "Grade",
+                  "correlation": "0.441"
+                },
+                {
+                  "col1": "Serial No.",
+                  "col2": "Marks",
+                  "correlation": "0.217"
+                },
+                {
+                  "col1": "Serial No.",
+                  "col2": "Grade",
+                  "correlation": "0.217"
+                },
+                {
+                  "col1": "Serial No.",
+                  "col2": "Subject",
+                  "correlation": "0.000"
+                },
+                {
+                  "col1": "Subject",
+                  "col2": "Marks",
+                  "correlation": "0.000"
+                },
+                {
+                  "col1": "Subject",
+                  "col2": "Grade",
+                  "correlation": "0.000"
+                }
+              ],
+              "duplicateStats": {
+                "Grade": {
+                  "totalValues": 21,
+                  "uniqueValues": 5,
+                  "topDuplicates": [
+                    {
+                      "count": 9,
+                      "value": "0"
+                    },
+                    {
+                      "count": 4,
+                      "value": "2"
+                    },
+                    {
+                      "count": 4,
+                      "value": "3"
+                    },
+                    {
+                      "count": 2,
+                      "value": "1"
+                    },
+                    {
+                      "count": 2,
+                      "value": "4"
+                    }
+                  ],
+                  "duplicateCount": 16,
+                  "duplicatePercentage": "76.2"
+                },
+                "Marks": {
+                  "totalValues": 21,
+                  "uniqueValues": 13,
+                  "topDuplicates": [
+                    {
+                      "count": 4,
+                      "value": "-4.2887329155961366e-16"
+                    },
+                    {
+                      "count": 3,
+                      "value": "-0.9941408214999444"
+                    },
+                    {
+                      "count": 2,
+                      "value": "-0.5112724224856858"
+                    },
+                    {
+                      "count": 2,
+                      "value": "1.903069572585607"
+                    },
+                    {
+                      "count": 2,
+                      "value": "0.21303017603570198"
+                    }
+                  ],
+                  "duplicateCount": 8,
+                  "duplicatePercentage": "38.1"
+                },
+                "Subject": {
+                  "totalValues": 21,
+                  "uniqueValues": 1,
+                  "topDuplicates": [
+                    {
+                      "count": 21,
+                      "value": "0"
+                    }
+                  ],
+                  "duplicateCount": 20,
+                  "duplicatePercentage": "95.2"
+                },
+                "Signature": {
+                  "totalValues": 21,
+                  "uniqueValues": 19,
+                  "topDuplicates": [
+                    {
+                      "count": 2,
+                      "value": "A1"
+                    },
+                    {
+                      "count": 2,
+                      "value": "Ganga"
+                    }
+                  ],
+                  "duplicateCount": 2,
+                  "duplicatePercentage": "9.5"
+                }
+              },
+              "numericColumns": [
+                "Serial No.",
+                "Subject",
+                "Marks",
+                "Grade"
+              ],
+              "hasInfiniteValues": false,
+              "categoricalColumns": []
+            }
+          ]
+        },
+        {
+          "name": "preprocessedData",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            [
+              {
+                "Grade": 0,
+                "Marks": -1.114857921253509,
+                "Subject": 0,
+                "Signature": "AP",
+                "Serial No.": -1.585462131317065,
+                "Student Name": "Ananda Kumar"
+              },
+              {
+                "Grade": 1,
+                "Marks": -0.5112724224856858,
+                "Subject": 0,
+                "Signature": "PI",
+                "Serial No.": -1.434807358657977,
+                "Student Name": "Ayusha Kumar"
+              },
+              {
+                "Grade": 1,
+                "Marks": -0.5112724224856858,
+                "Subject": 0,
+                "Signature": "A1",
+                "Serial No.": -1.28415258599889,
+                "Student Name": "Bibek Shekroma"
+              },
+              {
+                "Grade": 2,
+                "Marks": 1.299484073817784,
+                "Subject": 0,
+                "Signature": "A1",
+                "Serial No.": -1.133497813339802,
+                "Student Name": "Anish Pariyar"
+              },
+              {
+                "Grade": 2,
+                "Marks": 0.09231307628213734,
+                "Subject": 0,
+                "Signature": "Anisha",
+                "Serial No.": -0.9828430406807144,
+                "Student Name": "Anisha Kumar"
+              },
+              {
+                "Grade": 3,
+                "Marks": -2.080594719282026,
+                "Subject": 0,
+                "Signature": "Angali",
+                "Serial No.": -0.8321882680216266,
+                "Student Name": "Angali Kumari"
+              },
+              {
+                "Grade": 0,
+                "Marks": -0.9941408214999444,
+                "Subject": 0,
+                "Signature": "Asmita",
+                "Serial No.": -0.6815334953625389,
+                "Student Name": "Asmita Pariyar"
+              },
+              {
+                "Grade": 0,
+                "Marks": -0.9941408214999444,
+                "Subject": 0,
+                "Signature": "Babita",
+                "Serial No.": -0.5308787227034512,
+                "Student Name": "Babita Nepali"
+              },
+              {
+                "Grade": 2,
+                "Marks": 1.903069572585607,
+                "Subject": 0,
+                "Signature": "Bardan",
+                "Serial No.": -0.3802239500443634,
+                "Student Name": "Bardan Aryal"
+              },
+              {
+                "Grade": 0,
+                "Marks": -4.288732915596137e-16,
+                "Subject": 0,
+                "Signature": "Bibek",
+                "Serial No.": -0.2295691773852757,
+                "Student Name": "Bibek Darji"
+              },
+              {
+                "Grade": 0,
+                "Marks": -4.288732915596137e-16,
+                "Subject": 0,
+                "Signature": "Bipin",
+                "Serial No.": -0.07891440472618799,
+                "Student Name": "Bipin Nepali"
+              },
+              {
+                "Grade": 4,
+                "Marks": 1.178766974064219,
+                "Subject": 0,
+                "Signature": "Bishwash",
+                "Serial No.": 0.07174036793289973,
+                "Student Name": "Bishwash Kumar"
+              },
+              {
+                "Grade": 2,
+                "Marks": 1.903069572585607,
+                "Subject": 0,
+                "Signature": "Dipendra",
+                "Serial No.": 0.3730499132510752,
+                "Student Name": "Dipendra Kumar"
+              },
+              {
+                "Grade": 0,
+                "Marks": -4.288732915596137e-16,
+                "Subject": 0,
+                "Signature": "Eak",
+                "Serial No.": 0.523704685910163,
+                "Student Name": "Eak Bahadur"
+              },
+              {
+                "Grade": 0,
+                "Marks": -0.9941408214999444,
+                "Subject": 0,
+                "Signature": "Ganga",
+                "Serial No.": 0.6743594585692506,
+                "Student Name": "Ganga Kumar"
+              },
+              {
+                "Grade": 3,
+                "Marks": 0.213030176035702,
+                "Subject": 0,
+                "Signature": "Ganga",
+                "Serial No.": 0.8250142312283384,
+                "Student Name": "Ganga Thapa"
+              },
+              {
+                "Grade": 0,
+                "Marks": -4.288732915596137e-16,
+                "Subject": 0,
+                "Signature": "Immanuel",
+                "Serial No.": 0.9756690038874261,
+                "Student Name": "Immanuel Kumar"
+              },
+              {
+                "Grade": 3,
+                "Marks": 0.213030176035702,
+                "Subject": 0,
+                "Signature": "Indira",
+                "Serial No.": 1.126323776546514,
+                "Student Name": "Indira Kumar"
+              },
+              {
+                "Grade": 4,
+                "Marks": 1.058049874310655,
+                "Subject": 0,
+                "Signature": "Jenny",
+                "Serial No.": 1.276978549205602,
+                "Student Name": "Jenny Gurung"
+              },
+              {
+                "Grade": 3,
+                "Marks": -0.0284040234714273,
+                "Subject": 0,
+                "Signature": "Jyoti",
+                "Serial No.": 1.578288094523777,
+                "Student Name": "Jyoti Kumari"
+              },
+              {
+                "Grade": 0,
+                "Marks": -0.6319895222392505,
+                "Subject": 0,
+                "Signature": "Karan",
+                "Serial No.": 1.728942867182865,
+                "Student Name": "Karan Budhathoki"
+              }
+            ]
+          ]
+        },
+        {
+          "name": "preprocessingSteps",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            [
+              "Handled missing values: fillMean",
+              "Applied Encoding: label",
+              "Applied Normalization: standard"
+            ]
+          ]
+        },
+        {
+          "name": "preGeneratedSummary",
+          "type": "string",
+          "nullable": true,
+          "nullCount": 1,
+          "nullRatio": 100,
+          "cardinality": 0,
+          "uniqueRatio": null,
+          "sampleValues": []
+        },
+        {
+          "name": "threads",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            [
+              {
+                "role": "user",
+                "content": "Data quality issues?",
+                "timestamp": "2026-01-20T02:24:19.396Z"
+              },
+              {
+                "role": "assistant",
+                "content": "⚠️ **AI Service Temporarily Unavailable**\n\nI'm having trouble connecting to the AI service right now. Here's what I can tell you about your data:\n\n📊 **Dataset Structure**\n- **Total Rows:** 21\n- **Total Columns:** 6\n- **Numeric Columns:** 2\n- **Categorical Columns:** 2\n\n📈 **Data Quality**\n- **Missing Values:** 0\n- **Completeness:** N/A%\n- **Infinite Values:** No ✓\n\n💡 **Quick Recommendations:**\n- Consider encoding categorical variables\n- Normalize/standardize numeric features\n\n\nPlease try your question again in a moment when the AI service is available.",
+                "timestamp": "2026-01-20T02:24:19.396Z"
+              },
+              {
+                "role": "user",
+                "content": "hey",
+                "timestamp": "2026-01-20T03:14:13.393Z"
+              },
+              {
+                "role": "assistant",
+                "content": "⚠️ **AI Service Temporarily Unavailable**\n\nI'm having trouble connecting to the AI service right now. Here's what I can tell you about your data:\n\n📊 **Dataset Structure**\n- **Total Rows:** 21\n- **Total Columns:** 6\n- **Numeric Columns:** 4\n- **Categorical Columns:** 0\n\n📈 **Data Quality**\n- **Missing Values:** 0\n- **Completeness:** N/A%\n- **Infinite Values:** No ✓\n\n💡 **Quick Recommendations:**\n- Normalize/standardize numeric features\n\n\nPlease try your question again in a moment when the AI service is available.",
+                "timestamp": "2026-01-20T03:14:13.393Z"
+              },
+              {
+                "role": "user",
+                "content": "hey",
+                "timestamp": "2026-01-20T03:14:19.395Z"
+              },
+              {
+                "role": "assistant",
+                "content": "⚠️ **AI Service Temporarily Unavailable**\n\nI'm having trouble connecting to the AI service right now. Here's what I can tell you about your data:\n\n📊 **Dataset Structure**\n- **Total Rows:** 21\n- **Total Columns:** 6\n- **Numeric Columns:** 4\n- **Categorical Columns:** 0\n\n📈 **Data Quality**\n- **Missing Values:** 0\n- **Completeness:** N/A%\n- **Infinite Values:** No ✓\n\n💡 **Quick Recommendations:**\n- Normalize/standardize numeric features\n\n\nPlease try your question again in a moment when the AI service is available.",
+                "timestamp": "2026-01-20T03:14:19.395Z"
+              },
+              {
+                "role": "user",
+                "content": "hey",
+                "timestamp": "2026-01-20T17:35:07.044Z"
+              },
+              {
+                "role": "assistant",
+                "content": "⚠️ **AI Service Temporarily Unavailable**\n\nI'm having trouble connecting to the AI service right now. Here's what I can tell you about your data:\n\n📊 **Dataset Structure**\n- **Total Rows:** 21\n- **Total Columns:** 6\n- **Numeric Columns:** 4\n- **Categorical Columns:** 0\n\n📈 **Data Quality**\n- **Missing Values:** 0\n- **Completeness:** N/A%\n- **Infinite Values:** No ✓\n\n💡 **Quick Recommendations:**\n- Normalize/standardize numeric features\n\n\nPlease try your question again in a moment when the AI service is available.",
+                "timestamp": "2026-01-20T17:35:07.044Z"
+              }
+            ]
+          ]
+        },
+        {
+          "name": "createdAt",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "2026-01-19T22:20:51.357Z"
+          ]
+        },
+        {
+          "name": "updatedAt",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "2026-01-20T17:35:07.089Z"
+          ]
+        },
+        {
+          "name": "__v",
+          "type": "number",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            0
+          ]
+        }
+      ],
+      "rowCount": 1,
+      "columnCount": 15
+    },
+    "statsSummaryJson": null,
+    "sourceType": "UPLOAD",
+    "sourceId": "6df83d64-0495-4e71-8d6d-7cc8701f80f8",
+    "rowCount": 1,
+    "columnCount": 15,
+    "createdAt": "2026-01-29T22:39:28.395Z",
+    "createdBy": null,
+    "dataset": {
+      "id": "828e548f-6bef-4af7-98d4-051b8b37fcb3",
+      "tenantId": "3f96438f-1bf1-4ddd-9eca-25aeacf7dd32",
+      "projectId": "1ea7b3fd-9f8e-4ace-b21f-cab421525853",
+      "name": "student_data.json",
+      "sourceType": "UPLOAD",
+      "activeVersionId": "5b509dd7-824c-41cd-9059-5639516ffcb8",
+      "createdAt": "2026-01-29T22:39:26.468Z"
+    },
+    "edaResults": [
+      {
+        "id": "907e749d-48ae-4891-857d-a81e14f6aec2",
+        "tenantId": "3f96438f-1bf1-4ddd-9eca-25aeacf7dd32",
+        "datasetVersionId": "5b509dd7-824c-41cd-9059-5639516ffcb8",
+        "resultS3Key": "tenants/3f96438f-1bf1-4ddd-9eca-25aeacf7dd32/eda/5b509dd7-824c-41cd-9059-5639516ffcb8/1769726369765.json",
+        "summaryJson": {
+          "overview": {
+            "rowCount": 1,
+            "totalCells": 15,
+            "columnCount": 15,
+            "columnTypes": {
+              "number": 2,
+              "string": 13
+            },
+            "missingCells": 1,
+            "missingRatio": 6.67,
+            "duplicateRows": 0,
+            "duplicateRatio": 0
+          },
+          "qualitySummary": {
+            "low": 0,
+            "high": 1,
+            "medium": 14
+          }
+        },
+        "status": "pending",
+        "results": null,
+        "errorMessage": null,
+        "createdAt": "2026-01-29T22:39:30.189Z"
+      }
+    ]
+  },
+  {
+    "id": "b3d27145-07ae-4082-8d30-f85b93ddc2b9",
+    "datasetId": "7fbe48cf-de27-46bf-8aa2-8c190bebd475",
+    "versionNumber": 1,
+    "parentVersionId": null,
+    "artifactS3Key": "tenants/3f96438f-1bf1-4ddd-9eca-25aeacf7dd32/parsed/7fbe48cf-de27-46bf-8aa2-8c190bebd475/1769725848340.json",
+    "schemaJson": {
+      "columns": [
+        {
+          "name": "_id",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "696eae434e4519250d176e40"
+          ]
+        },
+        {
+          "name": "userId",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "6917c5f0c30cdce064258f00"
+          ]
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "student_data"
+          ]
+        },
+        {
+          "name": "fileName",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "student_data.xlsx"
+          ]
+        },
+        {
+          "name": "fileSize",
+          "type": "number",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            6308
+          ]
+        },
+        {
+          "name": "mimeType",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          ]
+        },
+        {
+          "name": "rawData",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            [
+              {
+                "Grade": "20+22",
+                "Marks": 5,
+                "Subject": "Nepali",
+                "Signature": "AP",
+                "Serial No.": 701,
+                "Student Name": "Ananda Kumar"
+              },
+              {
+                "Grade": "20+24",
+                "Marks": 7.5,
+                "Subject": "Nepali",
+                "Signature": "PI",
+                "Serial No.": 702,
+                "Student Name": "Ayusha Kumar"
+              },
+              {
+                "Grade": "20+24",
+                "Marks": 7.5,
+                "Subject": "Nepali",
+                "Signature": "A1",
+                "Serial No.": 703,
+                "Student Name": "Bibek Shekroma"
+              },
+              {
+                "Grade": "22+25",
+                "Marks": 15,
+                "Subject": "Nepali",
+                "Signature": "A1",
+                "Serial No.": 704,
+                "Student Name": "Anish Pariyar"
+              },
+              {
+                "Grade": "22+25",
+                "Marks": 10,
+                "Subject": "Nepali",
+                "Signature": "Anisha",
+                "Serial No.": 705,
+                "Student Name": "Anisha Kumar"
+              },
+              {
+                "Grade": "22+22",
+                "Marks": 1,
+                "Subject": "Nepali",
+                "Signature": "Angali",
+                "Serial No.": 706,
+                "Student Name": "Angali Kumari"
+              },
+              {
+                "Grade": "20+22",
+                "Marks": 5.5,
+                "Subject": "Nepali",
+                "Signature": "Asmita",
+                "Serial No.": 707,
+                "Student Name": "Asmita Pariyar"
+              },
+              {
+                "Grade": "20+22",
+                "Marks": 5.5,
+                "Subject": "Nepali",
+                "Signature": "Babita",
+                "Serial No.": 708,
+                "Student Name": "Babita Nepali"
+              },
+              {
+                "Grade": "22+25",
+                "Marks": 17.5,
+                "Subject": "Nepali",
+                "Signature": "Bardan",
+                "Serial No.": 709,
+                "Student Name": "Bardan Aryal"
+              },
+              {
+                "Grade": "20+22",
+                "Subject": "Nepali",
+                "Signature": "Bibek",
+                "Serial No.": 710,
+                "Student Name": "Bibek Darji"
+              },
+              {
+                "Grade": "20+22",
+                "Subject": "Nepali",
+                "Signature": "Bipin",
+                "Serial No.": 711,
+                "Student Name": "Bipin Nepali"
+              },
+              {
+                "Grade": "20+25",
+                "Marks": 14.5,
+                "Subject": "Nepali",
+                "Signature": "Bishwash",
+                "Serial No.": 712,
+                "Student Name": "Bishwash Kumar"
+              },
+              {
+                "Grade": "22+25",
+                "Marks": 17.5,
+                "Subject": "Nepali",
+                "Signature": "Dipendra",
+                "Serial No.": 714,
+                "Student Name": "Dipendra Kumar"
+              },
+              {
+                "Grade": "20+22",
+                "Subject": "Nepali",
+                "Signature": "Eak",
+                "Serial No.": 715,
+                "Student Name": "Eak Bahadur"
+              },
+              {
+                "Grade": "20+22",
+                "Marks": 5.5,
+                "Subject": "Nepali",
+                "Signature": "Ganga",
+                "Serial No.": 716,
+                "Student Name": "Ganga Kumar"
+              },
+              {
+                "Grade": "22+22",
+                "Marks": 10.5,
+                "Subject": "Nepali",
+                "Signature": "Ganga",
+                "Serial No.": 717,
+                "Student Name": "Ganga Thapa"
+              },
+              {
+                "Grade": "20+22",
+                "Subject": "Nepali",
+                "Signature": "Immanuel",
+                "Serial No.": 718,
+                "Student Name": "Immanuel Kumar"
+              },
+              {
+                "Grade": "22+22",
+                "Marks": 10.5,
+                "Subject": "Nepali",
+                "Signature": "Indira",
+                "Serial No.": 719,
+                "Student Name": "Indira Kumar"
+              },
+              {
+                "Grade": "20+25",
+                "Marks": 14,
+                "Subject": "Nepali",
+                "Signature": "Jenny",
+                "Serial No.": 720,
+                "Student Name": "Jenny Gurung"
+              },
+              {
+                "Grade": "22+22",
+                "Marks": 9.5,
+                "Subject": "Nepali",
+                "Signature": "Jyoti",
+                "Serial No.": 722,
+                "Student Name": "Jyoti Kumari"
+              },
+              {
+                "Grade": "20+22",
+                "Marks": 7,
+                "Subject": "Nepali",
+                "Signature": "Karan",
+                "Serial No.": 723,
+                "Student Name": "Karan Budhathoki"
+              }
+            ]
+          ]
+        },
+        {
+          "name": "analysis",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            {
+              "columns": {
+                "Grade": {
+                  "type": "numeric",
+                  "stats": {
+                    "q1": "0.00",
+                    "q3": "3.00",
+                    "iqr": "3.00",
+                    "max": "4.00",
+                    "min": "0.00",
+                    "std": "1.43",
+                    "mean": "1.43",
+                    "count": 21,
+                    "median": "1.00",
+                    "outliers": 0,
+                    "skewness": "0.39"
+                  },
+                  "unique": 5,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Marks": {
+                  "type": "numeric",
+                  "stats": {
+                    "q1": "-0.63",
+                    "q3": "0.21",
+                    "iqr": "0.85",
+                    "max": "1.90",
+                    "min": "-2.08",
+                    "std": "1.00",
+                    "mean": "-0.00",
+                    "count": 21,
+                    "median": "-0.00",
+                    "outliers": 3,
+                    "skewness": "0.24"
+                  },
+                  "unique": 13,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Subject": {
+                  "type": "numeric",
+                  "stats": {
+                    "q1": "0.00",
+                    "q3": "0.00",
+                    "iqr": "0.00",
+                    "max": "0.00",
+                    "min": "0.00",
+                    "std": "0.00",
+                    "mean": "0.00",
+                    "count": 21,
+                    "median": "0.00",
+                    "outliers": 0,
+                    "skewness": "NaN"
+                  },
+                  "unique": 1,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Signature": {
+                  "type": "text",
+                  "stats": null,
+                  "unique": 19,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Serial No.": {
+                  "type": "numeric",
+                  "stats": {
+                    "q1": "-0.83",
+                    "q3": "0.83",
+                    "iqr": "1.66",
+                    "max": "1.73",
+                    "min": "-1.59",
+                    "std": "1.00",
+                    "mean": "0.00",
+                    "count": 21,
+                    "median": "-0.08",
+                    "outliers": 0,
+                    "skewness": "0.10"
+                  },
+                  "unique": 21,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Student Name": {
+                  "type": "text",
+                  "stats": null,
+                  "unique": 21,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                }
+              },
+              "rowCount": 21,
+              "columnCount": 6,
+              "dateColumns": [],
+              "correlations": [
+                {
+                  "col1": "Marks",
+                  "col2": "Grade",
+                  "correlation": "0.441"
+                },
+                {
+                  "col1": "Serial No.",
+                  "col2": "Marks",
+                  "correlation": "0.217"
+                },
+                {
+                  "col1": "Serial No.",
+                  "col2": "Grade",
+                  "correlation": "0.217"
+                },
+                {
+                  "col1": "Serial No.",
+                  "col2": "Subject",
+                  "correlation": "0.000"
+                },
+                {
+                  "col1": "Subject",
+                  "col2": "Marks",
+                  "correlation": "0.000"
+                },
+                {
+                  "col1": "Subject",
+                  "col2": "Grade",
+                  "correlation": "0.000"
+                }
+              ],
+              "duplicateStats": {
+                "Grade": {
+                  "totalValues": 21,
+                  "uniqueValues": 5,
+                  "topDuplicates": [
+                    {
+                      "count": 9,
+                      "value": "0"
+                    },
+                    {
+                      "count": 4,
+                      "value": "2"
+                    },
+                    {
+                      "count": 4,
+                      "value": "3"
+                    },
+                    {
+                      "count": 2,
+                      "value": "1"
+                    },
+                    {
+                      "count": 2,
+                      "value": "4"
+                    }
+                  ],
+                  "duplicateCount": 16,
+                  "duplicatePercentage": "76.2"
+                },
+                "Marks": {
+                  "totalValues": 21,
+                  "uniqueValues": 13,
+                  "topDuplicates": [
+                    {
+                      "count": 4,
+                      "value": "-4.2887329155961366e-16"
+                    },
+                    {
+                      "count": 3,
+                      "value": "-0.9941408214999444"
+                    },
+                    {
+                      "count": 2,
+                      "value": "-0.5112724224856858"
+                    },
+                    {
+                      "count": 2,
+                      "value": "1.903069572585607"
+                    },
+                    {
+                      "count": 2,
+                      "value": "0.21303017603570198"
+                    }
+                  ],
+                  "duplicateCount": 8,
+                  "duplicatePercentage": "38.1"
+                },
+                "Subject": {
+                  "totalValues": 21,
+                  "uniqueValues": 1,
+                  "topDuplicates": [
+                    {
+                      "count": 21,
+                      "value": "0"
+                    }
+                  ],
+                  "duplicateCount": 20,
+                  "duplicatePercentage": "95.2"
+                },
+                "Signature": {
+                  "totalValues": 21,
+                  "uniqueValues": 19,
+                  "topDuplicates": [
+                    {
+                      "count": 2,
+                      "value": "A1"
+                    },
+                    {
+                      "count": 2,
+                      "value": "Ganga"
+                    }
+                  ],
+                  "duplicateCount": 2,
+                  "duplicatePercentage": "9.5"
+                }
+              },
+              "numericColumns": [
+                "Serial No.",
+                "Subject",
+                "Marks",
+                "Grade"
+              ],
+              "hasInfiniteValues": false,
+              "categoricalColumns": []
+            }
+          ]
+        },
+        {
+          "name": "preprocessedData",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            [
+              {
+                "Grade": 0,
+                "Marks": -1.114857921253509,
+                "Subject": 0,
+                "Signature": "AP",
+                "Serial No.": -1.585462131317065,
+                "Student Name": "Ananda Kumar"
+              },
+              {
+                "Grade": 1,
+                "Marks": -0.5112724224856858,
+                "Subject": 0,
+                "Signature": "PI",
+                "Serial No.": -1.434807358657977,
+                "Student Name": "Ayusha Kumar"
+              },
+              {
+                "Grade": 1,
+                "Marks": -0.5112724224856858,
+                "Subject": 0,
+                "Signature": "A1",
+                "Serial No.": -1.28415258599889,
+                "Student Name": "Bibek Shekroma"
+              },
+              {
+                "Grade": 2,
+                "Marks": 1.299484073817784,
+                "Subject": 0,
+                "Signature": "A1",
+                "Serial No.": -1.133497813339802,
+                "Student Name": "Anish Pariyar"
+              },
+              {
+                "Grade": 2,
+                "Marks": 0.09231307628213734,
+                "Subject": 0,
+                "Signature": "Anisha",
+                "Serial No.": -0.9828430406807144,
+                "Student Name": "Anisha Kumar"
+              },
+              {
+                "Grade": 3,
+                "Marks": -2.080594719282026,
+                "Subject": 0,
+                "Signature": "Angali",
+                "Serial No.": -0.8321882680216266,
+                "Student Name": "Angali Kumari"
+              },
+              {
+                "Grade": 0,
+                "Marks": -0.9941408214999444,
+                "Subject": 0,
+                "Signature": "Asmita",
+                "Serial No.": -0.6815334953625389,
+                "Student Name": "Asmita Pariyar"
+              },
+              {
+                "Grade": 0,
+                "Marks": -0.9941408214999444,
+                "Subject": 0,
+                "Signature": "Babita",
+                "Serial No.": -0.5308787227034512,
+                "Student Name": "Babita Nepali"
+              },
+              {
+                "Grade": 2,
+                "Marks": 1.903069572585607,
+                "Subject": 0,
+                "Signature": "Bardan",
+                "Serial No.": -0.3802239500443634,
+                "Student Name": "Bardan Aryal"
+              },
+              {
+                "Grade": 0,
+                "Marks": -4.288732915596137e-16,
+                "Subject": 0,
+                "Signature": "Bibek",
+                "Serial No.": -0.2295691773852757,
+                "Student Name": "Bibek Darji"
+              },
+              {
+                "Grade": 0,
+                "Marks": -4.288732915596137e-16,
+                "Subject": 0,
+                "Signature": "Bipin",
+                "Serial No.": -0.07891440472618799,
+                "Student Name": "Bipin Nepali"
+              },
+              {
+                "Grade": 4,
+                "Marks": 1.178766974064219,
+                "Subject": 0,
+                "Signature": "Bishwash",
+                "Serial No.": 0.07174036793289973,
+                "Student Name": "Bishwash Kumar"
+              },
+              {
+                "Grade": 2,
+                "Marks": 1.903069572585607,
+                "Subject": 0,
+                "Signature": "Dipendra",
+                "Serial No.": 0.3730499132510752,
+                "Student Name": "Dipendra Kumar"
+              },
+              {
+                "Grade": 0,
+                "Marks": -4.288732915596137e-16,
+                "Subject": 0,
+                "Signature": "Eak",
+                "Serial No.": 0.523704685910163,
+                "Student Name": "Eak Bahadur"
+              },
+              {
+                "Grade": 0,
+                "Marks": -0.9941408214999444,
+                "Subject": 0,
+                "Signature": "Ganga",
+                "Serial No.": 0.6743594585692506,
+                "Student Name": "Ganga Kumar"
+              },
+              {
+                "Grade": 3,
+                "Marks": 0.213030176035702,
+                "Subject": 0,
+                "Signature": "Ganga",
+                "Serial No.": 0.8250142312283384,
+                "Student Name": "Ganga Thapa"
+              },
+              {
+                "Grade": 0,
+                "Marks": -4.288732915596137e-16,
+                "Subject": 0,
+                "Signature": "Immanuel",
+                "Serial No.": 0.9756690038874261,
+                "Student Name": "Immanuel Kumar"
+              },
+              {
+                "Grade": 3,
+                "Marks": 0.213030176035702,
+                "Subject": 0,
+                "Signature": "Indira",
+                "Serial No.": 1.126323776546514,
+                "Student Name": "Indira Kumar"
+              },
+              {
+                "Grade": 4,
+                "Marks": 1.058049874310655,
+                "Subject": 0,
+                "Signature": "Jenny",
+                "Serial No.": 1.276978549205602,
+                "Student Name": "Jenny Gurung"
+              },
+              {
+                "Grade": 3,
+                "Marks": -0.0284040234714273,
+                "Subject": 0,
+                "Signature": "Jyoti",
+                "Serial No.": 1.578288094523777,
+                "Student Name": "Jyoti Kumari"
+              },
+              {
+                "Grade": 0,
+                "Marks": -0.6319895222392505,
+                "Subject": 0,
+                "Signature": "Karan",
+                "Serial No.": 1.728942867182865,
+                "Student Name": "Karan Budhathoki"
+              }
+            ]
+          ]
+        },
+        {
+          "name": "preprocessingSteps",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            [
+              "Handled missing values: fillMean",
+              "Applied Encoding: label",
+              "Applied Normalization: standard"
+            ]
+          ]
+        },
+        {
+          "name": "preGeneratedSummary",
+          "type": "string",
+          "nullable": true,
+          "nullCount": 1,
+          "nullRatio": 100,
+          "cardinality": 0,
+          "uniqueRatio": null,
+          "sampleValues": []
+        },
+        {
+          "name": "threads",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            [
+              {
+                "role": "user",
+                "content": "Data quality issues?",
+                "timestamp": "2026-01-20T02:24:19.396Z"
+              },
+              {
+                "role": "assistant",
+                "content": "⚠️ **AI Service Temporarily Unavailable**\n\nI'm having trouble connecting to the AI service right now. Here's what I can tell you about your data:\n\n📊 **Dataset Structure**\n- **Total Rows:** 21\n- **Total Columns:** 6\n- **Numeric Columns:** 2\n- **Categorical Columns:** 2\n\n📈 **Data Quality**\n- **Missing Values:** 0\n- **Completeness:** N/A%\n- **Infinite Values:** No ✓\n\n💡 **Quick Recommendations:**\n- Consider encoding categorical variables\n- Normalize/standardize numeric features\n\n\nPlease try your question again in a moment when the AI service is available.",
+                "timestamp": "2026-01-20T02:24:19.396Z"
+              },
+              {
+                "role": "user",
+                "content": "hey",
+                "timestamp": "2026-01-20T03:14:13.393Z"
+              },
+              {
+                "role": "assistant",
+                "content": "⚠️ **AI Service Temporarily Unavailable**\n\nI'm having trouble connecting to the AI service right now. Here's what I can tell you about your data:\n\n📊 **Dataset Structure**\n- **Total Rows:** 21\n- **Total Columns:** 6\n- **Numeric Columns:** 4\n- **Categorical Columns:** 0\n\n📈 **Data Quality**\n- **Missing Values:** 0\n- **Completeness:** N/A%\n- **Infinite Values:** No ✓\n\n💡 **Quick Recommendations:**\n- Normalize/standardize numeric features\n\n\nPlease try your question again in a moment when the AI service is available.",
+                "timestamp": "2026-01-20T03:14:13.393Z"
+              },
+              {
+                "role": "user",
+                "content": "hey",
+                "timestamp": "2026-01-20T03:14:19.395Z"
+              },
+              {
+                "role": "assistant",
+                "content": "⚠️ **AI Service Temporarily Unavailable**\n\nI'm having trouble connecting to the AI service right now. Here's what I can tell you about your data:\n\n📊 **Dataset Structure**\n- **Total Rows:** 21\n- **Total Columns:** 6\n- **Numeric Columns:** 4\n- **Categorical Columns:** 0\n\n📈 **Data Quality**\n- **Missing Values:** 0\n- **Completeness:** N/A%\n- **Infinite Values:** No ✓\n\n💡 **Quick Recommendations:**\n- Normalize/standardize numeric features\n\n\nPlease try your question again in a moment when the AI service is available.",
+                "timestamp": "2026-01-20T03:14:19.395Z"
+              },
+              {
+                "role": "user",
+                "content": "hey",
+                "timestamp": "2026-01-20T17:35:07.044Z"
+              },
+              {
+                "role": "assistant",
+                "content": "⚠️ **AI Service Temporarily Unavailable**\n\nI'm having trouble connecting to the AI service right now. Here's what I can tell you about your data:\n\n📊 **Dataset Structure**\n- **Total Rows:** 21\n- **Total Columns:** 6\n- **Numeric Columns:** 4\n- **Categorical Columns:** 0\n\n📈 **Data Quality**\n- **Missing Values:** 0\n- **Completeness:** N/A%\n- **Infinite Values:** No ✓\n\n💡 **Quick Recommendations:**\n- Normalize/standardize numeric features\n\n\nPlease try your question again in a moment when the AI service is available.",
+                "timestamp": "2026-01-20T17:35:07.044Z"
+              }
+            ]
+          ]
+        },
+        {
+          "name": "createdAt",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "2026-01-19T22:20:51.357Z"
+          ]
+        },
+        {
+          "name": "updatedAt",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "2026-01-20T17:35:07.089Z"
+          ]
+        },
+        {
+          "name": "__v",
+          "type": "number",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            0
+          ]
+        }
+      ],
+      "rowCount": 1,
+      "columnCount": 15
+    },
+    "statsSummaryJson": null,
+    "sourceType": "UPLOAD",
+    "sourceId": "703672c9-1caf-48ea-9751-81dec9d9c4a6",
+    "rowCount": 1,
+    "columnCount": 15,
+    "createdAt": "2026-01-29T22:30:48.478Z",
+    "createdBy": null,
+    "dataset": {
+      "id": "7fbe48cf-de27-46bf-8aa2-8c190bebd475",
+      "tenantId": "3f96438f-1bf1-4ddd-9eca-25aeacf7dd32",
+      "projectId": "1ea7b3fd-9f8e-4ace-b21f-cab421525853",
+      "name": "student_data.json",
+      "sourceType": "UPLOAD",
+      "activeVersionId": "b3d27145-07ae-4082-8d30-f85b93ddc2b9",
+      "createdAt": "2026-01-29T22:30:47.716Z"
+    },
+    "edaResults": [
+      {
+        "id": "4f8a7b1e-6ba5-4aa9-a0db-0b3b5251a0cc",
+        "tenantId": "3f96438f-1bf1-4ddd-9eca-25aeacf7dd32",
+        "datasetVersionId": "b3d27145-07ae-4082-8d30-f85b93ddc2b9",
+        "resultS3Key": "tenants/3f96438f-1bf1-4ddd-9eca-25aeacf7dd32/eda/b3d27145-07ae-4082-8d30-f85b93ddc2b9/1769725849136.json",
+        "summaryJson": {
+          "overview": {
+            "rowCount": 1,
+            "totalCells": 15,
+            "columnCount": 15,
+            "columnTypes": {
+              "number": 2,
+              "string": 13
+            },
+            "missingCells": 1,
+            "missingRatio": 6.67,
+            "duplicateRows": 0,
+            "duplicateRatio": 0
+          },
+          "qualitySummary": {
+            "low": 0,
+            "high": 1,
+            "medium": 14
+          }
+        },
+        "status": "pending",
+        "results": null,
+        "errorMessage": null,
+        "createdAt": "2026-01-29T22:30:49.453Z"
+      }
+    ]
+  },
+  {
+    "id": "4993ff4b-bb08-4c33-b8ef-d38447ca5a62",
+    "datasetId": "a4b8df0e-1422-46e4-bb59-ac68207e198d",
+    "versionNumber": 1,
+    "parentVersionId": null,
+    "artifactS3Key": "tenants/3f96438f-1bf1-4ddd-9eca-25aeacf7dd32/parsed/a4b8df0e-1422-46e4-bb59-ac68207e198d/1769725841546.json",
+    "schemaJson": {
+      "columns": [
+        {
+          "name": "_id",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "696eae434e4519250d176e40"
+          ]
+        },
+        {
+          "name": "userId",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "6917c5f0c30cdce064258f00"
+          ]
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "student_data"
+          ]
+        },
+        {
+          "name": "fileName",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "student_data.xlsx"
+          ]
+        },
+        {
+          "name": "fileSize",
+          "type": "number",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            6308
+          ]
+        },
+        {
+          "name": "mimeType",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          ]
+        },
+        {
+          "name": "rawData",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            [
+              {
+                "Grade": "20+22",
+                "Marks": 5,
+                "Subject": "Nepali",
+                "Signature": "AP",
+                "Serial No.": 701,
+                "Student Name": "Ananda Kumar"
+              },
+              {
+                "Grade": "20+24",
+                "Marks": 7.5,
+                "Subject": "Nepali",
+                "Signature": "PI",
+                "Serial No.": 702,
+                "Student Name": "Ayusha Kumar"
+              },
+              {
+                "Grade": "20+24",
+                "Marks": 7.5,
+                "Subject": "Nepali",
+                "Signature": "A1",
+                "Serial No.": 703,
+                "Student Name": "Bibek Shekroma"
+              },
+              {
+                "Grade": "22+25",
+                "Marks": 15,
+                "Subject": "Nepali",
+                "Signature": "A1",
+                "Serial No.": 704,
+                "Student Name": "Anish Pariyar"
+              },
+              {
+                "Grade": "22+25",
+                "Marks": 10,
+                "Subject": "Nepali",
+                "Signature": "Anisha",
+                "Serial No.": 705,
+                "Student Name": "Anisha Kumar"
+              },
+              {
+                "Grade": "22+22",
+                "Marks": 1,
+                "Subject": "Nepali",
+                "Signature": "Angali",
+                "Serial No.": 706,
+                "Student Name": "Angali Kumari"
+              },
+              {
+                "Grade": "20+22",
+                "Marks": 5.5,
+                "Subject": "Nepali",
+                "Signature": "Asmita",
+                "Serial No.": 707,
+                "Student Name": "Asmita Pariyar"
+              },
+              {
+                "Grade": "20+22",
+                "Marks": 5.5,
+                "Subject": "Nepali",
+                "Signature": "Babita",
+                "Serial No.": 708,
+                "Student Name": "Babita Nepali"
+              },
+              {
+                "Grade": "22+25",
+                "Marks": 17.5,
+                "Subject": "Nepali",
+                "Signature": "Bardan",
+                "Serial No.": 709,
+                "Student Name": "Bardan Aryal"
+              },
+              {
+                "Grade": "20+22",
+                "Subject": "Nepali",
+                "Signature": "Bibek",
+                "Serial No.": 710,
+                "Student Name": "Bibek Darji"
+              },
+              {
+                "Grade": "20+22",
+                "Subject": "Nepali",
+                "Signature": "Bipin",
+                "Serial No.": 711,
+                "Student Name": "Bipin Nepali"
+              },
+              {
+                "Grade": "20+25",
+                "Marks": 14.5,
+                "Subject": "Nepali",
+                "Signature": "Bishwash",
+                "Serial No.": 712,
+                "Student Name": "Bishwash Kumar"
+              },
+              {
+                "Grade": "22+25",
+                "Marks": 17.5,
+                "Subject": "Nepali",
+                "Signature": "Dipendra",
+                "Serial No.": 714,
+                "Student Name": "Dipendra Kumar"
+              },
+              {
+                "Grade": "20+22",
+                "Subject": "Nepali",
+                "Signature": "Eak",
+                "Serial No.": 715,
+                "Student Name": "Eak Bahadur"
+              },
+              {
+                "Grade": "20+22",
+                "Marks": 5.5,
+                "Subject": "Nepali",
+                "Signature": "Ganga",
+                "Serial No.": 716,
+                "Student Name": "Ganga Kumar"
+              },
+              {
+                "Grade": "22+22",
+                "Marks": 10.5,
+                "Subject": "Nepali",
+                "Signature": "Ganga",
+                "Serial No.": 717,
+                "Student Name": "Ganga Thapa"
+              },
+              {
+                "Grade": "20+22",
+                "Subject": "Nepali",
+                "Signature": "Immanuel",
+                "Serial No.": 718,
+                "Student Name": "Immanuel Kumar"
+              },
+              {
+                "Grade": "22+22",
+                "Marks": 10.5,
+                "Subject": "Nepali",
+                "Signature": "Indira",
+                "Serial No.": 719,
+                "Student Name": "Indira Kumar"
+              },
+              {
+                "Grade": "20+25",
+                "Marks": 14,
+                "Subject": "Nepali",
+                "Signature": "Jenny",
+                "Serial No.": 720,
+                "Student Name": "Jenny Gurung"
+              },
+              {
+                "Grade": "22+22",
+                "Marks": 9.5,
+                "Subject": "Nepali",
+                "Signature": "Jyoti",
+                "Serial No.": 722,
+                "Student Name": "Jyoti Kumari"
+              },
+              {
+                "Grade": "20+22",
+                "Marks": 7,
+                "Subject": "Nepali",
+                "Signature": "Karan",
+                "Serial No.": 723,
+                "Student Name": "Karan Budhathoki"
+              }
+            ]
+          ]
+        },
+        {
+          "name": "analysis",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            {
+              "columns": {
+                "Grade": {
+                  "type": "numeric",
+                  "stats": {
+                    "q1": "0.00",
+                    "q3": "3.00",
+                    "iqr": "3.00",
+                    "max": "4.00",
+                    "min": "0.00",
+                    "std": "1.43",
+                    "mean": "1.43",
+                    "count": 21,
+                    "median": "1.00",
+                    "outliers": 0,
+                    "skewness": "0.39"
+                  },
+                  "unique": 5,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Marks": {
+                  "type": "numeric",
+                  "stats": {
+                    "q1": "-0.63",
+                    "q3": "0.21",
+                    "iqr": "0.85",
+                    "max": "1.90",
+                    "min": "-2.08",
+                    "std": "1.00",
+                    "mean": "-0.00",
+                    "count": 21,
+                    "median": "-0.00",
+                    "outliers": 3,
+                    "skewness": "0.24"
+                  },
+                  "unique": 13,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Subject": {
+                  "type": "numeric",
+                  "stats": {
+                    "q1": "0.00",
+                    "q3": "0.00",
+                    "iqr": "0.00",
+                    "max": "0.00",
+                    "min": "0.00",
+                    "std": "0.00",
+                    "mean": "0.00",
+                    "count": 21,
+                    "median": "0.00",
+                    "outliers": 0,
+                    "skewness": "NaN"
+                  },
+                  "unique": 1,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Signature": {
+                  "type": "text",
+                  "stats": null,
+                  "unique": 19,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Serial No.": {
+                  "type": "numeric",
+                  "stats": {
+                    "q1": "-0.83",
+                    "q3": "0.83",
+                    "iqr": "1.66",
+                    "max": "1.73",
+                    "min": "-1.59",
+                    "std": "1.00",
+                    "mean": "0.00",
+                    "count": 21,
+                    "median": "-0.08",
+                    "outliers": 0,
+                    "skewness": "0.10"
+                  },
+                  "unique": 21,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                },
+                "Student Name": {
+                  "type": "text",
+                  "stats": null,
+                  "unique": 21,
+                  "missing": 0,
+                  "missingPercent": "0.0"
+                }
+              },
+              "rowCount": 21,
+              "columnCount": 6,
+              "dateColumns": [],
+              "correlations": [
+                {
+                  "col1": "Marks",
+                  "col2": "Grade",
+                  "correlation": "0.441"
+                },
+                {
+                  "col1": "Serial No.",
+                  "col2": "Marks",
+                  "correlation": "0.217"
+                },
+                {
+                  "col1": "Serial No.",
+                  "col2": "Grade",
+                  "correlation": "0.217"
+                },
+                {
+                  "col1": "Serial No.",
+                  "col2": "Subject",
+                  "correlation": "0.000"
+                },
+                {
+                  "col1": "Subject",
+                  "col2": "Marks",
+                  "correlation": "0.000"
+                },
+                {
+                  "col1": "Subject",
+                  "col2": "Grade",
+                  "correlation": "0.000"
+                }
+              ],
+              "duplicateStats": {
+                "Grade": {
+                  "totalValues": 21,
+                  "uniqueValues": 5,
+                  "topDuplicates": [
+                    {
+                      "count": 9,
+                      "value": "0"
+                    },
+                    {
+                      "count": 4,
+                      "value": "2"
+                    },
+                    {
+                      "count": 4,
+                      "value": "3"
+                    },
+                    {
+                      "count": 2,
+                      "value": "1"
+                    },
+                    {
+                      "count": 2,
+                      "value": "4"
+                    }
+                  ],
+                  "duplicateCount": 16,
+                  "duplicatePercentage": "76.2"
+                },
+                "Marks": {
+                  "totalValues": 21,
+                  "uniqueValues": 13,
+                  "topDuplicates": [
+                    {
+                      "count": 4,
+                      "value": "-4.2887329155961366e-16"
+                    },
+                    {
+                      "count": 3,
+                      "value": "-0.9941408214999444"
+                    },
+                    {
+                      "count": 2,
+                      "value": "-0.5112724224856858"
+                    },
+                    {
+                      "count": 2,
+                      "value": "1.903069572585607"
+                    },
+                    {
+                      "count": 2,
+                      "value": "0.21303017603570198"
+                    }
+                  ],
+                  "duplicateCount": 8,
+                  "duplicatePercentage": "38.1"
+                },
+                "Subject": {
+                  "totalValues": 21,
+                  "uniqueValues": 1,
+                  "topDuplicates": [
+                    {
+                      "count": 21,
+                      "value": "0"
+                    }
+                  ],
+                  "duplicateCount": 20,
+                  "duplicatePercentage": "95.2"
+                },
+                "Signature": {
+                  "totalValues": 21,
+                  "uniqueValues": 19,
+                  "topDuplicates": [
+                    {
+                      "count": 2,
+                      "value": "A1"
+                    },
+                    {
+                      "count": 2,
+                      "value": "Ganga"
+                    }
+                  ],
+                  "duplicateCount": 2,
+                  "duplicatePercentage": "9.5"
+                }
+              },
+              "numericColumns": [
+                "Serial No.",
+                "Subject",
+                "Marks",
+                "Grade"
+              ],
+              "hasInfiniteValues": false,
+              "categoricalColumns": []
+            }
+          ]
+        },
+        {
+          "name": "preprocessedData",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            [
+              {
+                "Grade": 0,
+                "Marks": -1.114857921253509,
+                "Subject": 0,
+                "Signature": "AP",
+                "Serial No.": -1.585462131317065,
+                "Student Name": "Ananda Kumar"
+              },
+              {
+                "Grade": 1,
+                "Marks": -0.5112724224856858,
+                "Subject": 0,
+                "Signature": "PI",
+                "Serial No.": -1.434807358657977,
+                "Student Name": "Ayusha Kumar"
+              },
+              {
+                "Grade": 1,
+                "Marks": -0.5112724224856858,
+                "Subject": 0,
+                "Signature": "A1",
+                "Serial No.": -1.28415258599889,
+                "Student Name": "Bibek Shekroma"
+              },
+              {
+                "Grade": 2,
+                "Marks": 1.299484073817784,
+                "Subject": 0,
+                "Signature": "A1",
+                "Serial No.": -1.133497813339802,
+                "Student Name": "Anish Pariyar"
+              },
+              {
+                "Grade": 2,
+                "Marks": 0.09231307628213734,
+                "Subject": 0,
+                "Signature": "Anisha",
+                "Serial No.": -0.9828430406807144,
+                "Student Name": "Anisha Kumar"
+              },
+              {
+                "Grade": 3,
+                "Marks": -2.080594719282026,
+                "Subject": 0,
+                "Signature": "Angali",
+                "Serial No.": -0.8321882680216266,
+                "Student Name": "Angali Kumari"
+              },
+              {
+                "Grade": 0,
+                "Marks": -0.9941408214999444,
+                "Subject": 0,
+                "Signature": "Asmita",
+                "Serial No.": -0.6815334953625389,
+                "Student Name": "Asmita Pariyar"
+              },
+              {
+                "Grade": 0,
+                "Marks": -0.9941408214999444,
+                "Subject": 0,
+                "Signature": "Babita",
+                "Serial No.": -0.5308787227034512,
+                "Student Name": "Babita Nepali"
+              },
+              {
+                "Grade": 2,
+                "Marks": 1.903069572585607,
+                "Subject": 0,
+                "Signature": "Bardan",
+                "Serial No.": -0.3802239500443634,
+                "Student Name": "Bardan Aryal"
+              },
+              {
+                "Grade": 0,
+                "Marks": -4.288732915596137e-16,
+                "Subject": 0,
+                "Signature": "Bibek",
+                "Serial No.": -0.2295691773852757,
+                "Student Name": "Bibek Darji"
+              },
+              {
+                "Grade": 0,
+                "Marks": -4.288732915596137e-16,
+                "Subject": 0,
+                "Signature": "Bipin",
+                "Serial No.": -0.07891440472618799,
+                "Student Name": "Bipin Nepali"
+              },
+              {
+                "Grade": 4,
+                "Marks": 1.178766974064219,
+                "Subject": 0,
+                "Signature": "Bishwash",
+                "Serial No.": 0.07174036793289973,
+                "Student Name": "Bishwash Kumar"
+              },
+              {
+                "Grade": 2,
+                "Marks": 1.903069572585607,
+                "Subject": 0,
+                "Signature": "Dipendra",
+                "Serial No.": 0.3730499132510752,
+                "Student Name": "Dipendra Kumar"
+              },
+              {
+                "Grade": 0,
+                "Marks": -4.288732915596137e-16,
+                "Subject": 0,
+                "Signature": "Eak",
+                "Serial No.": 0.523704685910163,
+                "Student Name": "Eak Bahadur"
+              },
+              {
+                "Grade": 0,
+                "Marks": -0.9941408214999444,
+                "Subject": 0,
+                "Signature": "Ganga",
+                "Serial No.": 0.6743594585692506,
+                "Student Name": "Ganga Kumar"
+              },
+              {
+                "Grade": 3,
+                "Marks": 0.213030176035702,
+                "Subject": 0,
+                "Signature": "Ganga",
+                "Serial No.": 0.8250142312283384,
+                "Student Name": "Ganga Thapa"
+              },
+              {
+                "Grade": 0,
+                "Marks": -4.288732915596137e-16,
+                "Subject": 0,
+                "Signature": "Immanuel",
+                "Serial No.": 0.9756690038874261,
+                "Student Name": "Immanuel Kumar"
+              },
+              {
+                "Grade": 3,
+                "Marks": 0.213030176035702,
+                "Subject": 0,
+                "Signature": "Indira",
+                "Serial No.": 1.126323776546514,
+                "Student Name": "Indira Kumar"
+              },
+              {
+                "Grade": 4,
+                "Marks": 1.058049874310655,
+                "Subject": 0,
+                "Signature": "Jenny",
+                "Serial No.": 1.276978549205602,
+                "Student Name": "Jenny Gurung"
+              },
+              {
+                "Grade": 3,
+                "Marks": -0.0284040234714273,
+                "Subject": 0,
+                "Signature": "Jyoti",
+                "Serial No.": 1.578288094523777,
+                "Student Name": "Jyoti Kumari"
+              },
+              {
+                "Grade": 0,
+                "Marks": -0.6319895222392505,
+                "Subject": 0,
+                "Signature": "Karan",
+                "Serial No.": 1.728942867182865,
+                "Student Name": "Karan Budhathoki"
+              }
+            ]
+          ]
+        },
+        {
+          "name": "preprocessingSteps",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            [
+              "Handled missing values: fillMean",
+              "Applied Encoding: label",
+              "Applied Normalization: standard"
+            ]
+          ]
+        },
+        {
+          "name": "preGeneratedSummary",
+          "type": "string",
+          "nullable": true,
+          "nullCount": 1,
+          "nullRatio": 100,
+          "cardinality": 0,
+          "uniqueRatio": null,
+          "sampleValues": []
+        },
+        {
+          "name": "threads",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            [
+              {
+                "role": "user",
+                "content": "Data quality issues?",
+                "timestamp": "2026-01-20T02:24:19.396Z"
+              },
+              {
+                "role": "assistant",
+                "content": "⚠️ **AI Service Temporarily Unavailable**\n\nI'm having trouble connecting to the AI service right now. Here's what I can tell you about your data:\n\n📊 **Dataset Structure**\n- **Total Rows:** 21\n- **Total Columns:** 6\n- **Numeric Columns:** 2\n- **Categorical Columns:** 2\n\n📈 **Data Quality**\n- **Missing Values:** 0\n- **Completeness:** N/A%\n- **Infinite Values:** No ✓\n\n💡 **Quick Recommendations:**\n- Consider encoding categorical variables\n- Normalize/standardize numeric features\n\n\nPlease try your question again in a moment when the AI service is available.",
+                "timestamp": "2026-01-20T02:24:19.396Z"
+              },
+              {
+                "role": "user",
+                "content": "hey",
+                "timestamp": "2026-01-20T03:14:13.393Z"
+              },
+              {
+                "role": "assistant",
+                "content": "⚠️ **AI Service Temporarily Unavailable**\n\nI'm having trouble connecting to the AI service right now. Here's what I can tell you about your data:\n\n📊 **Dataset Structure**\n- **Total Rows:** 21\n- **Total Columns:** 6\n- **Numeric Columns:** 4\n- **Categorical Columns:** 0\n\n📈 **Data Quality**\n- **Missing Values:** 0\n- **Completeness:** N/A%\n- **Infinite Values:** No ✓\n\n💡 **Quick Recommendations:**\n- Normalize/standardize numeric features\n\n\nPlease try your question again in a moment when the AI service is available.",
+                "timestamp": "2026-01-20T03:14:13.393Z"
+              },
+              {
+                "role": "user",
+                "content": "hey",
+                "timestamp": "2026-01-20T03:14:19.395Z"
+              },
+              {
+                "role": "assistant",
+                "content": "⚠️ **AI Service Temporarily Unavailable**\n\nI'm having trouble connecting to the AI service right now. Here's what I can tell you about your data:\n\n📊 **Dataset Structure**\n- **Total Rows:** 21\n- **Total Columns:** 6\n- **Numeric Columns:** 4\n- **Categorical Columns:** 0\n\n📈 **Data Quality**\n- **Missing Values:** 0\n- **Completeness:** N/A%\n- **Infinite Values:** No ✓\n\n💡 **Quick Recommendations:**\n- Normalize/standardize numeric features\n\n\nPlease try your question again in a moment when the AI service is available.",
+                "timestamp": "2026-01-20T03:14:19.395Z"
+              },
+              {
+                "role": "user",
+                "content": "hey",
+                "timestamp": "2026-01-20T17:35:07.044Z"
+              },
+              {
+                "role": "assistant",
+                "content": "⚠️ **AI Service Temporarily Unavailable**\n\nI'm having trouble connecting to the AI service right now. Here's what I can tell you about your data:\n\n📊 **Dataset Structure**\n- **Total Rows:** 21\n- **Total Columns:** 6\n- **Numeric Columns:** 4\n- **Categorical Columns:** 0\n\n📈 **Data Quality**\n- **Missing Values:** 0\n- **Completeness:** N/A%\n- **Infinite Values:** No ✓\n\n💡 **Quick Recommendations:**\n- Normalize/standardize numeric features\n\n\nPlease try your question again in a moment when the AI service is available.",
+                "timestamp": "2026-01-20T17:35:07.044Z"
+              }
+            ]
+          ]
+        },
+        {
+          "name": "createdAt",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "2026-01-19T22:20:51.357Z"
+          ]
+        },
+        {
+          "name": "updatedAt",
+          "type": "string",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            "2026-01-20T17:35:07.089Z"
+          ]
+        },
+        {
+          "name": "__v",
+          "type": "number",
+          "nullable": false,
+          "nullCount": 0,
+          "nullRatio": 0,
+          "cardinality": 1,
+          "uniqueRatio": 100,
+          "sampleValues": [
+            0
+          ]
+        }
+      ],
+      "rowCount": 1,
+      "columnCount": 15
+    },
+    "statsSummaryJson": null,
+    "sourceType": "UPLOAD",
+    "sourceId": "d36956a8-c341-4744-9eeb-17ff4211b267",
+    "rowCount": 1,
+    "columnCount": 15,
+    "createdAt": "2026-01-29T22:30:42.123Z",
+    "createdBy": null,
+    "dataset": {
+      "id": "a4b8df0e-1422-46e4-bb59-ac68207e198d",
+      "tenantId": "3f96438f-1bf1-4ddd-9eca-25aeacf7dd32",
+      "projectId": "1ea7b3fd-9f8e-4ace-b21f-cab421525853",
+      "name": "student_data.json",
+      "sourceType": "UPLOAD",
+      "activeVersionId": "4993ff4b-bb08-4c33-b8ef-d38447ca5a62",
+      "createdAt": "2026-01-29T22:30:40.430Z"
+    },
+    "edaResults": [
+      {
+        "id": "7680f545-7153-49b1-b64d-217d6efd849d",
+        "tenantId": "3f96438f-1bf1-4ddd-9eca-25aeacf7dd32",
+        "datasetVersionId": "4993ff4b-bb08-4c33-b8ef-d38447ca5a62",
+        "resultS3Key": "tenants/3f96438f-1bf1-4ddd-9eca-25aeacf7dd32/eda/4993ff4b-bb08-4c33-b8ef-d38447ca5a62/1769725842891.json",
+        "summaryJson": {
+          "overview": {
+            "rowCount": 1,
+            "totalCells": 15,
+            "columnCount": 15,
+            "columnTypes": {
+              "number": 2,
+              "string": 13
+            },
+            "missingCells": 1,
+            "missingRatio": 6.67,
+            "duplicateRows": 0,
+            "duplicateRatio": 0
+          },
+          "qualitySummary": {
+            "low": 0,
+            "high": 1,
+            "medium": 14
+          }
+        },
+        "status": "pending",
+        "results": null,
+        "errorMessage": null,
+        "createdAt": "2026-01-29T22:30:43.236Z"
+      }
+    ]
+  }
+]

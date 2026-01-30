@@ -744,6 +744,65 @@ app.get('/tenants/:id/metadata', async (req, res) => {
     }
 });
 
+// Update tenant settings
+app.patch('/tenants/:id', async (req, res) => {
+    try {
+        const { openaiApiKey } = req.body;
+        const tenantId = req.params.id;
+
+        const updated = await (prisma.tenant.update as any)({
+            where: { id: tenantId },
+            data: { openaiApiKey }
+        });
+
+        res.json({ message: 'Tenant updated successfully' });
+    } catch (error) {
+        logger.error(error, 'Failed to update tenant');
+        res.status(500).json({ error: 'Failed to update tenant' });
+    }
+});
+
+// Update feature flags
+app.post('/tenants/:id/flags', async (req, res) => {
+    try {
+        const { flags } = req.body;
+        const tenantId = req.params.id;
+
+        const updated = await prisma.featureFlags.upsert({
+            where: { tenantId },
+            create: { tenantId, flagsJson: flags },
+            update: { flagsJson: flags }
+        });
+
+        res.json(updated);
+    } catch (error) {
+        logger.error(error, 'Failed to update flags');
+        res.status(500).json({ error: 'Failed to update flags' });
+    }
+});
+
+// Update quotas
+app.post('/tenants/:id/quotas', async (req, res) => {
+    try {
+        const { quotas } = req.body;
+        const tenantId = req.params.id;
+
+        // Clean up internal fields if they exist
+        const { id, tenantId: _, currentProjects, ...quotaData } = quotas;
+
+        const updated = await prisma.quotas.upsert({
+            where: { tenantId },
+            create: { ...quotaData, tenantId },
+            update: quotaData
+        });
+
+        res.json(updated);
+    } catch (error) {
+        logger.error(error, 'Failed to update quotas');
+        res.status(500).json({ error: 'Failed to update quotas' });
+    }
+});
+
 app.listen(PORT, () => {
     logger.info(`Tenant Service running on port ${PORT}`);
 });

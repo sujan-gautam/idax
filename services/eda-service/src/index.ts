@@ -136,7 +136,12 @@ app.post('/jobs/eda', async (req, res) => {
                     resultS3Key: resultKey,
                     summaryJson: {
                         overview: edaResults.overview,
-                        qualitySummary: edaResults.dataQuality.summary
+                        qualitySummary: edaResults.dataQuality.summary,
+                        correlations: edaResults.correlations.correlations.slice(0, 5), // Top 5 correlations
+                        outliers: Object.entries(edaResults.outliers).map(([col, data]: [string, any]) => ({
+                            column: col,
+                            count: data.count
+                        }))
                     } as any
                 }
             });
@@ -149,7 +154,12 @@ app.post('/jobs/eda', async (req, res) => {
                     resultS3Key: resultKey,
                     summaryJson: {
                         overview: edaResults.overview,
-                        qualitySummary: edaResults.dataQuality.summary
+                        qualitySummary: edaResults.dataQuality.summary,
+                        correlations: edaResults.correlations.correlations.slice(0, 5),
+                        outliers: Object.entries(edaResults.outliers).map(([col, data]: [string, any]) => ({
+                            column: col,
+                            count: data.count
+                        }))
                     } as any
                 }
             });

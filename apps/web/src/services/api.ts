@@ -161,3 +161,34 @@ export const changePassword = async (data: { currentPassword: string; newPasswor
     const { data: response } = await api.post('/auth/change-password', data);
     return response;
 };
+
+// AI APIs
+export const chatWithAI = async (message: string, datasetId?: string, projectId?: string, provider: 'gemini' | 'openai' = 'gemini', sessionId?: string) => {
+    const { data } = await api.post('/ai/chat', { message, datasetId, projectId, provider, sessionId });
+    return data;
+};
+
+export const getAiUsage = async () => {
+    const { data } = await api.get('/ai/usage');
+    return data;
+};
+
+export const getAiSessions = async (datasetId?: string) => {
+    const { data } = await api.get('/ai/sessions', { params: { datasetId } });
+    return data;
+};
+
+export const getAiSessionDetail = async (sessionId: string) => {
+    const { data } = await api.get(`/ai/sessions/${sessionId}`);
+    return data;
+};
+
+export const deleteAiSession = async (sessionId: string) => {
+    const { data } = await api.delete(`/ai/sessions/${sessionId}`);
+    return data;
+};
+
+export const updateTenantSettings = async (tenantId: string, settings: { openaiApiKey?: string }) => {
+    const { data } = await api.patch(`/tenants/${tenantId}`, settings);
+    return data;
+};

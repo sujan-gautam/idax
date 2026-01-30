@@ -48,6 +48,7 @@ const PARSER_SERVICE_URL = process.env.PARSER_SERVICE_URL || 'http://localhost:8
 const EDA_SERVICE_URL = process.env.EDA_SERVICE_URL || 'http://localhost:8004';
 const JOB_ORCHESTRATOR_SERVICE_URL = process.env.JOB_ORCHESTRATOR_SERVICE_URL || 'http://localhost:8005';
 const BILLING_SERVICE_URL = process.env.BILLING_SERVICE_URL || 'http://localhost:8007';
+const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8008';
 
 // Auth routes (public - no middleware)
 app.use('/api/v1/auth', createProxyMiddleware({
@@ -171,6 +172,22 @@ app.use('/api/v1/billing', createProxyMiddleware({
         }
     },
     onError: handleProxyError('billing')
+}));
+
+app.use('/api/v1/ai', createProxyMiddleware({
+    target: AI_SERVICE_URL,
+    changeOrigin: true,
+    pathRewrite: { '^/api/v1/ai': '' },
+    onProxyReq: (proxyReq, req) => {
+        proxyReq.setHeader('x-correlation-id', req.headers['x-correlation-id'] as string);
+        if (req.headers.authorization) {
+            proxyReq.setHeader('authorization', req.headers.authorization);
+        }
+        if (req.headers['x-tenant-id']) {
+            proxyReq.setHeader('x-tenant-id', req.headers['x-tenant-id'] as string);
+        }
+    },
+    onError: handleProxyError('ai')
 }));
 
 // 404 handler

@@ -10,7 +10,6 @@ import {
     FolderTree,
     Database,
     GitBranch,
-    TrendingUp,
     AlertCircle,
     Clock,
     CheckCircle2,
@@ -25,8 +24,9 @@ import { useFeatureStore } from '../store/useFeatureStore';
 import { api } from '../services/api';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { PageHeader, EmptyState, LoadingState, StatusIndicator } from '../components/common';
+import { PageHeader, EmptyState } from '../components/common';
 import { StatCard } from '../components/data';
+import AiChat from '../components/analytics/AiChat';
 import { cn } from '../lib/utils';
 
 interface DashboardStats {
@@ -212,106 +212,73 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* Content Grid */}
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid gap-6 lg:grid-cols-3">
                 {/* Recent Activity */}
-                <Card className="border-none bg-white shadow-sm dark:bg-neutral-900">
-                    <CardHeader className="border-b border-neutral-200 dark:border-neutral-800">
-                        <div className="flex items-center justify-between">
-                            <CardTitle className="flex items-center gap-2 text-base font-semibold">
-                                <Activity className="h-4 w-4" />
-                                Recent Activity
-                            </CardTitle>
-                            <Button variant="ghost" size="sm">
-                                View All
-                            </Button>
-                        </div>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                        {recentActivity.length === 0 ? (
-                            <EmptyState
-                                icon={Clock}
-                                title="No recent activity"
-                                description="Your activity will appear here"
-                                className="py-12"
-                            />
-                        ) : (
-                            <div className="divide-y divide-neutral-200 dark:divide-neutral-800">
-                                {recentActivity.map((activity) => (
-                                    <div key={activity.id} className="flex items-center gap-4 p-4">
-                                        <div
-                                            className={cn(
-                                                'rounded-full p-2',
-                                                activity.status === 'success' && 'bg-success-50 dark:bg-success-900/20',
-                                                activity.status === 'error' && 'bg-error-50 dark:bg-error-900/20',
-                                                activity.status === 'warning' && 'bg-warning-50 dark:bg-warning-900/20',
-                                                activity.status === 'info' && 'bg-info-50 dark:bg-info-900/20'
-                                            )}
-                                        >
-                                            {activity.status === 'success' && (
-                                                <CheckCircle2 className="h-4 w-4 text-success-600" />
-                                            )}
-                                            {activity.status === 'error' && (
-                                                <XCircle className="h-4 w-4 text-error-600" />
-                                            )}
-                                            {activity.status === 'warning' && (
-                                                <AlertCircle className="h-4 w-4 text-warning-600" />
-                                            )}
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="text-sm font-medium text-neutral-900 dark:text-neutral-50">
-                                                {activity.action}
-                                            </p>
-                                            <p className="text-xs text-neutral-600 dark:text-neutral-400">
-                                                {new Date(activity.timestamp).toLocaleString()}
-                                            </p>
-                                        </div>
-                                    </div>
-                                ))}
+                <div className="lg:col-span-2">
+                    <Card className="border-none bg-white shadow-sm dark:bg-neutral-900 h-full">
+                        <CardHeader className="border-b border-neutral-200 dark:border-neutral-800">
+                            <div className="flex items-center justify-between">
+                                <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                                    <Activity className="h-4 w-4" />
+                                    Recent Activity
+                                </CardTitle>
+                                <Button variant="ghost" size="sm">
+                                    View All
+                                </Button>
                             </div>
-                        )}
-                    </CardContent>
-                </Card>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            {recentActivity.length === 0 ? (
+                                <EmptyState
+                                    icon={Clock}
+                                    title="No recent activity"
+                                    description="Your activity will appear here"
+                                    className="py-12"
+                                />
+                            ) : (
+                                <div className="divide-y divide-neutral-200 dark:divide-neutral-800">
+                                    {recentActivity.map((activity) => (
+                                        <div key={activity.id} className="flex items-center gap-4 p-4">
+                                            {/* ... activity render ... */}
+                                            <div
+                                                className={cn(
+                                                    'rounded-full p-2',
+                                                    activity.status === 'success' && 'bg-emerald-50 dark:bg-emerald-900/20',
+                                                    activity.status === 'error' && 'bg-red-50 dark:bg-red-900/20',
+                                                    activity.status === 'warning' && 'bg-amber-50 dark:bg-amber-900/20',
+                                                    activity.status === 'info' && 'bg-blue-50 dark:bg-blue-900/20'
+                                                )}
+                                            >
+                                                {activity.status === 'success' && (
+                                                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                                                )}
+                                                {activity.status === 'error' && (
+                                                    <XCircle className="h-4 w-4 text-red-600" />
+                                                )}
+                                                {activity.status === 'warning' && (
+                                                    <AlertCircle className="h-4 w-4 text-amber-600" />
+                                                )}
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-sm font-medium text-neutral-900 dark:text-neutral-50">
+                                                    {activity.action}
+                                                </p>
+                                                <p className="text-xs text-neutral-600 dark:text-neutral-400">
+                                                    {new Date(activity.timestamp).toLocaleString()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
 
-                {/* Quick Actions */}
-                <Card className="border-none bg-white shadow-sm dark:bg-neutral-900">
-                    <CardHeader className="border-b border-neutral-200 dark:border-neutral-800">
-                        <CardTitle className="text-base font-semibold">Quick Actions</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3 p-6">
-                        <Button
-                            variant="outline"
-                            className="w-full justify-start"
-                            onClick={() => navigate('/projects')}
-                        >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Create New Project
-                        </Button>
-                        <Button
-                            variant="outline"
-                            className="w-full justify-start"
-                            onClick={() => navigate('/datasets')}
-                        >
-                            <Upload className="mr-2 h-4 w-4" />
-                            Upload Dataset
-                        </Button>
-                        <Button
-                            variant="outline"
-                            className="w-full justify-start"
-                            onClick={() => navigate('/jobs')}
-                        >
-                            <GitBranch className="mr-2 h-4 w-4" />
-                            View All Jobs
-                        </Button>
-                        <Button
-                            variant="outline"
-                            className="w-full justify-start"
-                            onClick={() => navigate('/developer')}
-                        >
-                            <TrendingUp className="mr-2 h-4 w-4" />
-                            API Documentation
-                        </Button>
-                    </CardContent>
-                </Card>
+                {/* AI Chat Sidebar */}
+                <div className="lg:col-span-1">
+                    <AiChat compact={false} />
+                </div>
             </div>
 
             {/* System Alerts */}

@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
 import {
     ShieldCheck,
-    Settings2,
     CreditCard,
-    Users,
     Activity,
     Lock,
     Zap,
     Save,
     Loader2,
-    AlertCircle
 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useFeatureStore } from '../store/useFeatureStore';
@@ -19,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Switch } from '../components/ui/switch';
 import { Input } from '../components/ui/input';
+import { Progress } from '../components/ui/progress';
 
 const Admin: React.FC = () => {
     const { tenant } = useAuthStore();
@@ -47,6 +45,25 @@ const Admin: React.FC = () => {
         } catch (error) {
             console.error('Failed to save flags:', error);
             alert('Failed to update flags');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleSaveQuotas = async () => {
+        if (!tenant?.id) return;
+        try {
+            setIsSaving(true);
+            await api.post(`/tenants/${tenant.id}/quotas`, {
+                quotas: localQuotas
+            }, {
+                headers: { 'x-tenant-id': tenant.id }
+            });
+            await fetchMetadata();
+            alert('Quotas updated successfully');
+        } catch (error) {
+            console.error('Failed to save quotas:', error);
+            alert('Failed to update quotas');
         } finally {
             setIsSaving(false);
         }
@@ -93,79 +110,26 @@ const Admin: React.FC = () => {
                                 <CardDescription>Enable or disable advanced system capabilities.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
-                                <div className="flex items-center justify-between space-x-4 rounded-lg border p-4">
-                                    <div className="flex-1 space-y-1">
-                                        <p className="text-sm font-medium leading-none">Auto-EDA</p>
-                                        <p className="text-xs text-slate-500">Enable automatic exploratory data analysis on every upload.</p>
+                                {[
+                                    { key: 'autoEDA', label: 'Auto-EDA', desc: 'Enable automatic exploratory data analysis on every upload.' },
+                                    { key: 'distributions', label: 'Statistical Distributions', desc: 'Enable histogram and frequency analysis tabs.' },
+                                    { key: 'correlations', label: 'Relationship Correlations', desc: 'Enable heatmaps and linear dependency matrix.' },
+                                    { key: 'outliers', label: 'Outlier Detection', desc: 'Identify extreme statistical anomalies for manual review.' },
+                                    { key: 'quality', label: 'Data Quality Scores', desc: 'Show health assessment metrics and recommendations.' },
+                                    { key: 'advancedCleansing', label: 'Advanced Cleansing', desc: 'Access to AI-driven data imputation techniques.' },
+                                    { key: 'aiAssistant', label: 'AI Analytics Assistant', desc: 'Enable RAG-based AI chat for data exploration.' },
+                                ].map((flag) => (
+                                    <div key={flag.key} className="flex items-center justify-between space-x-4 rounded-lg border p-4">
+                                        <div className="flex-1 space-y-1">
+                                            <p className="text-sm font-medium leading-none text-slate-900 dark:text-slate-100">{flag.label}</p>
+                                            <p className="text-xs text-slate-500">{flag.desc}</p>
+                                        </div>
+                                        <Switch
+                                            checked={localFlags[flag.key] ?? (flag.key === 'aiAssistant' ? true : false)}
+                                            onCheckedChange={() => toggleFlag(flag.key)}
+                                        />
                                     </div>
-                                    <Switch
-                                        checked={localFlags.autoEDA ?? false}
-                                        onCheckedChange={() => toggleFlag('autoEDA')}
-                                    />
-                                </div>
-
-                                <div className="flex items-center justify-between space-x-4 rounded-lg border p-4">
-                                    <div className="flex-1 space-y-1">
-                                        <p className="text-sm font-medium leading-none">Statistical Distributions</p>
-                                        <p className="text-xs text-slate-500">Enable histogram and frequency analysis tabs.</p>
-                                    </div>
-                                    <Switch
-                                        checked={localFlags.distributions ?? false}
-                                        onCheckedChange={() => toggleFlag('distributions')}
-                                    />
-                                </div>
-
-                                <div className="flex items-center justify-between space-x-4 rounded-lg border p-4">
-                                    <div className="flex-1 space-y-1">
-                                        <p className="text-sm font-medium leading-none">Relationship Correlations</p>
-                                        <p className="text-xs text-slate-500">Enable heatmaps and linear dependency matrix.</p>
-                                    </div>
-                                    <Switch
-                                        checked={localFlags.correlations ?? false}
-                                        onCheckedChange={() => toggleFlag('correlations')}
-                                    />
-                                </div>
-
-                                <div className="flex items-center justify-between space-x-4 rounded-lg border p-4">
-                                    <div className="flex-1 space-y-1">
-                                        <p className="text-sm font-medium leading-none">Outlier Detection</p>
-                                        <p className="text-xs text-slate-500">Identify extreme statistical anomalies for manual review.</p>
-                                    </div>
-                                    <Switch
-                                        checked={localFlags.outliers ?? false}
-                                        onCheckedChange={() => toggleFlag('outliers')}
-                                    />
-                                </div>
-
-                                <div className="flex items-center justify-between space-x-4 rounded-lg border p-4">
-                                    <div className="flex-1 space-y-1">
-                                        <p className="text-sm font-medium leading-none">Data Quality Scores</p>
-                                        <p className="text-xs text-slate-500">Show health assessment metrics and recommendations.</p>
-                                    </div>
-                                    <Switch
-                                        checked={localFlags.quality ?? false}
-                                        onCheckedChange={() => toggleFlag('quality')}
-                                    />
-                                </div>
-
-                                <div className="flex items-center justify-between space-x-4 rounded-lg border p-4">
-                                    <div className="flex-1 space-y-1">
-                                        <p className="text-sm font-medium leading-none">Advanced Cleansing</p>
-                                        <p className="text-xs text-slate-500">Access to AI-driven data imputation techniques.</p>
-                                    </div>
-                                    <Switch
-                                        checked={localFlags.advancedCleansing ?? false}
-                                        onCheckedChange={() => toggleFlag('advancedCleansing')}
-                                    />
-                                </div>
-
-                                <div className="flex items-center justify-between space-x-4 rounded-lg border p-4 opacity-50">
-                                    <div className="flex-1 space-y-1">
-                                        <p className="text-sm font-medium leading-none">Export to Snowflake</p>
-                                        <p className="text-xs text-slate-500">Direct warehouse synchronization.</p>
-                                    </div>
-                                    <div className="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-black uppercase">Coming Soon</div>
-                                </div>
+                                ))}
                             </CardContent>
                             <CardFooter className="border-t pt-6">
                                 <Button onClick={handleSaveFlags} disabled={isSaving} className="w-full">
@@ -194,36 +158,61 @@ const Admin: React.FC = () => {
                             </CardTitle>
                             <CardDescription>Manage and monitor resource consumption limits.</CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-8">
-                            <div className="space-y-2">
-                                <div className="flex justify-between text-sm">
-                                    <span className="font-medium text-slate-700 dark:text-slate-300">Max Projects</span>
-                                    <span className="font-bold">{quotas?.currentProjects || 0} / {quotas?.maxProjects || 5}</span>
+                        <CardContent className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase">Max Projects</label>
+                                    <Input
+                                        type="number"
+                                        value={localQuotas.maxProjects || 0}
+                                        onChange={(e) => setLocalQuotas({ ...localQuotas, maxProjects: parseInt(e.target.value) })}
+                                    />
                                 </div>
-                                <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                    <div
-                                        className="h-full bg-emerald-500"
-                                        style={{ width: `${((quotas?.currentProjects || 0) / (quotas?.maxProjects || 5)) * 100}%` }}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase">Max Uploads / Mo</label>
+                                    <Input
+                                        type="number"
+                                        value={localQuotas.maxUploadsPerMonth || 0}
+                                        onChange={(e) => setLocalQuotas({ ...localQuotas, maxUploadsPerMonth: parseInt(e.target.value) })}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase">Max API Calls / Mo</label>
+                                    <Input
+                                        type="number"
+                                        value={localQuotas.maxApiCallsPerMonth || 0}
+                                        onChange={(e) => setLocalQuotas({ ...localQuotas, maxApiCallsPerMonth: parseInt(e.target.value) })}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase">Max AI Tokens / Mo</label>
+                                    <Input
+                                        type="number"
+                                        value={localQuotas.maxAiTokensPerMonth || 50000}
+                                        onChange={(e) => setLocalQuotas({ ...localQuotas, maxAiTokensPerMonth: parseInt(e.target.value) })}
                                     />
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <div className="flex justify-between text-sm">
-                                    <span className="font-medium text-slate-700 dark:text-slate-300">Monthly Uploads</span>
-                                    <span className="font-bold">0 / {quotas?.maxUploadsPerMonth || 50}</span>
-                                </div>
-                                <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                    <div className="h-full bg-blue-500" style={{ width: '5%' }} />
+                            <div className="pt-4 space-y-4">
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="font-medium text-slate-700 dark:text-slate-300">Project Capacity</span>
+                                        <span className="font-bold">{quotas?.currentProjects || 0} / {localQuotas?.maxProjects || 5}</span>
+                                    </div>
+                                    <Progress value={((quotas?.currentProjects || 0) / (localQuotas?.maxProjects || 5)) * 100} className="h-2 bg-slate-100 dark:bg-slate-800" indicatorClassName="bg-indigo-500" />
                                 </div>
                             </div>
 
-                            <div className="p-4 rounded-xl bg-slate-900 text-white flex items-center justify-between">
+                            <div className="p-4 rounded-xl bg-slate-900 text-white flex items-center justify-between mt-6">
                                 <div className="space-y-1">
                                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Active Plan</p>
                                     <p className="text-xl font-black">{tenant?.plan || 'FREE'}</p>
                                 </div>
-                                <Button className="bg-white text-slate-900 hover:bg-slate-100">Upgrade to Pro</Button>
+                                <Button variant="secondary" onClick={handleSaveQuotas} disabled={isSaving}>
+                                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                    Apply Quota Update
+                                </Button>
                             </div>
                         </CardContent>
                     </Card>

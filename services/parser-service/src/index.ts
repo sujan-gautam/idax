@@ -251,7 +251,38 @@ function parseXLSX(buffer: Uint8Array): { data: any[], schema: any } {
  * Parse JSON with schema inference
  */
 function parseJSON(content: string): { data: any[], schema: any } {
-    const parsed = JSON.parse(content);
+    let parsed = JSON.parse(content);
+
+    // Intelligent Unwrapping for Project IDA / MongoDB / Mongoose exports
+    // If we have a single object with internal data arrays, use those instead
+    if (!Array.isArray(parsed) && typeof parsed === 'object' && parsed !== null) {
+        const dataKeys = ['rawData', 'data', 'results', 'rows', 'preprocessedData', 'items'];
+        for (const key of dataKeys) {
+            const val = parsed[key];
+
+            // Handle actual arrays
+            if (Array.isArray(val) && val.length > 0) {
+                logger.info({ key }, 'Unwrapped nested JSON array');
+                parsed = val;
+                break;
+            }
+
+            // Handle stringified arrays (common in Mongoose/IDA exports)
+            if (typeof val === 'string' && (val.trim().startsWith('[') || val.trim().startsWith('{'))) {
+                try {
+                    const nested = JSON.parse(val);
+                    if (Array.isArray(nested) && nested.length > 0) {
+                        logger.info({ key }, 'Parsed and unwrapped stringified JSON array');
+                        parsed = nested;
+                        break;
+                    }
+                } catch (e) {
+                    // Not valid JSON or not an array, continue
+                }
+            }
+        }
+    }
+
     const data = Array.isArray(parsed) ? parsed : [parsed];
     const columns = Object.keys(data[0] || {});
 
