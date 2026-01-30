@@ -150,3 +150,14 @@ export const createProject = async (name: string, description?: string) => {
 export const deleteProject = async (id: string) => {
     await api.delete(`/projects/${id}`);
 };
+
+// User/Account APIs
+export const updateUserProfile = async (data: { name: string }) => {
+    const { data: response } = await api.put('/auth/me', data);
+    return response;
+};
+
+export const changePassword = async (data: { currentPassword: string; newPassword: string }) => {
+    const { data: response } = await api.post('/auth/change-password', data);
+    return response;
+};

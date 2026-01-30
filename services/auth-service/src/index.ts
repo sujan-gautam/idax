@@ -301,6 +301,69 @@ app.get('/me', authenticateToken, async (req, res) => {
     }
 });
 
+// Update Profile
+app.put('/me', authenticateToken, async (req, res) => {
+    try {
+        const { name } = req.body;
+        const userId = req.user!.userId;
+
+        const user = await prisma.user.update({
+            where: { id: userId },
+            data: { name }
+        });
+
+        logger.info({ userId }, 'User profile updated');
+
+        res.json({
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role: user.role,
+                tenantId: user.tenantId
+            }
+        });
+    } catch (error) {
+        logger.error(error, 'Failed to update user profile');
+        res.status(500).json({ error: 'Failed to update profile' });
+    }
+});
+
+// Change Password
+app.post('/change-password', authenticateToken, async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const userId = req.user!.userId;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ error: 'Missing fields' });
+        }
+
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user || !user.passwordHash) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+        if (!valid) {
+            return res.status(401).json({ error: 'Invalid current password' });
+        }
+
+        const passwordHash = await bcrypt.hash(newPassword, 10);
+        await prisma.user.update({
+            where: { id: userId },
+            data: { passwordHash }
+        });
+
+        logger.info({ userId }, 'Password changed');
+        res.json({ message: 'Password updated successfully' });
+
+    } catch (error) {
+        logger.error(error, 'Failed to change password');
+        res.status(500).json({ error: 'Failed to change password' });
+    }
+});
+
 // Middleware to authenticate requests
 function authenticateToken(req: any, res: any, next: any) {
     const authHeader = req.headers['authorization'];

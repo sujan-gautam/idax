@@ -15,35 +15,38 @@ const Jobs = lazy(() => import('./pages/Jobs'));
 const DatasetDetails = lazy(() => import('./pages/DatasetDetails'));
 const Admin = lazy(() => import('./pages/Admin'));
 const Billing = lazy(() => import('./pages/Billing'));
-
-// Placeholder pages for those not yet implemented
-const PlaceholderPage = ({ title }: { title: string }) => (
-  <div className="flex flex-col gap-4">
-    <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{title}</h1>
-    <div className="rounded-lg border border-dashed p-12 text-center">
-      <p className="text-slate-500">This feature is currently under development.</p>
-    </div>
-  </div>
-);
+const Settings = lazy(() => import('./pages/Settings'));
+const Landing = lazy(() => import('./pages/Landing'));
+const Pricing = lazy(() => import('./pages/Pricing'));
+const Features = lazy(() => import('./pages/Features'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Privacy = lazy(() => import('./pages/Legal').then(module => ({ default: module.Privacy })));
+const Terms = lazy(() => import('./pages/Legal').then(module => ({ default: module.Terms })));
 
 const App: React.FC = () => {
   return (
     <Suspense fallback={<LoadingState variant="page" message="Loading..." />}>
       <Routes>
-        {/* Public routes */}
+        {/* Public Landing & Marketing */}
+        <Route path="/" element={<Landing />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/features" element={<Features />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+
+        {/* Public Auth routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Protected routes */}
+        {/* Protected App routes */}
         <Route
-          path="/"
           element={
             <ProtectedRoute>
               <AppShell />
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="projects" element={<Projects />} />
           <Route path="projects/:id" element={<ProjectDetail />} />
@@ -52,7 +55,7 @@ const App: React.FC = () => {
           <Route path="jobs" element={<Jobs />} />
           <Route path="admin" element={<Admin />} />
           <Route path="billing" element={<Billing />} />
-          <Route path="settings" element={<PlaceholderPage title="Account Settings" />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
 
         {/* Catch all */}

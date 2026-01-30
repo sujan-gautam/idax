@@ -24,6 +24,7 @@ interface AuthState {
     error: string | null;
 
     setAuth: (user: User, tenant: Tenant, accessToken: string, refreshToken: string) => void;
+    setUser: (user: User) => void;
     clearAuth: () => void;
     setLoading: (isLoading: boolean) => void;
     setError: (error: string | null) => void;
@@ -47,6 +48,10 @@ export const useAuthStore = create<AuthState>()(
             setAuth: (user, tenant, accessToken, refreshToken) => {
                 set({ user, tenant, accessToken, refreshToken, error: null })
                 api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
+            },
+
+            setUser: (user) => {
+                set({ user })
             },
 
             clearAuth: () => {
