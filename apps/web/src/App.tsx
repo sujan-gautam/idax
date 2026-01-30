@@ -10,8 +10,11 @@ const Register = lazy(() => import('./pages/Register'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Projects = lazy(() => import('./pages/Projects'));
 const ProjectDetail = lazy(() => import('./pages/ProjectDetail'));
+const Datasets = lazy(() => import('./pages/Datasets'));
+const Jobs = lazy(() => import('./pages/Jobs'));
 const DatasetDetails = lazy(() => import('./pages/DatasetDetails'));
 const Admin = lazy(() => import('./pages/Admin'));
+const Billing = lazy(() => import('./pages/Billing'));
 
 // Placeholder pages for those not yet implemented
 const PlaceholderPage = ({ title }: { title: string }) => (
@@ -44,11 +47,11 @@ const App: React.FC = () => {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="projects" element={<Projects />} />
           <Route path="projects/:id" element={<ProjectDetail />} />
-          <Route path="datasets" element={<PlaceholderPage title="Datasets Library" />} />
+          <Route path="datasets" element={<Datasets />} />
           <Route path="datasets/:id" element={<DatasetDetails />} />
-          <Route path="jobs" element={<PlaceholderPage title="Jobs & Pipelines" />} />
+          <Route path="jobs" element={<Jobs />} />
           <Route path="admin" element={<Admin />} />
-          <Route path="billing" element={<PlaceholderPage title="Billing & Subscription" />} />
+          <Route path="billing" element={<Billing />} />
           <Route path="settings" element={<PlaceholderPage title="Account Settings" />} />
         </Route>
 

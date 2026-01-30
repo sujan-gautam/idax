@@ -75,7 +75,7 @@ api.interceptors.response.use(
 );
 
 // Upload file with presigned URL
-export const uploadFile = async (file: File, tenantId: string, projectId: string) => {
+export const uploadFile = async (file: File, tenantId: string, projectId?: string) => {
     const contentType = file.type || 'application/octet-stream';
 
     // 1. Get Presigned URL

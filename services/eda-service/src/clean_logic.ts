@@ -104,7 +104,7 @@ function detectColumnIntent(columnName: string, values: any[], type: string): st
     }
 
     // 4. CATEGORICAL detection
-    const uniqueCount = uniqueValues.size;
+    const uniqueCount = uniqueValues.length;
     const uniqueRatio = uniqueCount / nonNullValues.length;
     if (type === 'string' && (uniqueRatio < 0.1 || uniqueCount < 20)) {
         return 'categorical';

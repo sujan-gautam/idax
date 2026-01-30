@@ -390,9 +390,13 @@ export const DistributionsTab: React.FC<DistributionsTabProps> = ({ datasetId })
                     <div className="grid gap-4 md:grid-cols-2">
                         {columns.slice(10, 20).map((col) => {
                             const data = distributions.distributions[col];
-                            return data.histogram
-                                ? renderNumericDistribution(col, data)
-                                : renderCategoricalDistribution(col, data);
+                            return (
+                                <div key={col}>
+                                    {data.histogram
+                                        ? renderNumericDistribution(col, data)
+                                        : renderCategoricalDistribution(col, data)}
+                                </div>
+                            );
                         })}
                     </div>
                 )}

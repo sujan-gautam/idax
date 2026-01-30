@@ -25,7 +25,7 @@ interface ProjectCardProps {
         description?: string;
         datasetCount?: number;
         createdAt: string;
-        updatedAt: string;
+        updatedAt?: string;
     };
     onDelete?: (id: string) => void;
     className?: string;
@@ -112,7 +112,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
                         </div>
                         <div className="flex items-center gap-1.5 text-neutral-600 dark:text-neutral-400">
                             <Calendar className="h-4 w-4" />
-                            <span>{new Date(project.updatedAt).toLocaleDateString()}</span>
+                            <span>{new Date(project.createdAt).toLocaleDateString()}</span>
                         </div>
                     </div>
 

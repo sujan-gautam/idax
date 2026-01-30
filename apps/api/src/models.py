@@ -25,6 +25,16 @@ class User(Base):
     
     tenant = relationship("Tenant")
 
+class Project(Base):
+    __tablename__ = "Project"
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    tenantId = Column(String, ForeignKey("Tenant.id"))
+    name = Column(String)
+    description = Column(String, nullable=True)
+    createdAt = Column(DateTime, default=datetime.utcnow)
+    
+    tenant = relationship("Tenant")
+
 class Dataset(Base):
     __tablename__ = "Dataset"
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))

@@ -1,7 +1,7 @@
 import express from 'express';
 import { logger } from '@project-ida/logger';
 import { prisma } from '@project-ida/db';
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { authMiddleware, AuthRequest } from '@project-ida/auth-middleware';
 import { runEDA } from './eda_logic';
 import { runAutoClean } from './clean_logic';
@@ -295,14 +295,165 @@ router.post('/clean', authMiddleware, async (req: AuthRequest, res) => {
 
         // Note: In a real system, we'd save this as a NEW VERSION in S3 and DB.
         // For this demo/task, we return the summary and first 10 rows of cleaned data.
+
+        let savedVersion = null;
+
+        if (req.body.save) {
+            // 1. Upload to S3
+            const newVersionNum = (version.versionNumber || 0) + 1;
+            const newKey = `tenants/${tenantId}/datasets/${datasetId}/v${newVersionNum}.json`;
+            const cleanedContent = JSON.stringify(cleanedData);
+
+            await s3Client.send(new PutObjectCommand({
+                Bucket: BUCKET,
+                Key: newKey,
+                Body: cleanedContent,
+                ContentType: 'application/json'
+            }));
+
+            // 2. Create DB Version
+            savedVersion = await prisma.datasetVersion.create({
+                data: {
+                    datasetId: datasetId,
+                    versionNumber: newVersionNum,
+                    parentVersionId: version.id,
+                    artifactS3Key: newKey,
+                    schemaJson: version.schemaJson || {}, // Reuse schema for now
+                    rowCount: cleanedData.length,
+                    columnCount: Object.keys(cleanedData[0] || {}).length,
+                    createdBy: req.user?.userId || 'system',
+                    sourceType: 'auto-clean'
+                }
+            });
+
+            logger.info({ datasetId, newVersion: newVersionNum }, 'Saved cleaned dataset version');
+        }
+
         res.json({
             summary,
             preview: cleanedData.slice(0, 10),
-            full_data_length: cleanedData.length
+            full_data_length: cleanedData.length,
+            savedVersion
         });
     } catch (error: any) {
         logger.error({ error: error.message }, 'Auto-clean failed');
         res.status(500).json({ error: 'Auto-clean failed', message: error.message });
+    }
+});
+
+// ============================================================================
+// TRIGGER ANALYSIS
+// ============================================================================
+
+router.post('/analyze', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const { datasetId } = req.body;
+        const tenantId = req.user?.tenantId;
+
+        if (!datasetId || !tenantId) {
+            return res.status(400).json({ error: 'DatasetId and tenant session required' });
+        }
+
+        const dataset = await prisma.dataset.findFirst({
+            where: { id: datasetId, tenantId },
+            include: {
+                versions: {
+                    orderBy: { versionNumber: 'desc' },
+                    take: 1
+                }
+            }
+        });
+
+        if (!dataset || !dataset.versions[0]) {
+            return res.status(404).json({ error: 'Dataset version not found' });
+        }
+
+        const version = dataset.versions[0];
+        const versionId = version.id;
+
+        logger.info({ datasetId, versionId, s3Key: version.artifactS3Key }, 'Starting EDA analysis');
+
+        // Download parsed data from S3 with local fallback
+        let content: string | undefined;
+        try {
+            const getCommand = new GetObjectCommand({
+                Bucket: BUCKET,
+                Key: version.artifactS3Key
+            });
+            const s3Response = await s3Client.send(getCommand);
+            content = await s3Response.Body?.transformToString();
+        } catch (s3Err: any) {
+            const uploadUrl = process.env.UPLOAD_SERVICE_URL || 'http://localhost:8002';
+            const localRes = await fetch(`${uploadUrl}/local-s3/${version.artifactS3Key}`);
+            if (localRes.ok) content = await localRes.text();
+            else logger.warn({ s3Key: version.artifactS3Key, error: s3Err.message }, 'Failed to fetch artifact');
+        }
+
+        if (!content) {
+            return res.status(404).json({ error: 'Failed to download data content' });
+        }
+
+        const data = JSON.parse(content);
+        const edaResults = runEDA(data, version.schemaJson);
+
+        // Store full results in S3 with local fallback
+        const resultKey = `tenants/${tenantId}/eda/${versionId}/${Date.now()}.json`;
+
+        try {
+            const putCommand = new PutObjectCommand({
+                Bucket: BUCKET,
+                Key: resultKey,
+                Body: JSON.stringify(edaResults),
+                ContentType: 'application/json'
+            });
+            await s3Client.send(putCommand);
+        } catch (putErr: any) {
+            const uploadUrl = process.env.UPLOAD_SERVICE_URL || 'http://localhost:8002';
+            await fetch(`${uploadUrl}/local-s3/${resultKey}`, {
+                method: 'PUT',
+                body: JSON.stringify(edaResults)
+            });
+        }
+
+        // Check if EDA result already exists
+        const existingEDA = await prisma.eDAResult.findFirst({
+            where: { datasetVersionId: versionId }
+        });
+
+        if (existingEDA) {
+            await prisma.eDAResult.update({
+                where: { id: existingEDA.id },
+                data: {
+                    resultS3Key: resultKey,
+                    summaryJson: {
+                        overview: edaResults.overview,
+                        qualitySummary: edaResults.dataQuality.summary
+                    } as any,
+                    status: 'completed',
+                    errorMessage: null
+                }
+            });
+        } else {
+            await prisma.eDAResult.create({
+                data: {
+                    tenantId: tenantId,
+                    datasetVersionId: versionId,
+                    resultS3Key: resultKey,
+                    summaryJson: {
+                        overview: edaResults.overview,
+                        qualitySummary: edaResults.dataQuality.summary
+                    } as any,
+                    status: 'completed'
+                }
+            });
+        }
+
+        logger.info({ datasetId, versionId }, 'EDA analysis completed and saved');
+        res.json({ success: true, versionId });
+
+    } catch (error: any) {
+        logger.error({ error: error.message }, 'EDA analysis failed');
+        res.status(500).json({ error: 'EDA analysis failed', message: error.message });
     }
 });
 

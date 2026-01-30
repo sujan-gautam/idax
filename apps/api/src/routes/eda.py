@@ -242,12 +242,156 @@ async def get_eda_distributions(
             }
         }
 
-@router.get("/{dataset_id}/eda/correlations")
-async def get_eda_correlations(
+    return correlations
+
+@router.get("/{dataset_id}/eda/outliers")
+async def get_eda_outliers(
     dataset_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     results = get_completed_results(db, dataset_id, current_user)
-    correlations = results.get("correlations", {})
-    return correlations
+    return results.get("outliers", {})
+
+@router.get("/{dataset_id}/eda/quality")
+async def get_eda_quality(
+    dataset_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    results = get_completed_results(db, dataset_id, current_user)
+    return results.get("quality", {})
+
+def get_local_path(s3_key: str) -> str:
+    # Resolve relative to project root .local-storage
+    # Current file: apps/api/src/routes/eda.py
+    # Root: ../../../../.local-storage
+    import sys
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../.local-storage"))
+    return os.path.join(base_dir, s3_key)
+
+@router.get("/{dataset_id}/preview")
+async def get_dataset_preview(
+    dataset_id: str,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    dataset = db.query(Dataset).filter(Dataset.id == dataset_id).first()
+    if not dataset or not dataset.activeVersionId:
+        raise HTTPException(status_code=404, detail="Dataset not found or no active version")
+    
+    version = db.query(DatasetVersion).filter(DatasetVersion.id == dataset.activeVersionId).first()
+    if not version or not version.artifactS3Key:
+        raise HTTPException(status_code=404, detail="Artifact not found")
+        
+    s3_key = version.artifactS3Key
+    file_path = get_local_path(s3_key)
+    
+    if not os.path.exists(file_path):
+        # Fallback: check if path is absolute or relative to where we are?
+        # Maybe version.artifactS3Key IS absolute path from my uploads.py?
+        if os.path.exists(s3_key):
+            file_path = s3_key
+        else:
+             # Try simple local relative
+             pass
+
+    if not os.path.exists(file_path):
+         raise HTTPException(status_code=404, detail=f"File not found on server: {file_path}")
+
+    try:
+        import pandas as pd
+        import numpy as np
+        
+        if file_path.endswith('.csv'):
+            df = pd.read_csv(file_path, nrows=limit)
+        elif file_path.endswith(('.xlsx', '.xls')):
+            df = pd.read_excel(file_path, nrows=limit)
+        elif file_path.endswith('.parquet'):
+             df = pd.read_parquet(file_path).head(limit)
+        else:
+             raise HTTPException(status_code=400, detail="Unsupported file format for preview")
+             
+        # Replacements for JSON safety
+        df = df.replace({np.nan: None})
+        
+        return {
+            "columns": [{"name": col, "type": str(df[col].dtype)} for col in df.columns],
+            "rows": df.to_dict(orient='records')
+        }
+    except Exception as e:
+        logger.error(f"Preview error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to read preview: {str(e)}")
+
+@router.get("/{dataset_id}/versions")
+async def get_dataset_versions(
+    dataset_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    # Check access logic if needed (e.g. tenant check via join or relationship)
+    # Simple check:
+    dataset = db.query(Dataset).filter(
+        Dataset.id == dataset_id,
+        Dataset.tenantId == current_user.tenantId
+    ).first()
+    
+    if not dataset:
+         raise HTTPException(status_code=404, detail="Dataset not found")
+
+    versions = db.query(DatasetVersion)\
+        .filter(DatasetVersion.datasetId == dataset_id)\
+        .order_by(DatasetVersion.versionNumber.desc())\
+        .all()
+    return versions
+
+@router.get("")
+async def list_datasets(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    datasets = db.query(Dataset)\
+        .filter(Dataset.tenantId == current_user.tenantId)\
+        .offset(skip)\
+        .limit(limit)\
+        .all()
+    
+    # Enrich with version counts if possible, but basic list is fine for now
+    return datasets
+
+@router.delete("/{dataset_id}")
+async def delete_dataset(
+    dataset_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    dataset = db.query(Dataset).filter(
+        Dataset.id == dataset_id,
+        Dataset.tenantId == current_user.tenantId
+    ).first()
+    
+    if not dataset:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+    
+    # Cascade delete should be handled by DB foreign keys typically, 
+    # but explicit cleanup is safer if cascade isn't set up perfectly or for S3 cleanup.
+    
+    # 1. Delete EDA Results
+    # Find all versions
+    versions = db.query(DatasetVersion).filter(DatasetVersion.datasetId == dataset.id).all()
+    version_ids = [v.id for v in versions]
+    
+    db.query(EDAResult).filter(EDAResult.datasetVersionId.in_(version_ids)).delete(synchronize_session=False)
+    
+    # 2. Delete Versions
+    db.query(DatasetVersion).filter(DatasetVersion.datasetId == dataset.id).delete(synchronize_session=False)
+    
+    # 3. Delete Dataset
+    db.delete(dataset)
+    
+    db.commit()
+    
+    return {"message": "Dataset deleted successfully", "id": dataset_id}

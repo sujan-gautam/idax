@@ -58,7 +58,7 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[480px]">
+            <DialogContent className="sm:max-w-[480px] bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-xl">
                 <DialogHeader>
                     <DialogTitle>Create New Project</DialogTitle>
                     <DialogDescription>

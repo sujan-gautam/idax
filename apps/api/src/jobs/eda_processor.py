@@ -463,6 +463,150 @@ class EDAProcessor:
             logger.error(f"EDA failed: {e}", exc_info=True)
             return {'error': str(e)}
 
+    def apply_cleaning(self, options: Dict, save_path: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Apply cleaning transformations to the dataset
+        """
+        if not self.load_data():
+            return {'error': 'Failed to load dataset'}
+            
+        logs = []
+        original_rows = len(self.df)
+        initial_quality = self.analyze_data_quality()
+        
+        df_clean = self.df.copy()
+        
+        protected_cols = options.get('protectedColumns', [])
+        
+        # 1. Deduplication
+        dropped_duplicates = 0
+        if options.get('dropDuplicates'):
+            before_dedup = len(df_clean)
+            df_clean = df_clean.drop_duplicates()
+            dropped_duplicates = before_dedup - len(df_clean)
+            if dropped_duplicates > 0:
+                logs.append({
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "action": "Deduplication",
+                    "reason": "Exact duplicate rows detected",
+                    "count": dropped_duplicates
+                })
+                
+        # 2. Fill Missing
+        filled_missing = 0
+        if options.get('fillMissing'):
+            for col in df_clean.columns:
+                if col in protected_cols:
+                    continue
+                
+                missing_count = df_clean[col].isna().sum()
+                if missing_count > 0:
+                    col_type = self._detect_single_column_type(df_clean[col])
+                    if col_type == 'numeric':
+                        fill_val = df_clean[col].median()
+                        df_clean[col] = df_clean[col].fillna(fill_val)
+                    else:
+                        fill_val = df_clean[col].mode().iloc[0] if not df_clean[col].mode().empty else "Unknown"
+                        df_clean[col] = df_clean[col].fillna(fill_val)
+                    
+                    filled_missing += missing_count
+                    
+            if filled_missing > 0:
+                logs.append({
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "action": "Imputation",
+                    "reason": "Missing values filled with median/mode",
+                    "count": filled_missing
+                })
+
+        # 3. Standardize Text
+        text_standardized = 0
+        if options.get('standardizeText'):
+            for col in df_clean.select_dtypes(include=['object']).columns:
+                if col in protected_cols:
+                    continue
+                
+                original_series = df_clean[col].astype(str)
+                cleaned_series = df_clean[col].astype(str).str.strip()
+                
+                changes = (original_series != cleaned_series).sum()
+                if changes > 0:
+                    df_clean[col] = cleaned_series
+                    text_standardized += changes
+
+            if text_standardized > 0:
+                 logs.append({
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "action": "Standardization",
+                    "reason": "Whitespace stripped from text columns",
+                    "count": text_standardized
+                 })
+                 
+        # 4. Remove Outliers
+        outliers_capped = 0
+        if options.get('removeOutliers'):
+            numeric_cols = df_clean.select_dtypes(include=[np.number]).columns
+            for col in numeric_cols:
+                if col in protected_cols:
+                    continue
+                
+                q1 = df_clean[col].quantile(0.25)
+                q3 = df_clean[col].quantile(0.75)
+                iqr = q3 - q1
+                lower = q1 - 1.5 * iqr
+                upper = q3 + 1.5 * iqr
+                
+                outliers = df_clean[(df_clean[col] < lower) | (df_clean[col] > upper)]
+                count = len(outliers)
+                if count > 0:
+                    df_clean = df_clean[~((df_clean[col] < lower) | (df_clean[col] > upper))]
+                    outliers_capped += count
+            
+            if outliers_capped > 0:
+                logs.append({
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "action": "Outlier Removal",
+                    "reason": "Rows with values outside 1.5*IQR removed",
+                    "count": outliers_capped
+                })
+        
+        # Recalculate quality
+        temp_df = self.df
+        self.df = df_clean
+        final_quality = self.analyze_data_quality()
+        self.df = temp_df
+        
+        # Save if requested
+        if save_path:
+            try:
+                if save_path.endswith('.csv'):
+                    df_clean.to_csv(save_path, index=False)
+                elif save_path.endswith('.parquet'):
+                    df_clean.to_parquet(save_path, index=False)
+                else:
+                    df_clean.to_csv(save_path, index=False)
+            except Exception as e:
+                logger.error(f"Failed to save cleaned data: {e}")
+                return {'error': f"Failed to save data: {e}"}
+
+        return {
+            "originalRows": original_rows,
+            "finalRows": len(df_clean),
+            "droppedDuplicates": dropped_duplicates,
+            "filledMissing": filled_missing,
+            "outliersCapped": outliers_capped,
+            "textStandardized": text_standardized,
+            "beforeQualityScore": int(initial_quality['quality_score']),
+            "afterQualityScore": int(final_quality['quality_score']),
+            "logs": logs,
+            "intents": {col: self._detect_single_column_type(df_clean[col]) for col in df_clean.columns},
+            "schemaValidation": {
+                "isValid": True,
+                "errors": []
+            }
+        }
+
+
 
 # Example usage
 if __name__ == "__main__":

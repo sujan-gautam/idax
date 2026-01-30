@@ -22,9 +22,8 @@ if (!fs.existsSync(LOCAL_STORAGE_DIR)) {
     fs.mkdirSync(LOCAL_STORAGE_DIR, { recursive: true });
 }
 
-app.use(express.json());
-
 // Mock S3 endpoint for local development without Docker
+// MUST be defined BEFORE express.json() to handle raw binary uploads of JSON files
 app.put('/local-s3/*', express.raw({ type: '*/*', limit: '100mb' }), (req, res) => {
     const fileKey = (req.params as any)[0];
     const filePath = path.join(LOCAL_STORAGE_DIR, fileKey);
@@ -34,10 +33,13 @@ app.put('/local-s3/*', express.raw({ type: '*/*', limit: '100mb' }), (req, res) 
         fs.mkdirSync(dirPath, { recursive: true });
     }
 
+    // req.body is now a Buffer thanks to express.raw()
     fs.writeFileSync(filePath, req.body);
     logger.info({ fileKey, filePath }, 'Stored file in local storage fallback');
     res.status(200).send('OK');
 });
+
+app.use(express.json());
 
 // GET endpoint to serve local files to parser-service
 app.get('/local-s3/*', (req, res) => {
@@ -60,8 +62,39 @@ app.get('/health', (req, res) => {
 
 app.post('/uploads/presigned', authMiddleware, async (req: AuthRequest, res) => {
     try {
-        const { filename, contentType, datasetId } = req.body;
+        const { filename, contentType, datasetId, projectId } = req.body;
         const tenantId = req.tenantId!; // Enforced by authMiddleware
+
+        // --- ENFORCE PLAN LIMITS ---
+        const tenant = await prisma.tenant.findUnique({
+            where: { id: tenantId },
+            select: { plan: true }
+        });
+
+        if (tenant) {
+            const datasetsCount = await prisma.dataset.count({
+                where: { tenantId }
+            });
+
+            // Define limits locally (should be shared, but hardcoding for safety now)
+            const limits: Record<string, number> = {
+                'FREE': 5,
+                'PRO': 100,
+                'ENTERPRISE': 999999999
+            };
+
+            const limit = limits[tenant.plan] || 5;
+
+            if (datasetsCount >= limit) {
+                logger.warn({ tenantId, plan: tenant.plan, current: datasetsCount, limit }, 'Upload rejected: Plan limit reached');
+                return res.status(403).json({
+                    error: 'Plan Limit Reached',
+                    message: `You have reached the limit of ${limit} datasets for your ${tenant.plan} plan. Please upgrade to upload more.`,
+                    code: 'PLAN_LIMIT_EXCEEDED'
+                });
+            }
+        }
+        // ---------------------------
 
         // Basic validation
         if (!filename || !contentType) {
@@ -82,11 +115,22 @@ app.post('/uploads/presigned', authMiddleware, async (req: AuthRequest, res) => 
         // Ensure Dataset exists
         let targetDatasetId = datasetId;
         if (!targetDatasetId) {
-            let project = await prisma.project.findFirst({ where: { tenantId, name: 'Default' } });
-            if (!project) {
-                project = await prisma.project.create({
-                    data: { name: 'Default', tenantId }
+            // Determine Project
+            let project;
+            if (projectId) {
+                project = await prisma.project.findFirst({
+                    where: { id: projectId, tenantId }
                 });
+            }
+
+            // Fallback to "Default" if no project specified or found
+            if (!project) {
+                project = await prisma.project.findFirst({ where: { tenantId, name: 'Default' } });
+                if (!project) {
+                    project = await prisma.project.create({
+                        data: { name: 'Default', tenantId }
+                    });
+                }
             }
 
             const dataset = await prisma.dataset.create({

@@ -10,7 +10,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { api } from '../services/api';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { PageHeader, EmptyState, LoadingState } from '../components/common';
+import { PageHeader, EmptyState } from '../components/common';
 import { ProjectCard, CreateProjectDialog } from '../components/project';
 
 interface Project {
@@ -19,7 +19,7 @@ interface Project {
     description?: string;
     datasetCount?: number;
     createdAt: string;
-    updatedAt: string;
+    updatedAt?: string;
 }
 
 const Projects: React.FC = () => {
@@ -63,7 +63,10 @@ const Projects: React.FC = () => {
                 headers: { 'x-tenant-id': tenant.id },
             });
 
-            setProjects(response.data);
+            setProjects(response.data.map((p: any) => ({
+                ...p,
+                datasetCount: p._count?.datasets || 0
+            })));
         } catch (err: any) {
             console.error('Failed to load projects:', err);
             setError(err.message || 'Failed to load projects');

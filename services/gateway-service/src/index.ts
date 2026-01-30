@@ -46,6 +46,8 @@ const TENANT_SERVICE_URL = process.env.TENANT_SERVICE_URL || 'http://localhost:8
 const UPLOAD_SERVICE_URL = process.env.UPLOAD_SERVICE_URL || 'http://localhost:8002';
 const PARSER_SERVICE_URL = process.env.PARSER_SERVICE_URL || 'http://localhost:8003';
 const EDA_SERVICE_URL = process.env.EDA_SERVICE_URL || 'http://localhost:8004';
+const JOB_ORCHESTRATOR_SERVICE_URL = process.env.JOB_ORCHESTRATOR_SERVICE_URL || 'http://localhost:8005';
+const BILLING_SERVICE_URL = process.env.BILLING_SERVICE_URL || 'http://localhost:8007';
 
 // Auth routes (public - no middleware)
 app.use('/api/v1/auth', createProxyMiddleware({
@@ -126,7 +128,7 @@ app.use('/api/v1/projects', createProxyMiddleware({
 }));
 
 app.use('/api/v1/jobs', createProxyMiddleware({
-    target: PARSER_SERVICE_URL,
+    target: JOB_ORCHESTRATOR_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: { '^/api/v1/jobs': '/jobs' },
     onProxyReq: (proxyReq, req) => {
@@ -134,8 +136,12 @@ app.use('/api/v1/jobs', createProxyMiddleware({
         if (req.headers.authorization) {
             proxyReq.setHeader('authorization', req.headers.authorization);
         }
+        // Forward tenant ID for multi-tenancy
+        if (req.headers['x-tenant-id']) {
+            proxyReq.setHeader('x-tenant-id', req.headers['x-tenant-id'] as string);
+        }
     },
-    onError: handleProxyError('parser')
+    onError: handleProxyError('job-orchestrator')
 }));
 
 app.use('/api/v1/eda', createProxyMiddleware({
@@ -149,6 +155,22 @@ app.use('/api/v1/eda', createProxyMiddleware({
         }
     },
     onError: handleProxyError('eda')
+}));
+
+app.use('/api/v1/billing', createProxyMiddleware({
+    target: BILLING_SERVICE_URL,
+    changeOrigin: true,
+    pathRewrite: { '^/api/v1/billing': '' },
+    onProxyReq: (proxyReq, req) => {
+        proxyReq.setHeader('x-correlation-id', req.headers['x-correlation-id'] as string);
+        if (req.headers.authorization) {
+            proxyReq.setHeader('authorization', req.headers.authorization);
+        }
+        if (req.headers['x-tenant-id']) {
+            proxyReq.setHeader('x-tenant-id', req.headers['x-tenant-id'] as string);
+        }
+    },
+    onError: handleProxyError('billing')
 }));
 
 // 404 handler

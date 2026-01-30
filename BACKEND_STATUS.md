@@ -87,7 +87,7 @@ The following backend services are in the process of starting:
 | Tenant | ❌ Crashed | 8001 | TypeScript error |
 | Upload | 🟡 Starting | 8002 | In progress |
 | Parser | 🟡 Starting | 8003 | In progress |
-| EDA | 🟡 Starting | 8004 | In progress |
+| EDA | ✅ Running | 8004 | Auto-clean and EDA stats |
 | MinIO | ✅ Running | 9000, 9001 | Object storage |
 | Redis | ✅ Running | 6380 | Cache |
 | PostgreSQL | ✅ Remote | Cloud | Neon database |

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-    Database,
     Upload,
     Plus,
     Table as TableIcon,
@@ -13,7 +12,6 @@ import {
     History,
     Loader2,
     ChevronLeft,
-    Filter,
     ArrowUpRight
 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
@@ -36,7 +34,6 @@ import {
     DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
 import UploadComponent from '../components/UploadComponent';
-import { cn } from '../lib/utils';
 
 interface Dataset {
     id: string;
@@ -239,15 +236,16 @@ const ProjectDetail: React.FC = () => {
 
             {/* Upload Dialog */}
             <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-2xl bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 shadow-2xl">
                     <DialogHeader>
-                        <DialogTitle>File Intelligence Upload</DialogTitle>
+                        <DialogTitle>Upload Dataset</DialogTitle>
                         <DialogDescription>
-                            Upload CSV, JSON or Excel files. Our system will automatically parse and analyze the data.
+                            Upload your data file and let our intelligent system automatically parse, validate, and analyze it for you.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-6">
                         <UploadComponent
+                            projectId={id}
                             onUploadComplete={() => {
                                 setIsUploadOpen(false);
                                 loadProject();
@@ -255,7 +253,7 @@ const ProjectDetail: React.FC = () => {
                         />
                     </div>
                     <DialogFooter>
-                        <Button variant="ghost" onClick={() => setIsUploadOpen(false)}>Cancel</Button>
+                        <Button variant="outline" onClick={() => setIsUploadOpen(false)}>Cancel</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

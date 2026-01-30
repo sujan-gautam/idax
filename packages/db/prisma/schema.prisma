@@ -74,6 +74,7 @@ model Tenant {
   datasets  Dataset[]
   recipes   Recipe[]
   edaResults EDAResult[]
+  subscription Subscription?
 }
 
 model User {
@@ -239,5 +240,100 @@ model ApiKey {
   scopesJson  Json
   status      String   @default("ACTIVE")
   createdAt   DateTime @default(now())
-  lastUsedAt  DateTime?
 }
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  TRIALING
+  UNPAID
+}
+
+enum BillingInterval {
+  MONTH
+  YEAR
+}
+
+enum InvoiceStatus {
+  DRAFT
+  OPEN
+  PAID
+  UNCOLLECTIBLE
+  VOID
+}
+
+model Subscription {
+  id                   String             @id @default(uuid())
+  tenantId             String             @unique
+  tenant               Tenant             @relation(fields: [tenantId], references: [id])
+  stripeCustomerId     String             @unique
+  stripeSubscriptionId String?            @unique
+  stripePriceId        String?
+  plan                 Plan               @default(FREE)
+  status               SubscriptionStatus @default(ACTIVE)
+  billingInterval      BillingInterval    @default(MONTH)
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  canceledAt           DateTime?
+  trialStart           DateTime?
+  trialEnd             DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  invoices             Invoice[]
+  usageRecords         UsageRecord[]
+}
+
+model PaymentMethod {
+  id               String   @id @default(uuid())
+  tenantId         String
+  stripePaymentMethodId String @unique
+  type             String   // card, bank_account, etc.
+  brand            String?  // visa, mastercard, etc.
+  last4            String?
+  expiryMonth      Int?
+  expiryYear       Int?
+  isDefault        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model Invoice {
+  id               String        @id @default(uuid())
+  subscriptionId   String
+  subscription     Subscription  @relation(fields: [subscriptionId], references: [id])
+  stripeInvoiceId  String        @unique
+  invoiceNumber    String?
+  status           InvoiceStatus @default(DRAFT)
+  amountDue        Int           // in cents
+  amountPaid       Int           @default(0)
+  currency         String        @default("usd")
+  periodStart      DateTime
+  periodEnd        DateTime
+  paidAt           DateTime?
+  hostedInvoiceUrl String?
+  invoicePdf       String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([subscriptionId])
+}
+
+model UsageRecord {
+  id             String       @id @default(uuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  metricType     String       // datasets, storage, api_calls, users
+  quantity       Int
+  timestamp      DateTime     @default(now())
+  createdAt      DateTime     @default(now())
+
+  @@index([subscriptionId, metricType])
+  @@index([timestamp])
+}
+
