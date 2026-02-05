@@ -25,8 +25,8 @@ router.get('/usage', authMiddleware, async (req: AuthRequest, res) => {
 
         res.json({
             storage: {
-                used: usage?.storageUsed || 0,
-                limit: quotas?.maxStorageBytes || (tenant?.plan === 'PRO' ? 10737418240 : 1073741824) // 10GB or 1GB
+                used: 0, // Storage usage not currently tracked in AiUsage
+                limit: quotas?.maxStorageBytes ? Number(quotas.maxStorageBytes) : (tenant?.plan === 'PRO' ? 10737418240 : 1073741824) // 10GB or 1GB
             },
             ai_tokens: {
                 used: usage?.tokensUsed || 0,
@@ -34,7 +34,8 @@ router.get('/usage', authMiddleware, async (req: AuthRequest, res) => {
             },
             datasets: {
                 used: await prisma.dataset.count({ where: { tenantId } }),
-                limit: quotas?.maxDatasets || (tenant?.plan === 'PRO' ? 100 : 5)
+                // maxDatasets not in schema, using fallback based on plan
+                limit: tenant?.plan === 'PRO' ? 100 : 5
             }
         });
     } catch (error) {
