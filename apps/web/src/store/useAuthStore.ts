@@ -22,6 +22,8 @@ interface AuthState {
     accessToken: string | null;
     refreshToken: string | null;
     isLoading: boolean;
+    loading: boolean;
+    isAuthenticated: boolean;
     error: string | null;
 
     setAuth: (user: User, tenant: Tenant, accessToken: string, refreshToken: string) => void;
@@ -44,10 +46,12 @@ export const useAuthStore = create<AuthState>()(
             accessToken: null,
             refreshToken: null,
             isLoading: false,
+            loading: false,
+            isAuthenticated: false,
             error: null,
 
             setAuth: (user, tenant, accessToken, refreshToken) => {
-                set({ user, tenant, accessToken, refreshToken, error: null })
+                set({ user, tenant, accessToken, refreshToken, isAuthenticated: true, error: null })
                 api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
             },
 
@@ -56,13 +60,13 @@ export const useAuthStore = create<AuthState>()(
             },
 
             clearAuth: () => {
-                set({ user: null, tenant: null, accessToken: null, refreshToken: null })
+                set({ user: null, tenant: null, accessToken: null, refreshToken: null, isAuthenticated: false })
                 delete api.defaults.headers.common['Authorization']
                 localStorage.removeItem('accessToken')
                 localStorage.removeItem('refreshToken')
             },
 
-            setLoading: (isLoading) => set({ isLoading }),
+            setLoading: (isLoading) => set({ isLoading, loading: isLoading }),
             setError: (error) => set({ error }),
 
             login: async (email, password) => {
@@ -127,7 +131,7 @@ export const useAuthStore = create<AuthState>()(
                     localStorage.setItem('accessToken', accessToken)
                     api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
 
-                    set({ user, tenant, accessToken, error: null })
+                    set({ user, tenant, accessToken, isAuthenticated: true, error: null })
                 } catch (error) {
                     get().clearAuth()
                     throw error

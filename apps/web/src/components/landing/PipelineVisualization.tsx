@@ -90,7 +90,7 @@ const PipelineVisualization: React.FC = () => {
                                                 : "bg-neutral-900 border-white/10 text-slate-500"
                                     )}
                                 >
-                                    {isCompleted ? <CheckCircle2 className="h-4 w-4 md:h-6 md:w-6" /> : React.cloneElement(step.icon as React.ReactElement, { className: "h-4 w-4 md:h-6 md:w-6" })}
+                                    {isCompleted ? <CheckCircle2 className="h-4 w-4 md:h-6 md:w-6" /> : React.cloneElement(step.icon as React.ReactElement<any>, { className: "h-4 w-4 md:h-6 md:w-6" })}
                                 </div>
 
                                 <div className="mt-2 md:mt-4">
