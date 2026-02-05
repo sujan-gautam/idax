@@ -93,8 +93,15 @@ router.get('/subscription', authMiddleware, async (req: AuthRequest, res) => {
 // POST /create-checkout-session
 router.post('/create-checkout-session', authMiddleware, async (req: AuthRequest, res) => {
     try {
-        const { priceId } = req.body;
+        const { priceId, plan, billingInterval } = req.body;
         const tenantId = req.user?.tenantId;
+
+        console.log(`[BILLING_REQUEST] Body:`, { priceId, plan, billingInterval });
+
+        // Frontend sends 'plan' (e.g. 'PRO', 'ENTERPRISE') and 'billingInterval' ('MONTHLY', 'YEARLY')
+        // Normalize input
+        const planKey = (plan || priceId || '').toString().toUpperCase();
+        const intervalKey = (billingInterval || 'MONTHLY').toString().toUpperCase();
 
         // Mock success for development if no Stripe key is set
         if (!process.env.STRIPE_SECRET_KEY) {
@@ -107,26 +114,35 @@ router.post('/create-checkout-session', authMiddleware, async (req: AuthRequest,
             apiVersion: '2023-10-16', // Use a pinned version for stability
         });
 
-        // Map internal plan IDs to Stripe Price IDs from env
-        let targetPriceId = priceId;
+        // Construct expected env var key, e.g. STRIPE_PRICE_PRO_MONTHLY
+        // Handle "FREE" plan gracefully
+        if (planKey === 'FREE') {
+            return res.status(400).json({ error: 'Cannot create checkout session for Free plan.' });
+        }
 
-        // Default to monthly if no interval specified
-        // In the future, we can extract { interval } = req.body
-        if (priceId === 'pro') targetPriceId = process.env.STRIPE_PRICE_PRO_MONTHLY;
-        if (priceId === 'enterprise') targetPriceId = process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY;
+        const envVarKey = `STRIPE_PRICE_${planKey}_${intervalKey}`;
+        let targetPriceId = process.env[envVarKey];
+
+        // Debug logging
+        console.log(`[BILLING_DEBUG] Looking for env var: ${envVarKey}`);
+
+        // Fallback for previous simple configuration if specific monthly/yearly missing
+        if (!targetPriceId && intervalKey === 'MONTHLY') {
+            if (planKey === 'PRO') targetPriceId = process.env.STRIPE_PRICE_PRO;
+            if (planKey === 'ENTERPRISE') targetPriceId = process.env.STRIPE_PRICE_ENTERPRISE;
+            if (targetPriceId) console.log(`[BILLING_DEBUG] Found legacy fallback for ${planKey}`);
+        }
 
         if (!targetPriceId) {
-            console.error(`[BILLING_ERROR] Price ID not found for plan: "${priceId}"`);
-            console.error(`[DEBUG_ENV] STRIPE_PRICE_PRO_MONTHLY exists? ${!!process.env.STRIPE_PRICE_PRO_MONTHLY}, Value: ${process.env.STRIPE_PRICE_PRO_MONTHLY ? 'set' : 'missing'}`);
-            console.error(`[DEBUG_ENV] STRIPE_PRICE_ENTERPRISE_MONTHLY exists? ${!!process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY}, Value: ${process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY ? 'set' : 'missing'}`);
-
-            return res.status(400).json({ error: 'Price ID not configured for this plan. Please check server logs and .env configuration.' });
+            console.error(`[BILLING_ERROR] Price ID not found for plan: "${planKey}", interval: "${intervalKey}"`);
+            console.error(`[DEBUG_ENV] Checked key: ${envVarKey}, Exists: ${!!process.env[envVarKey]}`);
+            return res.status(400).json({ error: `Price ID not configured for ${planKey} (${intervalKey}). Please check server configuration.` });
         }
 
         const session = await stripe.checkout.sessions.create({
             mode: 'subscription',
             payment_method_types: ['card'],
-            customer_email: req.user?.email, // Pre-fill email
+            customer_email: req.user?.email,
             line_items: [
                 {
                     price: targetPriceId,
@@ -137,6 +153,8 @@ router.post('/create-checkout-session', authMiddleware, async (req: AuthRequest,
             cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/billing?canceled=true`,
             metadata: {
                 tenantId: tenantId!,
+                plan: planKey,
+                interval: intervalKey
             },
         });
 
