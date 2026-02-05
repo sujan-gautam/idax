@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppShell from './components/layout/AppShell';
+import { AdminLayout } from './components/layout/AdminLayout';
 import LoadingState from './components/common/LoadingState';
 
 // Lazy load pages for better performance
@@ -13,6 +14,7 @@ const ProjectDetail = lazy(() => import('./pages/ProjectDetail'));
 const Datasets = lazy(() => import('./pages/Datasets'));
 const Jobs = lazy(() => import('./pages/Jobs'));
 const DatasetDetails = lazy(() => import('./pages/DatasetDetails'));
+const Developer = lazy(() => import('./pages/Developer'));
 const Admin = lazy(() => import('./pages/Admin'));
 const Billing = lazy(() => import('./pages/Billing'));
 const Settings = lazy(() => import('./pages/Settings'));
@@ -39,7 +41,7 @@ const App: React.FC = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Protected App routes */}
+        {/* Protected User Dashboard routes */}
         <Route
           element={
             <ProtectedRoute>
@@ -53,9 +55,26 @@ const App: React.FC = () => {
           <Route path="datasets" element={<Datasets />} />
           <Route path="datasets/:id" element={<DatasetDetails />} />
           <Route path="jobs" element={<Jobs />} />
-          <Route path="admin" element={<Admin />} />
+          <Route path="developer" element={<Developer />} />
           <Route path="billing" element={<Billing />} />
           <Route path="settings" element={<Settings />} />
+        </Route>
+
+        {/* Protected Admin Panel routes - Separate Layout */}
+        <Route
+          element={
+            <ProtectedRoute>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="admin" element={<Navigate to="/admin/statistics" replace />} />
+          <Route path="admin/statistics" element={<Admin section="statistics" />} />
+          <Route path="admin/users" element={<Admin section="users" />} />
+          <Route path="admin/features" element={<Admin section="features" />} />
+          <Route path="admin/quotas" element={<Admin section="quotas" />} />
+          <Route path="admin/audit" element={<Admin section="audit" />} />
+          <Route path="admin/settings" element={<Admin section="settings" />} />
         </Route>
 
         {/* Catch all */}

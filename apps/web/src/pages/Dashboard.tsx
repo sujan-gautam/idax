@@ -66,9 +66,13 @@ const Dashboard: React.FC = () => {
             setError(null);
 
             // Fetch projects and datasets in parallel
-            const [projectsRes, datasetsRes] = await Promise.all([
+            const [projectsRes, datasetsRes, auditLogsRes] = await Promise.all([
                 api.get('/projects', { headers: { 'x-tenant-id': tenant.id } }),
                 api.get('/datasets', { headers: { 'x-tenant-id': tenant.id } }),
+                api.get('/admin/audit-logs', {
+                    headers: { 'x-tenant-id': tenant.id },
+                    params: { limit: 10 } // Get last 10 activities
+                }).catch(() => ({ data: { logs: [] } })) // Fallback if admin endpoint not accessible
             ]);
 
             const projects = projectsRes.data;
@@ -95,16 +99,47 @@ const Dashboard: React.FC = () => {
                 },
             });
 
-            // Mock recent activity
-            setRecentActivity([
-                {
-                    id: '1',
-                    type: 'dataset',
-                    action: 'Dataset uploaded successfully',
-                    timestamp: new Date().toISOString(),
-                    status: 'success',
-                },
-            ]);
+            // Map audit logs to recent activity
+            const logs = auditLogsRes.data?.logs || [];
+            const mappedActivity: RecentActivity[] = logs.map((log: any) => {
+                // Determine activity type and status based on action
+                let type: 'project' | 'dataset' | 'job' = 'dataset';
+                let status: 'success' | 'warning' | 'error' | 'info' = 'info';
+                let action = log.action || 'Unknown action';
+
+                // Map entity types
+                if (log.entityType === 'Project') type = 'project';
+                else if (log.entityType === 'Dataset' || log.entityType === 'Upload') type = 'dataset';
+                else if (log.entityType === 'Job') type = 'job';
+
+                // Map actions to user-friendly messages and statuses
+                if (action.includes('CREATED')) {
+                    status = 'success';
+                    action = `${log.entityType} created successfully`;
+                } else if (action.includes('UPDATED')) {
+                    status = 'info';
+                    action = `${log.entityType} updated`;
+                } else if (action.includes('DELETED')) {
+                    status = 'warning';
+                    action = `${log.entityType} deleted`;
+                } else if (action.includes('FAILED')) {
+                    status = 'error';
+                    action = `${log.entityType} operation failed`;
+                } else if (action.includes('COMPLETED')) {
+                    status = 'success';
+                    action = `${log.entityType} completed`;
+                }
+
+                return {
+                    id: log.id,
+                    type,
+                    action,
+                    timestamp: log.createdAt,
+                    status
+                };
+            });
+
+            setRecentActivity(mappedActivity);
         } catch (error: any) {
             console.error('Failed to load dashboard:', error);
             setError(error.message || 'Failed to load dashboard data');
@@ -277,7 +312,7 @@ const Dashboard: React.FC = () => {
 
                 {/* AI Chat Sidebar */}
                 <div className="lg:col-span-1">
-                    <AiChat compact={false} />
+                    <AiChat />
                 </div>
             </div>
 

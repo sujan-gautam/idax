@@ -13,6 +13,7 @@ interface Tenant {
     id: string;
     name: string;
     plan: string;
+    status?: string;
 }
 
 interface AuthState {

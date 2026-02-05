@@ -1,0 +1,20 @@
+{
+    "name": "@project-ida/auth",
+    "version": "1.0.0",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch"
+    },
+    "dependencies": {
+        "jsonwebtoken": "^9.0.2",
+        "@project-ida/logger": "*"
+    },
+    "devDependencies": {
+        "@types/jsonwebtoken": "^9.0.3",
+        "@types/express": "^4.17.17",
+        "@types/node": "^20.4.2",
+        "typescript": "^5.1.6"
+    }
+}

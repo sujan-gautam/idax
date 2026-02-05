@@ -1,6 +1,6 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import eda, billing, uploads, projects, jobs
+from .routes import eda, billing, uploads, projects, jobs, admin
 from .database import engine, Base, SessionLocal
 from .models import Tenant, User
 
@@ -20,10 +20,11 @@ async def startup_event():
             db.commit()
             db.refresh(tenant)
             
-            user = User(email="demo@antigravity.ai", name="Demo User", tenantId=tenant.id)
+            # Create admin user with ADMIN role
+            user = User(email="demo@antigravity.ai", name="Demo User", tenantId=tenant.id, role="ADMIN")
             db.add(user)
             db.commit()
-            print("Database seeded with Demo User.")
+            print("Database seeded with Demo Admin User.")
     except Exception as e:
         print(f"Seeding failed: {e}")
     finally:
@@ -50,6 +51,7 @@ api_router.include_router(billing.router)
 api_router.include_router(uploads.router)
 api_router.include_router(projects.router)
 api_router.include_router(jobs.router)
+api_router.include_router(admin.router)
 
 app.include_router(api_router)
 

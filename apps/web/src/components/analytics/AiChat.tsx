@@ -163,37 +163,58 @@ const AiChat: React.FC<AiChatProps> = ({ datasetId, projectId, onClose }) => {
     const usagePercentage = usage ? (usage.used / usage.limit) * 100 : 0;
 
     return (
-        <div className="flex flex-col h-full bg-white dark:bg-slate-900 border-none shadow-none relative overflow-hidden">
-            <CardHeader className="p-4 border-b dark:bg-slate-900/50 flex flex-row items-center justify-between space-y-0 shrink-0">
-                <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                        <Bot className="h-6 w-6 text-white" />
+        <div className="flex flex-col h-full bg-white dark:bg-slate-900 border-none shadow-none relative overflow-hidden rounded-lg">
+            <CardHeader className="p-3 md:p-4 border-b dark:bg-slate-900/50 flex flex-row items-center justify-between space-y-0 shrink-0">
+                <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
+                    <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
+                        <Bot className="h-4 w-4 md:h-6 md:w-6 text-white" />
                     </div>
-                    <div>
-                        <CardTitle className="text-sm font-bold flex items-center gap-2">
-                            IDA AI Assistant
-                            <Sparkles className="h-3 w-3 text-indigo-400" />
+                    <div className="min-w-0 flex-1">
+                        <CardTitle className="text-xs md:text-sm font-bold flex items-center gap-1.5 md:gap-2">
+                            <span className="truncate">IDA AI Assistant</span>
+                            <Sparkles className="h-2.5 w-2.5 md:h-3 md:w-3 text-indigo-400 shrink-0" />
                         </CardTitle>
-                        <div className="flex items-center gap-1.5 line-clamp-1">
-                            <BrainCircuit className="h-2.5 w-2.5 text-slate-400" />
-                            <p className="text-[9px] text-slate-500 font-medium uppercase tracking-tighter">
+                        <div className="flex items-center gap-1 md:gap-1.5">
+                            <BrainCircuit className="h-2 w-2 md:h-2.5 md:w-2.5 text-slate-400 shrink-0" />
+                            <p className="text-[8px] md:text-[9px] text-slate-500 font-medium uppercase tracking-tighter truncate">
                                 {provider === 'gemini' ? 'Gemini 1.5 Pro' : 'GPT-4 Turbo'}
                             </p>
                         </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" onClick={startNewChat} title="New Chat" className="h-8 w-8 text-slate-500 hover:text-indigo-600">
-                        <PlusCircle className="h-4 w-4" />
+                <div className="flex items-center gap-0.5 md:gap-1 shrink-0">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={startNewChat}
+                        title="New Chat"
+                        className="h-7 w-7 md:h-8 md:w-8 text-slate-500 hover:text-indigo-600"
+                    >
+                        <PlusCircle className="h-3.5 w-3.5 md:h-4 md:w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => setShowHistory(!showHistory)} title="History" className={cn("h-8 w-8", showHistory ? "text-indigo-600 bg-indigo-50" : "text-slate-500 hover:text-indigo-600")}>
-                        <History className="h-4 w-4" />
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setShowHistory(!showHistory)}
+                        title="History"
+                        className={cn(
+                            "h-7 w-7 md:h-8 md:w-8",
+                            showHistory ? "text-indigo-600 bg-indigo-50" : "text-slate-500 hover:text-indigo-600"
+                        )}
+                    >
+                        <History className="h-3.5 w-3.5 md:h-4 md:w-4" />
                     </Button>
                     {onClose && (
                         <>
-                            <div className="w-[1px] h-4 bg-slate-200 dark:bg-slate-800 mx-1" />
-                            <Button variant="ghost" size="icon" onClick={onClose} title="Close" className="h-8 w-8 text-slate-500 hover:text-red-500">
-                                <X className="h-4 w-4" />
+                            <div className="w-[1px] h-4 bg-slate-200 dark:bg-slate-800 mx-0.5 md:mx-1" />
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={onClose}
+                                title="Close"
+                                className="h-7 w-7 md:h-8 md:w-8 text-slate-500 hover:text-red-500"
+                            >
+                                <X className="h-3.5 w-3.5 md:h-4 md:w-4" />
                             </Button>
                         </>
                     )}
@@ -260,21 +281,21 @@ const AiChat: React.FC<AiChatProps> = ({ datasetId, projectId, onClose }) => {
                     )}
 
                     {messages.map((msg, idx) => (
-                        <div key={idx} className={cn("flex items-start gap-3 animate-fade-in", msg.role === 'user' ? "flex-row-reverse" : "")}>
-                            <div className={cn("h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-md", msg.role === 'assistant' ? "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600" : "bg-slate-200 dark:bg-slate-800 text-slate-600")}>
-                                {msg.role === 'assistant' ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
+                        <div key={idx} className={cn("flex items-start gap-2 md:gap-3 animate-fade-in", msg.role === 'user' ? "flex-row-reverse" : "")}>
+                            <div className={cn("h-6 w-6 md:h-8 md:w-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-md", msg.role === 'assistant' ? "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600" : "bg-slate-200 dark:bg-slate-800 text-slate-600")}>
+                                {msg.role === 'assistant' ? <Bot className="h-3 w-3 md:h-4 md:w-4" /> : <User className="h-3 w-3 md:h-4 md:w-4" />}
                             </div>
-                            <div className={cn("max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap shrink-1", msg.role === 'assistant' ? "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none prose prose-slate dark:prose-invert prose-xs" : "bg-indigo-600 text-white rounded-tr-none shadow-indigo-500/20 shadow-md")}>
+                            <div className={cn("max-w-[85%] md:max-w-[80%] p-2.5 md:p-3 rounded-2xl text-xs md:text-sm leading-relaxed whitespace-pre-wrap shrink-1", msg.role === 'assistant' ? "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none prose prose-slate dark:prose-invert prose-xs" : "bg-indigo-600 text-white rounded-tr-none shadow-indigo-500/20 shadow-md")}>
                                 {msg.role === 'assistant' ? (
                                     <ReactMarkdown
                                         components={{
                                             p: ({ children }: any) => <p className="mb-2 last:mb-0 leading-relaxed tracking-tight">{children}</p>,
-                                            ul: ({ children }: any) => <ul className="list-disc ml-4 mb-2 space-y-1">{children}</ul>,
-                                            ol: ({ children }: any) => <ol className="list-decimal ml-4 mb-2 space-y-1">{children}</ol>,
+                                            ul: ({ children }: any) => <ul className="list-disc ml-3 md:ml-4 mb-2 space-y-1">{children}</ul>,
+                                            ol: ({ children }: any) => <ol className="list-decimal ml-3 md:ml-4 mb-2 space-y-1">{children}</ol>,
                                             li: ({ children }: any) => <li className="mb-1">{children}</li>,
-                                            h3: ({ children }: any) => <h3 className="text-sm font-black mt-4 mb-2 uppercase tracking-wide text-slate-900 dark:text-slate-100">{children}</h3>,
+                                            h3: ({ children }: any) => <h3 className="text-xs md:text-sm font-black mt-3 md:mt-4 mb-2 uppercase tracking-wide text-slate-900 dark:text-slate-100">{children}</h3>,
                                             strong: ({ children }: any) => <strong className="font-bold text-indigo-600 dark:text-indigo-400">{children}</strong>,
-                                            code: ({ children }: any) => <code className="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-[11px] font-mono text-indigo-600 dark:text-indigo-400">{children}</code>
+                                            code: ({ children }: any) => <code className="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-[10px] md:text-[11px] font-mono text-indigo-600 dark:text-indigo-400">{children}</code>
                                         }}
                                     >
                                         {msg.content}
@@ -282,10 +303,10 @@ const AiChat: React.FC<AiChatProps> = ({ datasetId, projectId, onClose }) => {
                                 ) : (
                                     msg.content
                                 )}
-                                <div className={cn("text-[8px] mt-2 flex items-center gap-2 opacity-50 uppercase font-bold border-t pt-2 mt-3", msg.role === 'user' ? "flex-row-reverse border-indigo-400/30" : "border-slate-100 dark:border-slate-800")}>
+                                <div className={cn("text-[7px] md:text-[8px] mt-1.5 md:mt-2 flex items-center gap-1.5 md:gap-2 opacity-50 uppercase font-bold border-t pt-1.5 md:pt-2 mt-2 md:mt-3", msg.role === 'user' ? "flex-row-reverse border-indigo-400/30" : "border-slate-100 dark:border-slate-800")}>
                                     <span>{msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                     {msg.role === 'assistant' && (
-                                        <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800">{msg.provider}</span>
+                                        <span className="px-1 md:px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800">{msg.provider}</span>
                                     )}
                                 </div>
                             </div>

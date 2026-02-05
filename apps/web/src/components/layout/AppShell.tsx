@@ -38,6 +38,7 @@ import {
     DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { cn } from '../../lib/utils';
+import { useTheme } from '../../context/ThemeContext';
 
 interface NavItem {
     id: string;
@@ -59,7 +60,7 @@ const systemNavItems: NavItem[] = [
     { id: 'developer', label: 'Developer', icon: Code2, path: '/developer' },
     { id: 'billing', label: 'Billing', icon: CreditCard, path: '/billing' },
     { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
-    { id: 'admin', label: 'Admin', icon: ShieldCheck, path: '/admin', requiredRole: 'ADMIN' },
+    // Admin is accessed separately at /admin - not shown in user dashboard
 ];
 
 const AppShell: React.FC = () => {
@@ -67,24 +68,15 @@ const AppShell: React.FC = () => {
     const location = useLocation();
     const { user, tenant, logout } = useAuthStore();
     const { fetchMetadata } = useFeatureStore();
+    const { theme, toggleTheme } = useTheme();
 
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-    const [isDarkMode, setIsDarkMode] = useState(false);
 
     // Fetch feature flags and quotas on mount
     useEffect(() => {
         fetchMetadata();
     }, [fetchMetadata, tenant?.id]);
-
-    // Dark mode toggle
-    useEffect(() => {
-        if (isDarkMode) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    }, [isDarkMode]);
 
     const handleLogout = () => {
         logout();
@@ -252,12 +244,12 @@ const AppShell: React.FC = () => {
                             <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
                         </button>
 
-                        {/* Dark Mode Toggle */}
+                        {/* Theme Toggle */}
                         <button
-                            onClick={() => setIsDarkMode(!isDarkMode)}
+                            onClick={toggleTheme}
                             className="rounded-md p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800"
                         >
-                            {isDarkMode ? (
+                            {theme === 'dark' ? (
                                 <Sun className="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
                             ) : (
                                 <Moon className="h-4 w-4 text-neutral-600 dark:text-neutral-400" />

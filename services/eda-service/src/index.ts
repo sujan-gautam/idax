@@ -3,6 +3,7 @@ import path from 'path';
 dotenv.config({ path: path.join(__dirname, '../../../.env') });
 
 import express from 'express';
+import cors from 'cors';
 import { logger } from '@project-ida/logger';
 import { prisma } from '@project-ida/db';
 import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
@@ -12,6 +13,8 @@ import { runEDA } from './eda_logic';
 const app = express();
 const PORT = process.env.PORT || 8004;
 
+// Enable CORS for all routes
+app.use(cors());
 app.use(express.json());
 
 const s3Client = new S3Client({
