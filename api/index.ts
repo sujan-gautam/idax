@@ -9,6 +9,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import path from 'path';
+import fs from 'fs';
 
 // Load environment variables
 dotenv.config();
@@ -116,6 +118,42 @@ app.use('/api/v1/billing', billingRoutes);
 app.use('/api/v1/upload', uploadRoutes);
 app.use('/api/v1/tenant', tenantRoutes);
 app.use('/api/v1/eda', edaRoutes);
+
+// ============================================================================
+// SERVE FRONTEND (Single Service Deployment)
+// ============================================================================
+
+// Try multiple possible paths for public files
+const publicPaths = [
+    path.join(__dirname, 'public'),         // Production: dist/public
+    path.join(__dirname, '../public'),      // Development: from src
+    path.join(process.cwd(), 'api/public'), // Root execution
+    path.join(process.cwd(), 'public'),     // Current dir
+];
+
+let publicPath = '';
+for (const p of publicPaths) {
+    if (fs.existsSync(p) && fs.readdirSync(p).length > 0) {
+        publicPath = p;
+        break;
+    }
+}
+
+if (publicPath) {
+    console.log(`[INFO] Serving static files from ${publicPath}`);
+    app.use(express.static(publicPath));
+
+    // Catch-all for SPA routing
+    app.get('*', (req, res, next) => {
+        // Only serve index.html if it's not an API call
+        if (req.path.startsWith('/api/') || req.path.startsWith('/health')) {
+            return next();
+        }
+        res.sendFile(path.join(publicPath, 'index.html'));
+    });
+} else {
+    console.log(`[WARN] Static path not found after checking: ${publicPaths.join(', ')}. Running in API-only mode.`);
+}
 
 // ============================================================================
 // ERROR HANDLING

@@ -16,7 +16,8 @@
     "db:push": "prisma db push --schema=packages/db/prisma/schema.prisma",
     "generate": "prisma generate --schema=packages/db/prisma/schema.prisma",
     "build:packages": "npm run build -w @project-ida/logger && npm run build -w @project-ida/db && npm run build -w @project-ida/auth",
-    "build:api": "npm run build -w @project-ida/unified-api",
+    "build:web": "npm run build -w @project-ida/web",
+    "build:api": "npm run build -w @project-ida/unified-api && node scripts/collect-assets.js",
     "seed:admin": "node scripts/seed-admin.js"
   },
   "keywords": [],
