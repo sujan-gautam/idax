@@ -28,24 +28,6 @@ app.use(helmet({
     crossOriginEmbedderPolicy: false,
 }));
 
-// CORS configuration
-const allowedOrigins = [
-    process.env.FRONTEND_URL || 'http://localhost:5173',
-    'http://localhost:5173',
-    'http://localhost:3000',
-];
-
-app.use(cors({
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    credentials: true,
-}));
-
 // Body parsing
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
@@ -59,6 +41,52 @@ app.use((req, res, next) => {
         `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     next();
 });
+
+// ============================================================================
+// SERVE FRONTEND (High Priority)
+// ============================================================================
+
+const publicPaths = [
+    path.join(__dirname, 'public'),
+    path.join(__dirname, '../public'),
+    path.join(process.cwd(), 'api/public'),
+    path.join(process.cwd(), 'public'),
+];
+
+let publicPath = '';
+for (const p of publicPaths) {
+    if (fs.existsSync(p) && fs.readdirSync(p).length > 0) {
+        publicPath = p;
+        break;
+    }
+}
+
+if (publicPath) {
+    console.log(`[INFO] Serving static files from ${publicPath}`);
+    app.use(express.static(publicPath));
+}
+
+// ============================================================================
+// API CORS CONFIGURATION
+// ============================================================================
+
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    'http://localhost:5173',
+    'http://localhost:3000',
+].filter(Boolean) as string[];
+
+const corsOptions: cors.CorsOptions = {
+    origin: (origin, callback) => {
+        // Allow same-origin and localhost
+        if (!origin || allowedOrigins.includes(origin) || origin.includes('railway.app')) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+};
 
 // Health Check
 app.get('/api/v1/health', (req, res) => {
@@ -82,6 +110,8 @@ import tenantRoutes from './routes/tenant';
 import edaRoutes from './routes/eda';
 
 // Mount routes
+// Mount routes with CORS
+app.use('/api/v1', cors(corsOptions));
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/projects', projectRoutes);
@@ -94,39 +124,16 @@ app.use('/api/v1/tenant', tenantRoutes);
 app.use('/api/v1/eda', edaRoutes);
 
 // ============================================================================
-// SERVE FRONTEND (Single Service Deployment)
+// SPA ROUTING FALLBACK
 // ============================================================================
 
-// Try multiple possible paths for public files
-const publicPaths = [
-    path.join(__dirname, 'public'),         // Production: dist/public
-    path.join(__dirname, '../public'),      // Development: from src
-    path.join(process.cwd(), 'api/public'), // Root execution
-    path.join(process.cwd(), 'public'),     // Current dir
-];
-
-let publicPath = '';
-for (const p of publicPaths) {
-    if (fs.existsSync(p) && fs.readdirSync(p).length > 0) {
-        publicPath = p;
-        break;
-    }
-}
-
 if (publicPath) {
-    console.log(`[INFO] Serving static files from ${publicPath}`);
-    app.use(express.static(publicPath));
-
-    // Catch-all for SPA routing
     app.get('*', (req, res, next) => {
-        // Only serve index.html if it's not an API call
         if (req.path.startsWith('/api/') || req.path.startsWith('/health')) {
             return next();
         }
         res.sendFile(path.join(publicPath, 'index.html'));
     });
-} else {
-    console.log(`[WARN] Static path not found after checking: ${publicPaths.join(', ')}. Running in API-only mode.`);
 }
 
 // ============================================================================
