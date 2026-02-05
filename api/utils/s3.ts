@@ -16,7 +16,15 @@ const s3Client = new S3Client({
 
 const BUCKET_NAME = process.env.S3_BUCKET_NAME || 'project-ida-uploads';
 
-export let s3Available = true;
+export let s3Available = false; // Default to false until proven otherwise
+
+const getBaseUrl = () => {
+    if (process.env.NODE_ENV === 'production') {
+        const frontendUrl = process.env.FRONTEND_URL || '';
+        return frontendUrl.endsWith('/') ? frontendUrl.slice(0, -1) : frontendUrl;
+    }
+    return `http://localhost:${process.env.PORT || 3000}`;
+}
 
 export const initS3 = async () => {
     try {
@@ -59,10 +67,18 @@ export const initS3 = async () => {
         } catch (error) {
             logger.error({ error, bucket: BUCKET_NAME }, 'Failed to initialize S3 CORS');
         }
+    } else {
+        logger.warn('--- RUNNING IN LOCAL STORAGE MODE ---');
+        logger.warn('Files will be saved to the local server disk.');
     }
 };
 
 export const generatePresignedUploadUrl = async (key: string, _contentType: string) => {
+    if (!s3Available) {
+        // Fallback to our own API
+        const baseUrl = getBaseUrl();
+        return `${baseUrl}/api/v1/uploads/local-s3/${key}`;
+    }
     const command = new PutObjectCommand({
         Bucket: BUCKET_NAME,
         Key: key,
@@ -71,6 +87,10 @@ export const generatePresignedUploadUrl = async (key: string, _contentType: stri
 };
 
 export const generatePresignedDownloadUrl = async (key: string) => {
+    if (!s3Available) {
+        const baseUrl = getBaseUrl();
+        return `${baseUrl}/api/v1/uploads/local-s3/${key}`;
+    }
     const command = new GetObjectCommand({
         Bucket: BUCKET_NAME,
         Key: key

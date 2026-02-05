@@ -3,9 +3,37 @@ import { v4 as uuidv4 } from 'uuid';
 import { prisma } from '@project-ida/db';
 import { authMiddleware, AuthRequest } from '@project-ida/auth';
 import { logger } from '@project-ida/logger';
+import path from 'path';
+import fs from 'fs';
 import { generatePresignedUploadUrl } from '../utils/s3';
 
 const router = express.Router();
+
+// Local storage directory
+const LOCAL_STORAGE_DIR = path.join(process.cwd(), 'uploads-data');
+if (!fs.existsSync(LOCAL_STORAGE_DIR)) {
+    fs.mkdirSync(LOCAL_STORAGE_DIR, { recursive: true });
+}
+
+// Local storage endpoint for fallback
+router.put('/local-s3/*', express.raw({ type: '*/*', limit: '100mb' }), (req, res) => {
+    try {
+        const fileKey = (req.params as any)[0];
+        const filePath = path.join(LOCAL_STORAGE_DIR, fileKey);
+        const dirPath = path.dirname(filePath);
+
+        if (!fs.existsSync(dirPath)) {
+            fs.mkdirSync(dirPath, { recursive: true });
+        }
+
+        fs.writeFileSync(filePath, req.body);
+        logger.info({ fileKey, filePath }, 'Stored file in local storage fallback');
+        res.status(200).send('OK');
+    } catch (error) {
+        logger.error(error, 'Local storage write failed');
+        res.status(500).send('Failed to store file');
+    }
+});
 
 // Get Presigned URL for upload
 router.post('/presigned', authMiddleware, async (req: AuthRequest, res) => {
