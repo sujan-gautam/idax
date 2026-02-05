@@ -121,6 +121,8 @@ export const CorrelationsTab: React.FC<CorrelationsTabProps> = ({ datasetId }) =
     };
 
     const renderHeatmap = () => {
+        if (!correlations || !correlations.columns || !correlations.correlations) return null;
+
         const cols = correlations.columns.slice(0, 8);
         const matrix: number[][] = [];
 

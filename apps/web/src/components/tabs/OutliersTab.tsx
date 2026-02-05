@@ -134,7 +134,7 @@ export const OutliersTab: React.FC<OutliersTabProps> = ({ datasetId }) => {
                                             [{info.lowerBound}, {info.upperBound}]
                                         </span>
                                     </div>
-                                    {info.examples.length > 0 && (
+                                    {info.examples && info.examples.length > 0 && (
                                         <div>
                                             <p className="text-[10px] uppercase tracking-wider font-bold text-neutral-400 mb-1">
                                                 Extreme Value Examples
