@@ -69,7 +69,7 @@ router.post('/chat', authMiddleware, async (req: AuthRequest, res) => {
             });
         }
 
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
         const result = await model.generateContent(message);
         const answer = result.response.text();
 

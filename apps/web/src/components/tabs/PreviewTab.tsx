@@ -15,13 +15,23 @@ interface PreviewTabProps {
 }
 
 export const PreviewTab: React.FC<PreviewTabProps> = ({ datasetId }) => {
-    const { data: preview, isLoading, error } = useQuery<any[]>({
-        queryKey: ['dataset-preview', datasetId],
+    const [page, setPage] = React.useState(1);
+    const limit = 50;
+
+    const { data: previewData, isLoading, error } = useQuery<{ data: any[], total: number, page: number, totalPages: number }>({
+        queryKey: ['dataset-preview', datasetId, page],
         queryFn: async () => {
-            const response = await api.get(`/datasets/${datasetId}/preview`);
+            const response = await api.get(`/datasets/${datasetId}/preview?page=${page}&limit=${limit}`);
+            // Handle legacy API response (array) vs new paginated response
+            if (Array.isArray(response.data)) {
+                return { data: response.data, total: response.data.length, page: 1, totalPages: 1 };
+            }
             return response.data;
         }
     });
+
+    const preview = previewData?.data || [];
+    const totalPages = previewData?.totalPages || 1;
 
     if (isLoading) {
         return (
@@ -62,17 +72,18 @@ export const PreviewTab: React.FC<PreviewTabProps> = ({ datasetId }) => {
                 <div>
                     <h2 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-0">Data Preview</h2>
                     <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                        First 100 rows of the processed dataset
+                        View raw data rows {((page - 1) * limit) + 1} - {Math.min(page * limit, previewData?.total || 0)} of {previewData?.total}
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" className="gap-2">
-                        <FileJson className="h-4 w-4" />
-                        Export JSON
+                    <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
+                        Previous
                     </Button>
-                    <Button variant="outline" size="sm" className="gap-2">
-                        <FileSpreadsheet className="h-4 w-4" />
-                        Export CSV
+                    <span className="text-sm font-medium">
+                        Page {page} of {totalPages}
+                    </span>
+                    <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+                        Next
                     </Button>
                 </div>
             </div>
@@ -83,14 +94,6 @@ export const PreviewTab: React.FC<PreviewTabProps> = ({ datasetId }) => {
                         <TableIcon className="h-5 w-5 text-indigo-600" />
                         Raw Data Inspection
                     </CardTitle>
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-                        <input
-                            type="text"
-                            placeholder="Filter rows..."
-                            className="h-9 w-64 rounded-lg border border-neutral-200 bg-neutral-50 pl-9 pr-4 text-sm focus:border-indigo-500 focus:outline-none dark:border-neutral-800 dark:bg-neutral-950"
-                        />
-                    </div>
                 </CardHeader>
                 <CardContent className="p-0">
                     <div className="max-h-[600px] overflow-auto">

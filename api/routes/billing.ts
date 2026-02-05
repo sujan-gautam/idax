@@ -109,11 +109,15 @@ router.post('/create-checkout-session', authMiddleware, async (req: AuthRequest,
 
         // Map internal plan IDs to Stripe Price IDs from env
         let targetPriceId = priceId;
-        if (priceId === 'pro') targetPriceId = process.env.STRIPE_PRICE_PRO;
-        if (priceId === 'enterprise') targetPriceId = process.env.STRIPE_PRICE_ENTERPRISE;
+
+        // Default to monthly if no interval specified
+        // In the future, we can extract { interval } = req.body
+        if (priceId === 'pro') targetPriceId = process.env.STRIPE_PRICE_PRO_MONTHLY;
+        if (priceId === 'enterprise') targetPriceId = process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY;
 
         if (!targetPriceId) {
-            return res.status(400).json({ error: 'Price ID not configured. Please set STRIPE_PRICE_PRO / STRIPE_PRICE_ENTERPRISE in .env' });
+            console.error(`Price ID not found for plan: ${priceId}. Checked env vars: STRIPE_PRICE_PRO_MONTHLY, STRIPE_PRICE_ENTERPRISE_MONTHLY`);
+            return res.status(400).json({ error: 'Price ID not configured for this plan. Please check server .env configuration.' });
         }
 
         const session = await stripe.checkout.sessions.create({

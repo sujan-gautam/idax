@@ -115,6 +115,9 @@ router.get('/:id/status', authMiddleware, async (req: AuthRequest, res) => {
 router.get('/:id/preview', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const tenantId = req.user?.tenantId;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 50;
+        const skip = (page - 1) * limit;
 
         const dataset = await prisma.dataset.findFirst({
             where: {
@@ -136,7 +139,7 @@ router.get('/:id/preview', authMiddleware, async (req: AuthRequest, res) => {
 
         const version = dataset.versions[0];
         if (!version || !version.artifactS3Key) {
-            return res.json([]);
+            return res.json({ data: [], total: 0, page, limit });
         }
 
         // Logic to fetch from local storage
@@ -145,13 +148,22 @@ router.get('/:id/preview', authMiddleware, async (req: AuthRequest, res) => {
             const filePath = path.join(LOCAL_STORAGE_DIR, version.artifactS3Key);
 
             if (fs.existsSync(filePath)) {
-                const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-                // Return sample of first 50 rows
-                return res.json(data.slice(0, 50));
+                const rawContent = fs.readFileSync(filePath, 'utf-8');
+                const allData = JSON.parse(rawContent);
+                const total = allData.length;
+                const set = allData.slice(skip, skip + limit);
+
+                return res.json({
+                    data: set,
+                    total,
+                    page,
+                    limit,
+                    totalPages: Math.ceil(total / limit)
+                });
             }
-            res.json([]);
+            res.json({ data: [], total: 0, page, limit });
         } catch (err) {
-            res.json([]);
+            res.json({ data: [], total: 0, page, limit });
         }
     } catch (error) {
         res.status(500).json({ error: 'Preview failed' });

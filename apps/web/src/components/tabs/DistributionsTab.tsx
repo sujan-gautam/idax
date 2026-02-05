@@ -380,9 +380,9 @@ export const DistributionsTab: React.FC<DistributionsTabProps> = ({ datasetId })
 
                 {/* Distribution Charts */}
                 <div className="grid gap-6">
-                    {currentData.histogram
+                    {currentData && (currentData.histogram
                         ? renderNumericDistribution(currentColumn, currentData)
-                        : renderCategoricalDistribution(currentColumn, currentData)}
+                        : renderCategoricalDistribution(currentColumn, currentData))}
                 </div>
 
                 {/* Show more columns */}
