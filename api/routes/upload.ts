@@ -210,9 +210,11 @@ router.post('/finalize', authMiddleware, async (req: AuthRequest, res) => {
             if (!fs.existsSync(edaDir)) fs.mkdirSync(edaDir, { recursive: true });
             fs.writeFileSync(edaPath, JSON.stringify(edaResults));
 
+            if (!tenantId) throw new Error('Tenant context lost during processing');
+
             await prisma.eDAResult.create({
                 data: {
-                    tenantId,
+                    tenantId: tenantId,
                     datasetVersionId: version.id,
                     status: 'COMPLETED',
                     resultS3Key: edaKey,
