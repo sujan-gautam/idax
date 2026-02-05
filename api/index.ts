@@ -121,6 +121,7 @@ app.use('/api/v1/ai', aiRoutes);
 app.use('/api/v1/billing', billingRoutes);
 app.use('/api/v1/upload', uploadRoutes);
 app.use('/api/v1/tenant', tenantRoutes);
+app.use('/api/v1/tenants', tenantRoutes);
 app.use('/api/v1/eda', edaRoutes);
 
 // ============================================================================
