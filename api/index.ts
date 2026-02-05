@@ -11,6 +11,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
+import { initS3 } from './utils/s3';
 
 // Load environment variables
 dotenv.config();
@@ -120,6 +121,7 @@ app.use('/api/v1/jobs', jobRoutes);
 app.use('/api/v1/ai', aiRoutes);
 app.use('/api/v1/billing', billingRoutes);
 app.use('/api/v1/upload', uploadRoutes);
+app.use('/api/v1/uploads', uploadRoutes);
 app.use('/api/v1/tenant', tenantRoutes);
 app.use('/api/v1/tenants', tenantRoutes);
 app.use('/api/v1/eda', edaRoutes);
@@ -181,6 +183,9 @@ export default app;
 
 // For traditional hosting (Railway, etc.)
 if (require.main === module) {
+    // Initialize S3
+    initS3().catch(err => console.error('[S3_INIT_ERROR]', err));
+
     app.listen(PORT, () => {
         console.log('='.repeat(60));
         console.log('🚀 Project IDA - Unified API Server');
