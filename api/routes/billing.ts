@@ -63,19 +63,47 @@ router.get('/payment-methods', authMiddleware, async (req: AuthRequest, res) => 
     }
 });
 
+// GET /subscription - Get current subscription
+router.get('/subscription', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const tenantId = req.user?.tenantId;
+        const subscription = await prisma.subscription.findUnique({
+            where: { tenantId: tenantId! }
+        });
+
+        if (!subscription) {
+            return res.json({
+                plan: 'FREE',
+                status: 'active',
+                billingInterval: 'month'
+            });
+        }
+
+        res.json(subscription);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch subscription' });
+    }
+});
+
 // POST /create-checkout-session
 router.post('/create-checkout-session', authMiddleware, async (req: AuthRequest, res) => {
     try {
         const { priceId } = req.body;
         const tenantId = req.user?.tenantId;
 
-        // If no stripe configured, return error or mock success for dev
+        // Mock success for development if no Stripe key is set
         if (!process.env.STRIPE_SECRET_KEY) {
-            return res.status(400).json({ error: 'Billing not configured on server' });
+            return res.json({
+                url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/billing?success=true&session_id=mock_session_123`
+            });
         }
 
-        // Stripe Logic would go here
-        res.status(501).json({ error: 'Stripe integration pending' });
+        // Stripe Logic would go here (placeholder if key IS present but logic missing)
+        // In a real implementation:
+        // const session = await stripe.checkout.sessions.create({ ... })
+        // res.json({ url: session.url })
+
+        res.status(501).json({ error: 'Stripe integration pending implementation' });
 
     } catch (error) {
         res.status(500).json({ error: 'Failed to create checkout session' });
