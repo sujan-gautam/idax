@@ -97,6 +97,7 @@ router.post('/register', async (req, res) => {
         });
 
     } catch (error) {
+        console.error('[AUTH_REGISTER_ERROR]', error);
         res.status(500).json({ error: 'Registration failed' });
     }
 });
@@ -160,6 +161,7 @@ router.post('/login', async (req, res) => {
         });
 
     } catch (error) {
+        console.error('[AUTH_LOGIN_ERROR]', error);
         res.status(500).json({ error: 'Login failed' });
     }
 });
