@@ -95,17 +95,15 @@ const Datasets: React.FC = () => {
         e.stopPropagation();
         if (!confirm('Are you sure you want to delete this dataset? This action cannot be undone.')) return;
 
-        // Note: DELETE /datasets/:id is not explicitly implemented in eda.py yet?
-        // eda.py handles EDA logic. DELETE usually managed by a core datasets router.
-        // If it's 500/404, we'll handle gracefully.
-        // Assuming delete functionality might be missing, but UI should exist.
         try {
-            // Try to delete? 
-            // Currently backend misses delete. I'll omit call for safety or try it.
-            // Let's just alert for now as I recall checking eda.py and didn't see DELETE.
-            alert("Delete functionality coming soon.");
+            await api.delete(`/datasets/${id}`);
+
+            // Remove locally to feel instant
+            setDatasets(datasets.filter(d => d.id !== id));
+            setFilteredDatasets(filteredDatasets.filter(d => d.id !== id));
         } catch (error) {
-            // ignore
+            console.error('Failed to delete dataset:', error);
+            alert('Failed to delete dataset. It may be in use by other resources.');
         }
     };
 
