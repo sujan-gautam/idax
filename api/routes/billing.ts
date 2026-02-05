@@ -1,6 +1,7 @@
 import express from 'express';
 import { prisma } from '@project-ida/db';
 import { authMiddleware, AuthRequest } from '@project-ida/auth';
+import Stripe from 'stripe';
 
 const router = express.Router();
 
@@ -102,15 +103,41 @@ router.post('/create-checkout-session', authMiddleware, async (req: AuthRequest,
             });
         }
 
-        // Stripe Logic would go here (placeholder if key IS present but logic missing)
-        // In a real implementation:
-        // const session = await stripe.checkout.sessions.create({ ... })
-        // res.json({ url: session.url })
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+            apiVersion: '2023-10-16', // Use a pinned version for stability
+        });
 
-        res.status(501).json({ error: 'Stripe integration pending implementation' });
+        // Map internal plan IDs to Stripe Price IDs from env
+        let targetPriceId = priceId;
+        if (priceId === 'pro') targetPriceId = process.env.STRIPE_PRICE_PRO;
+        if (priceId === 'enterprise') targetPriceId = process.env.STRIPE_PRICE_ENTERPRISE;
 
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to create checkout session' });
+        if (!targetPriceId) {
+            return res.status(400).json({ error: 'Price ID not configured. Please set STRIPE_PRICE_PRO / STRIPE_PRICE_ENTERPRISE in .env' });
+        }
+
+        const session = await stripe.checkout.sessions.create({
+            mode: 'subscription',
+            payment_method_types: ['card'],
+            customer_email: req.user?.email, // Pre-fill email
+            line_items: [
+                {
+                    price: targetPriceId,
+                    quantity: 1,
+                },
+            ],
+            success_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/billing?success=true&session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/billing?canceled=true`,
+            metadata: {
+                tenantId: tenantId!,
+            },
+        });
+
+        res.json({ url: session.url });
+
+    } catch (error: any) {
+        console.error('Stripe Checkout Error:', error);
+        res.status(500).json({ error: error.message || 'Failed to create checkout session' });
     }
 });
 
