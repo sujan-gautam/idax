@@ -15,6 +15,7 @@
     "dev": "concurrently \"npm run dev -w @project-ida/web\" \"npm run dev -w gateway-service\" \"npm run dev -w auth-service\" \"npm run dev -w tenant-service\" \"npm run dev -w upload-service\" \"npm run dev -w parser-service\" \"npm run dev -w eda-service\" \"npm run dev -w job-orchestrator-service\" \"npm run dev -w billing-service\" \"npm run dev -w ai-service\" \"npm run dev -w @project-ida/admin-service\"",
     "db:push": "prisma db push --schema=packages/db/prisma/schema.prisma",
     "generate": "prisma generate --schema=packages/db/prisma/schema.prisma",
+    "build:api": "npm run build -w @project-ida/unified-api",
     "seed:admin": "node scripts/seed-admin.js"
   },
   "keywords": [],
