@@ -26,7 +26,7 @@ router.get('/usage', authMiddleware, async (req: AuthRequest, res) => {
         res.json({
             datasets: {
                 current: await prisma.dataset.count({ where: { tenantId } }),
-                limit: quotas?.maxDatasets || (tenant?.plan === 'PRO' ? 100 : 5)
+                limit: tenant?.plan === 'PRO' ? 100 : 5
             },
             storage: {
                 current: 0, // usage?.storageUsed || 0,
