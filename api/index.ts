@@ -60,35 +60,9 @@ app.use((req, res, next) => {
     next();
 });
 
-// ============================================================================
-// HEALTH CHECK
-// ============================================================================
-
-app.get('/health', (req, res) => {
-    res.json({
-        status: 'healthy',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        environment: process.env.NODE_ENV || 'development',
-    });
-});
-
-app.get('/', (req, res) => {
-    res.json({
-        name: 'Project IDA - Unified API',
-        version: '1.0.0',
-        status: 'running',
-        endpoints: {
-            auth: '/api/v1/auth',
-            admin: '/api/v1/admin',
-            projects: '/api/v1/projects',
-            datasets: '/api/v1/datasets',
-            jobs: '/api/v1/jobs',
-            ai: '/api/v1/ai',
-            billing: '/api/v1/billing',
-            upload: '/api/v1/upload',
-        },
-    });
+// Health Check
+app.get('/api/v1/health', (req, res) => {
+    res.json({ status: 'healthy', timestamp: new Date().toISOString() });
 });
 
 // ============================================================================
