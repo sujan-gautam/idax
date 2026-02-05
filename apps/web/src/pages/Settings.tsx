@@ -5,7 +5,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
-import { User, Lock, Save, Loader2, ShieldCheck, Mail, Sparkles, Key, Info } from 'lucide-react';
+import { User, Lock, Save, Loader2, Sparkles, Key, Info } from 'lucide-react';
 import { Badge } from '../components/ui/badge';
 
 const Settings: React.FC = () => {
