@@ -167,7 +167,7 @@ router.post('/finalize', authMiddleware, async (req: AuthRequest, res) => {
                 const result = parseCSV(fileBuffer.toString('utf-8'));
                 parsedData = result.data;
                 schema = result.schema;
-            } else if (upload.filename.endsWith('.xlsx')) {
+            } else if (upload.filename.endsWith('.xlsx') || upload.filename.endsWith('.xls')) {
                 const result = parseXLSX(fileBuffer);
                 parsedData = result.data;
                 schema = result.schema;
