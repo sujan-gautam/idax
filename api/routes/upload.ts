@@ -6,6 +6,8 @@ import { logger } from '@project-ida/logger';
 import path from 'path';
 import fs from 'fs';
 import { generatePresignedUploadUrl } from '../utils/s3';
+import { parseCSV, parseJSON, parseXLSX } from '../utils/parser_logic';
+import { runEDA } from '../utils/eda_logic';
 
 const router = express.Router();
 
@@ -34,6 +36,12 @@ router.put('/local-s3/*', express.raw({ type: '*/*', limit: '100mb' }), (req, re
         res.status(500).send('Failed to store file');
     }
 });
+
+// Helper for local file reading
+const readLocalFile = (key: string): Buffer => {
+    const filePath = path.join(LOCAL_STORAGE_DIR, key);
+    return fs.readFileSync(filePath);
+}
 
 // Get Presigned URL for upload
 router.post('/presigned', authMiddleware, async (req: AuthRequest, res) => {
@@ -137,20 +145,92 @@ router.post('/finalize', authMiddleware, async (req: AuthRequest, res) => {
         const tenantId = req.user?.tenantId;
 
         const upload = await prisma.upload.findFirst({
-            where: { id: uploadId, tenantId }
+            where: { id: uploadId, tenantId },
+            include: { dataset: true }
         });
 
         if (!upload) return res.status(404).json({ error: 'Upload not found' });
 
-        const updatedUpload = await prisma.upload.update({
+        await prisma.upload.update({
             where: { id: uploadId },
             data: { status: 'COMPLETED' }
         });
 
-        // Trigger Parser (Logic to be integrated or call external service)
-        // For now, we'll just log it. In a full integration, this would trigger the parser logic.
+        // --- UNIFIED PARSING LOGIC ---
+        let parsedData: any[] = [];
+        let schema: any = {};
 
-        res.json({ status: 'ok', upload: updatedUpload });
+        try {
+            const fileBuffer = readLocalFile(upload.s3Key);
+
+            if (upload.filename.endsWith('.csv')) {
+                const result = parseCSV(fileBuffer.toString('utf-8'));
+                parsedData = result.data;
+                schema = result.schema;
+            } else if (upload.filename.endsWith('.xlsx')) {
+                const result = parseXLSX(fileBuffer);
+                parsedData = result.data;
+                schema = result.schema;
+            } else {
+                const result = parseJSON(fileBuffer.toString('utf-8'));
+                parsedData = result.data;
+                schema = result.schema;
+            }
+
+            // Create Dataset Version
+            const artifactKey = `tenants/${tenantId}/parsed/${upload.datasetId}/${Date.now()}.json`;
+            const artifactPath = path.join(LOCAL_STORAGE_DIR, artifactKey);
+            const artifactDir = path.dirname(artifactPath);
+            if (!fs.existsSync(artifactDir)) fs.mkdirSync(artifactDir, { recursive: true });
+            fs.writeFileSync(artifactPath, JSON.stringify(parsedData));
+
+            const version = await prisma.datasetVersion.create({
+                data: {
+                    datasetId: upload.datasetId!,
+                    versionNumber: 1,
+                    artifactS3Key: artifactKey,
+                    schemaJson: schema as any,
+                    rowCount: parsedData.length,
+                    columnCount: schema.columns?.length || 0,
+                    sourceType: 'UPLOAD',
+                    sourceId: upload.id
+                }
+            });
+
+            await prisma.dataset.update({
+                where: { id: upload.datasetId! },
+                data: { activeVersionId: version.id }
+            });
+
+            // --- RUN EDA ---
+            const edaResults = runEDA(parsedData, schema);
+            const edaKey = `tenants/${tenantId}/eda/${version.id}/${Date.now()}.json`;
+            const edaPath = path.join(LOCAL_STORAGE_DIR, edaKey);
+            const edaDir = path.dirname(edaPath);
+            if (!fs.existsSync(edaDir)) fs.mkdirSync(edaDir, { recursive: true });
+            fs.writeFileSync(edaPath, JSON.stringify(edaResults));
+
+            await prisma.eDAResult.create({
+                data: {
+                    tenantId,
+                    datasetVersionId: version.id,
+                    status: 'COMPLETED',
+                    resultS3Key: edaKey,
+                    summaryJson: {
+                        overview: edaResults.overview,
+                        qualitySummary: edaResults.dataQuality.summary,
+                        correlations: edaResults.correlations.correlations.slice(0, 5)
+                    } as any
+                }
+            });
+
+            res.json({ status: 'ok', message: 'Data processed and EDA complete' });
+
+        } catch (processErr) {
+            logger.error(processErr, 'Data processing failed');
+            res.status(500).json({ error: 'Processing failed' });
+        }
+
     } catch (error) {
         logger.error(error, 'Failed to finalize upload');
         res.status(500).json({ error: 'Internal error' });
