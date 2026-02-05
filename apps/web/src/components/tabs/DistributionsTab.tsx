@@ -221,31 +221,31 @@ export const DistributionsTab: React.FC<DistributionsTabProps> = ({ datasetId })
                             <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
                                 <div className="text-xs text-neutral-600 dark:text-neutral-400">Mean</div>
                                 <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                                    {data.statistics.mean.toFixed(2)}
+                                    {data.statistics.mean !== undefined ? data.statistics.mean.toFixed(2) : 'N/A'}
                                 </div>
                             </div>
                             <div className="rounded-lg bg-purple-50 p-3 dark:bg-purple-900/20">
                                 <div className="text-xs text-neutral-600 dark:text-neutral-400">Median</div>
                                 <div className="text-lg font-bold text-purple-600 dark:text-purple-400">
-                                    {data.statistics.median.toFixed(2)}
+                                    {data.statistics.median !== undefined ? data.statistics.median.toFixed(2) : 'N/A'}
                                 </div>
                             </div>
                             <div className="rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
                                 <div className="text-xs text-neutral-600 dark:text-neutral-400">Std Dev</div>
                                 <div className="text-lg font-bold text-green-600 dark:text-green-400">
-                                    {data.statistics.std.toFixed(2)}
+                                    {data.statistics.std !== undefined ? data.statistics.std.toFixed(2) : 'N/A'}
                                 </div>
                             </div>
                             <div className="rounded-lg bg-orange-50 p-3 dark:bg-orange-900/20">
                                 <div className="text-xs text-neutral-600 dark:text-neutral-400">Skewness</div>
                                 <div className="text-lg font-bold text-orange-600 dark:text-orange-400">
-                                    {data.statistics.skewness.toFixed(2)}
+                                    {data.statistics.skewness !== undefined ? data.statistics.skewness.toFixed(2) : 'N/A'}
                                 </div>
                             </div>
                             <div className="rounded-lg bg-pink-50 p-3 dark:bg-pink-900/20">
                                 <div className="text-xs text-neutral-600 dark:text-neutral-400">Kurtosis</div>
                                 <div className="text-lg font-bold text-pink-600 dark:text-pink-400">
-                                    {data.statistics.kurtosis.toFixed(2)}
+                                    {data.statistics.kurtosis !== undefined ? data.statistics.kurtosis.toFixed(2) : 'N/A'}
                                 </div>
                             </div>
                         </div>
@@ -317,7 +317,7 @@ export const DistributionsTab: React.FC<DistributionsTabProps> = ({ datasetId })
                                     <Info className="h-4 w-4 text-indigo-400" />
                                 </div>
                                 <div className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-0">
-                                    {data.entropy.toFixed(3)}
+                                    {typeof data.entropy === 'number' ? data.entropy.toFixed(3) : 'N/A'}
                                 </div>
                                 <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                                     Measures dataset variety and uncertainty

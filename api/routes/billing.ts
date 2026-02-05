@@ -24,18 +24,22 @@ router.get('/usage', authMiddleware, async (req: AuthRequest, res) => {
         ]);
 
         res.json({
-            storage: {
-                used: 0, // Storage usage not currently tracked in AiUsage
-                limit: quotas?.maxStorageBytes ? Number(quotas.maxStorageBytes) : (tenant?.plan === 'PRO' ? 10737418240 : 1073741824) // 10GB or 1GB
-            },
-            ai_tokens: {
-                used: usage?.tokensUsed || 0,
-                limit: quotas?.maxAiTokensPerMonth || (tenant?.plan === 'PRO' ? 1000000 : 50000)
-            },
             datasets: {
-                used: await prisma.dataset.count({ where: { tenantId } }),
-                // maxDatasets not in schema, using fallback based on plan
-                limit: tenant?.plan === 'PRO' ? 100 : 5
+                current: await prisma.dataset.count({ where: { tenantId } }),
+                limit: quotas?.maxDatasets || (tenant?.plan === 'PRO' ? 100 : 5)
+            },
+            storage: {
+                current: 0, // usage?.storageUsed || 0,
+                limit: quotas?.maxStorageBytes ? Number(quotas.maxStorageBytes) / (1024 * 1024 * 1024) : (tenant?.plan === 'PRO' ? 10 : 1), // in GB
+                unit: 'GB'
+            },
+            apiCalls: {
+                current: usage?.totalRequests || 0,
+                limit: quotas?.maxApiCallsPerMonth || (tenant?.plan === 'PRO' ? 100000 : 1000)
+            },
+            users: {
+                current: 1, // Default to 1 (owner) for now
+                limit: 5 // Default limit
             }
         });
     } catch (error) {

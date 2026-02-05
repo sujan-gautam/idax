@@ -124,7 +124,7 @@ export const OutliersTab: React.FC<OutliersTabProps> = ({ datasetId }) => {
                                     />
                                 </div>
                                 <p className="mt-1 text-xs text-neutral-500 font-medium">
-                                    {info.percentage.toFixed(2)}% of data points
+                                    {typeof info.percentage === 'number' ? info.percentage.toFixed(2) : 'N/A'}% of data points
                                 </p>
 
                                 <div className="mt-4 space-y-2">
