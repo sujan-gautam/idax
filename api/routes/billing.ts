@@ -116,8 +116,11 @@ router.post('/create-checkout-session', authMiddleware, async (req: AuthRequest,
         if (priceId === 'enterprise') targetPriceId = process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY;
 
         if (!targetPriceId) {
-            console.error(`Price ID not found for plan: ${priceId}. Checked env vars: STRIPE_PRICE_PRO_MONTHLY, STRIPE_PRICE_ENTERPRISE_MONTHLY`);
-            return res.status(400).json({ error: 'Price ID not configured for this plan. Please check server .env configuration.' });
+            console.error(`[BILLING_ERROR] Price ID not found for plan: "${priceId}"`);
+            console.error(`[DEBUG_ENV] STRIPE_PRICE_PRO_MONTHLY exists? ${!!process.env.STRIPE_PRICE_PRO_MONTHLY}, Value: ${process.env.STRIPE_PRICE_PRO_MONTHLY ? 'set' : 'missing'}`);
+            console.error(`[DEBUG_ENV] STRIPE_PRICE_ENTERPRISE_MONTHLY exists? ${!!process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY}, Value: ${process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY ? 'set' : 'missing'}`);
+
+            return res.status(400).json({ error: 'Price ID not configured for this plan. Please check server logs and .env configuration.' });
         }
 
         const session = await stripe.checkout.sessions.create({

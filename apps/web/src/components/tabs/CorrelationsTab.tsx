@@ -257,10 +257,12 @@ export const CorrelationsTab: React.FC<CorrelationsTabProps> = ({ datasetId }) =
                                     <div className="mb-1 text-sm font-semibold">
                                         {corr.column1} × {corr.column2}
                                     </div>
-                                    <div className="text-3xl font-bold">{corr.correlation.toFixed(3)}</div>
+                                    <div className="text-3xl font-bold">
+                                        {typeof corr.correlation === 'number' ? corr.correlation.toFixed(3) : 'N/A'}
+                                    </div>
                                     <div className="mt-1 flex items-center justify-between text-xs">
                                         <span className="capitalize opacity-75">{corr.strength}</span>
-                                        {corr.p_value !== null && (
+                                        {corr.p_value !== null && corr.p_value !== undefined && typeof corr.p_value === 'number' && (
                                             <span className="opacity-75">p={corr.p_value.toFixed(4)}</span>
                                         )}
                                     </div>
