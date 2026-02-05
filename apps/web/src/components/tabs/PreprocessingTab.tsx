@@ -24,6 +24,7 @@ import {
     Info,
     Save
 } from 'lucide-react';
+import { api } from '../../services/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { Button } from '../ui/button';
 import { cn } from '../../lib/utils';
@@ -65,19 +66,11 @@ export const PreprocessingTab: React.FC<PreprocessingTabProps> = ({ datasetId })
     const [error, setError] = useState<string | null>(null);
     const [protectedCols, setProtectedCols] = useState<string[]>([]);
 
-    // Fetch schema to allow protected column selection
     const { data: overview } = useQuery({
         queryKey: ['eda-overview', datasetId],
         queryFn: async () => {
-            const EDA_SERVICE_URL = 'http://localhost:8004';
-            const response = await fetch(`${EDA_SERVICE_URL}/eda/overview?datasetId=${datasetId}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-                    'x-tenant-id': JSON.parse(localStorage.getItem('auth-storage') || '{}')?.state?.tenant?.id || ''
-                }
-            });
-            if (!response.ok) throw new Error('Failed to fetch overview');
-            return response.json();
+            const response = await api.get(`/datasets/${datasetId}/eda/overview`);
+            return response.data;
         }
     });
 
@@ -87,35 +80,19 @@ export const PreprocessingTab: React.FC<PreprocessingTabProps> = ({ datasetId })
         setIsCleaning(true);
         setError(null);
         try {
-            // Call EDA service (port 8004) via proxy
-            const EDA_SERVICE_URL = 'http://localhost:8004';
-            const response = await fetch(`${EDA_SERVICE_URL}/eda/clean`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-                    'x-tenant-id': JSON.parse(localStorage.getItem('auth-storage') || '{}')?.state?.tenant?.id || ''
-                },
-                body: JSON.stringify({
-                    datasetId,
-                    options: {
-                        dropDuplicates: true,
-                        fillMissing: true,
-                        removeOutliers: true,
-                        standardizeText: true,
-                        protectedColumns: protectedCols,
-                        validateSchema: true,
-                        detectIntent: true
-                    }
-                })
+            const response = await api.post(`/datasets/${datasetId}/eda/clean`, {
+                options: {
+                    dropDuplicates: true,
+                    fillMissing: true,
+                    removeOutliers: true,
+                    standardizeText: true,
+                    protectedColumns: protectedCols,
+                    validateSchema: true,
+                    detectIntent: true
+                }
             });
 
-            if (!response.ok) {
-                throw new Error(`Clean failed: ${response.statusText}`);
-            }
-
-            const data = await response.json();
-            setCleanResult(data.summary);
+            setCleanResult(response.data.summary);
         } catch (err: any) {
             console.error('Clean failed:', err);
             setError(err.message || 'Auto-clean failed');
@@ -128,33 +105,18 @@ export const PreprocessingTab: React.FC<PreprocessingTabProps> = ({ datasetId })
         setIsSaving(true);
         setError(null);
         try {
-            // Call EDA service (port 8004) via proxy
-            const EDA_SERVICE_URL = 'http://localhost:8004';
-            const response = await fetch(`${EDA_SERVICE_URL}/eda/clean`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-                    'x-tenant-id': JSON.parse(localStorage.getItem('auth-storage') || '{}')?.state?.tenant?.id || ''
-                },
-                body: JSON.stringify({
-                    datasetId,
-                    save: true,
-                    options: {
-                        dropDuplicates: true,
-                        fillMissing: true,
-                        removeOutliers: true,
-                        standardizeText: true,
-                        protectedColumns: protectedCols,
-                        validateSchema: true,
-                        detectIntent: true
-                    }
-                })
+            await api.post(`/datasets/${datasetId}/eda/clean`, {
+                save: true,
+                options: {
+                    dropDuplicates: true,
+                    fillMissing: true,
+                    removeOutliers: true,
+                    standardizeText: true,
+                    protectedColumns: protectedCols,
+                    validateSchema: true,
+                    detectIntent: true
+                }
             });
-
-            if (!response.ok) {
-                throw new Error(`Save failed: ${response.statusText}`);
-            }
 
             // Reset to initial state after save
             setCleanResult(null);

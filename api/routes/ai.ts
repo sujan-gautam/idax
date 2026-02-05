@@ -116,4 +116,59 @@ router.get('/usage', authMiddleware, async (req: AuthRequest, res) => {
     }
 });
 
+// GET /sessions
+router.get('/sessions', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const tenantId = req.user?.tenantId;
+        const { datasetId, projectId } = req.query;
+
+        const where: any = { tenantId };
+        if (datasetId) where.datasetId = datasetId as string;
+        if (projectId) where.projectId = projectId as string;
+
+        const sessions = await prisma.aiChatSession.findMany({
+            where,
+            include: {
+                _count: { select: { messages: true } }
+            },
+            orderBy: { updatedAt: 'desc' }
+        });
+
+        res.json(sessions);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch sessions' });
+    }
+});
+
+// GET /sessions/:id
+router.get('/sessions/:id', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const tenantId = req.user?.tenantId;
+        const session = await prisma.aiChatSession.findFirst({
+            where: { id: req.params.id, tenantId },
+            include: {
+                messages: { orderBy: { createdAt: 'asc' } }
+            }
+        });
+
+        if (!session) return res.status(404).json({ error: 'Session not found' });
+        res.json(session);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch session details' });
+    }
+});
+
+// DELETE /sessions/:id
+router.delete('/sessions/:id', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+        const tenantId = req.user?.tenantId;
+        await prisma.aiChatSession.delete({
+            where: { id: req.params.id, tenantId }
+        });
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete session' });
+    }
+});
+
 export default router;

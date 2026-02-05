@@ -220,8 +220,10 @@ router.post('/finalize', authMiddleware, async (req: AuthRequest, res) => {
                     resultS3Key: edaKey,
                     summaryJson: {
                         overview: edaResults.overview,
-                        qualitySummary: edaResults.dataQuality.summary,
-                        correlations: edaResults.correlations.correlations.slice(0, 5)
+                        qualitySummary: edaResults.dataQuality,
+                        correlations: edaResults.correlations.correlations,
+                        distributions: edaResults.distributions,
+                        outliers: edaResults.outliers
                     } as any
                 }
             });
