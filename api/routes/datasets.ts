@@ -277,8 +277,28 @@ router.delete('/:id', authMiddleware, async (req: AuthRequest, res) => {
             return res.status(404).json({ error: 'Dataset not found' });
         }
 
-        await prisma.dataset.delete({
-            where: { id: req.params.id }
+        // Cascade delete
+        await prisma.$transaction(async (tx) => {
+            const datasetId = req.params.id;
+
+            await tx.aiChatSession.deleteMany({ where: { datasetId } });
+            await tx.recipe.deleteMany({ where: { datasetId } });
+            await tx.upload.deleteMany({ where: { datasetId } });
+            await tx.job.deleteMany({ where: { datasetId } });
+
+            const versions = await tx.datasetVersion.findMany({
+                where: { datasetId },
+                select: { id: true }
+            });
+            const versionIds = versions.map(v => v.id);
+
+            if (versionIds.length > 0) {
+                await tx.job.deleteMany({ where: { datasetVersionId: { in: versionIds } } });
+                await tx.eDAResult.deleteMany({ where: { datasetVersionId: { in: versionIds } } });
+                await tx.datasetVersion.deleteMany({ where: { datasetId } });
+            }
+
+            await tx.dataset.delete({ where: { id: datasetId } });
         });
 
         res.json({ success: true });

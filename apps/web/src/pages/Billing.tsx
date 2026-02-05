@@ -205,8 +205,10 @@ const Billing: React.FC = () => {
     };
 
     const getUsagePercentage = (current: number, limit: number | string) => {
-        if (limit === 'unlimited') return 0;
-        return Math.min((current / (limit as number)) * 100, 100);
+        if (!limit || limit === 'unlimited') return 0;
+        const numLimit = typeof limit === 'string' ? parseInt(limit) : limit;
+        if (isNaN(numLimit) || numLimit === 0) return 0;
+        return Math.min((current / numLimit) * 100, 100);
     };
 
     const getUsageColor = (percentage: number) => {

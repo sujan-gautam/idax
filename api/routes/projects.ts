@@ -128,8 +128,50 @@ router.delete('/:id', authMiddleware, async (req: AuthRequest, res) => {
             return res.status(404).json({ error: 'Project not found' });
         }
 
-        await prisma.project.delete({
-            where: { id: req.params.id }
+        // Cascade delete all related entities
+        await prisma.$transaction(async (tx) => {
+            // Find all datasets in this project
+            const datasets = await tx.dataset.findMany({
+                where: { projectId: req.params.id },
+                select: { id: true }
+            });
+
+            const datasetIds = datasets.map(d => d.id);
+
+            // Delete related resources for these datasets
+            if (datasetIds.length > 0) {
+                await tx.aiChatSession.deleteMany({ where: { datasetId: { in: datasetIds } } });
+                await tx.recipe.deleteMany({ where: { datasetId: { in: datasetIds } } });
+
+                // Find versions to find EDA results
+                const versions = await tx.datasetVersion.findMany({
+                    where: { datasetId: { in: datasetIds } },
+                    select: { id: true }
+                });
+                const versionIds = versions.map(v => v.id);
+
+                if (versionIds.length > 0) {
+                    await tx.eDAResult.deleteMany({ where: { datasetVersionId: { in: versionIds } } });
+                    // Delete jobs related to versions
+                    await tx.job.deleteMany({ where: { datasetVersionId: { in: versionIds } } });
+                }
+
+                // Delete uploads and jobs related to datasets
+                await tx.upload.deleteMany({ where: { datasetId: { in: datasetIds } } });
+                await tx.job.deleteMany({ where: { datasetId: { in: datasetIds } } });
+
+                // Finally delete versions and datasets
+                await tx.datasetVersion.deleteMany({ where: { datasetId: { in: datasetIds } } });
+                await tx.dataset.deleteMany({ where: { projectId: req.params.id } });
+            }
+
+            // Delete project chat sessions first
+            await tx.aiChatSession.deleteMany({ where: { projectId: req.params.id } });
+
+            // Delete the project
+            await tx.project.delete({
+                where: { id: req.params.id }
+            });
         });
 
         res.json({ success: true });
