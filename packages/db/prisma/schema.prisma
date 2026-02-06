@@ -92,6 +92,7 @@ model User {
   createdAt    DateTime   @default(now())
   lastLoginAt  DateTime?
   auditLogs    AuditLog[]
+  verificationToken String?
 }
 
 model Project {

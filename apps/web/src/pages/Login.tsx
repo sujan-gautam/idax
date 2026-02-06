@@ -4,14 +4,15 @@
  * Design: Stripe + Vercel inspired
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Eye, EyeOff, Loader2, Database } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Database, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
 import { cn } from '../lib/utils';
+import { api } from '../services/api';
 
 const Login: React.FC = () => {
     const navigate = useNavigate();
@@ -23,7 +24,32 @@ const Login: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [localError, setLocalError] = useState('');
 
+    // Verification State
+    const [verificationStatus, setVerificationStatus] = useState<'idle' | 'verifying' | 'success' | 'error'>('idle');
+    const [verificationMessage, setVerificationMessage] = useState('');
+
     const from = (location.state as any)?.from?.pathname || '/dashboard';
+
+    useEffect(() => {
+        const verifyEmail = async () => {
+            const params = new URLSearchParams(location.search);
+            const token = params.get('verify');
+
+            if (token) {
+                setVerificationStatus('verifying'); // Clear URL to prevent re-verify on refresh? Maybe later.
+                try {
+                    await api.post('/auth/verify', { token });
+                    setVerificationStatus('success');
+                    setVerificationMessage('Email verified successfully! You can now sign in.');
+                } catch (err: any) {
+                    setVerificationStatus('error');
+                    setVerificationMessage(err.response?.data?.error || 'Verification failed. Token may be invalid or expired.');
+                }
+            }
+        };
+
+        verifyEmail();
+    }, [location.search]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -54,6 +80,28 @@ const Login: React.FC = () => {
                         </p>
                     </div>
                 </div>
+
+                {/* Verification Alerts */}
+                {verificationStatus === 'success' && (
+                    <div className="rounded-lg bg-green-50 p-4 text-sm text-green-800 dark:bg-green-900/30 dark:text-green-300 flex items-center gap-3 animate-fade-in border border-green-200 dark:border-green-800">
+                        <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
+                        <p>{verificationMessage}</p>
+                    </div>
+                )}
+
+                {verificationStatus === 'error' && (
+                    <div className="rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-300 flex items-center gap-3 animate-fade-in border border-red-200 dark:border-red-800">
+                        <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                        <p>{verificationMessage}</p>
+                    </div>
+                )}
+
+                {verificationStatus === 'verifying' && (
+                    <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 flex items-center gap-3 animate-fade-in border border-blue-200 dark:border-blue-800">
+                        <Loader2 className="h-5 w-5 animate-spin flex-shrink-0" />
+                        <p>Verifying your email...</p>
+                    </div>
+                )}
 
                 {/* Login Card */}
                 <Card className="border-neutral-200 bg-white shadow-xl dark:border-neutral-800 dark:bg-neutral-900">

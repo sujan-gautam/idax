@@ -1,6 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { prisma } from '@project-ida/db';
 
 const router = express.Router();
@@ -41,6 +42,7 @@ router.post('/register', async (req, res) => {
         }
 
         const passwordHash = await bcrypt.hash(password, 10);
+        const verificationToken = crypto.randomBytes(32).toString('hex');
 
         const result = await prisma.$transaction(async (tx: any) => {
             const tenant = await tx.tenant.create({
@@ -58,47 +60,57 @@ router.post('/register', async (req, res) => {
                     name: name || email.split('@')[0],
                     tenantId: tenant.id,
                     role: 'OWNER',
-                    status: 'ACTIVE'
+                    status: 'INACTIVE', // Enforce inactive until verified
+                    verificationToken
                 }
             });
 
             return { tenant, user };
         });
 
-        const accessToken = generateAccessToken({
-            userId: result.user.id,
-            tenantId: result.tenant.id,
-            email: result.user.email,
-            role: result.user.role
-        });
-
-        const refreshToken = generateRefreshToken({
-            userId: result.user.id,
-            tenantId: result.tenant.id,
-            email: result.user.email,
-            role: result.user.role
-        });
+        // Mock Email Sending (Log to console for developer)
+        const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/login?verify=${verificationToken}`;
+        console.log('---------------------------------------------------');
+        console.log(`[EMAIL MOCK] Verification Email for ${email}`);
+        console.log(`[EMAIL MOCK] Link: ${verificationUrl}`);
+        console.log('---------------------------------------------------');
 
         res.status(201).json({
-            user: {
-                id: result.user.id,
-                email: result.user.email,
-                name: result.user.name,
-                role: result.user.role,
-                tenantId: result.tenant.id
-            },
-            tenant: {
-                id: result.tenant.id,
-                name: result.tenant.name,
-                plan: result.tenant.plan
-            },
-            accessToken,
-            refreshToken
+            message: 'Registration successful. Please check your email to verify account.',
+            requireVerification: true
         });
 
     } catch (error) {
         console.error('[AUTH_REGISTER_ERROR]', error);
         res.status(500).json({ error: 'Registration failed' });
+    }
+});
+
+// Verify Email Endpoint
+router.post('/verify', async (req, res) => {
+    try {
+        const { token } = req.body;
+        if (!token) return res.status(400).json({ error: 'Token required' });
+
+        const user = await prisma.user.findFirst({
+            where: { verificationToken: token }
+        });
+
+        if (!user) {
+            return res.status(400).json({ error: 'Invalid or expired verification token' });
+        }
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                status: 'ACTIVE',
+                verificationToken: null
+            }
+        });
+
+        res.json({ success: true, message: 'Email verified successfully. You can now login.' });
+    } catch (error) {
+        res.status(500).json({ error: 'Verification failed' });
     }
 });
 

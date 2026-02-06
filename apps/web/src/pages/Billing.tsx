@@ -112,7 +112,7 @@ const Billing: React.FC = () => {
         {
             id: 'PRO',
             name: 'Professional',
-            price: billingInterval === 'month' ? 49 : 470,
+            price: billingInterval === 'month' ? 19 : 190,
             interval: billingInterval,
             description: 'For growing teams',
             icon: Activity,
@@ -130,7 +130,7 @@ const Billing: React.FC = () => {
         {
             id: 'ENTERPRISE',
             name: 'Enterprise',
-            price: billingInterval === 'month' ? 199 : 1990,
+            price: billingInterval === 'month' ? 47 : 470,
             interval: billingInterval,
             description: 'For large organizations',
             icon: TrendingUp,

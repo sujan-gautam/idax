@@ -9,8 +9,8 @@ const router = express.Router();
 router.get('/plans', async (req, res) => {
     res.json([
         { id: 'free', name: 'Free', price: 0 },
-        { id: 'pro', name: 'Pro', price: 29 },
-        { id: 'enterprise', name: 'Enterprise', price: 199 }
+        { id: 'pro', name: 'Pro', price: 19 },
+        { id: 'enterprise', name: 'Enterprise', price: 47 }
     ]);
 });
 

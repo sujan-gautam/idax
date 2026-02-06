@@ -11,6 +11,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
+import { api } from '../services/api';
 
 const Register: React.FC = () => {
     const navigate = useNavigate();
@@ -26,6 +27,8 @@ const Register: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [localError, setLocalError] = useState('');
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [isAuthLoading, setIsAuthLoading] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -49,16 +52,20 @@ const Register: React.FC = () => {
             return;
         }
 
+        setIsAuthLoading(true);
+
         try {
-            await register(
-                formData.email,
-                formData.password,
-                formData.name,
-                formData.tenantName
-            );
-            navigate('/dashboard', { replace: true });
+            await api.post('/auth/register', {
+                email: formData.email,
+                password: formData.password,
+                name: formData.name,
+                tenantName: formData.tenantName
+            });
+            setIsSuccess(true);
         } catch (err: any) {
-            setLocalError(err.message || 'Registration failed');
+            setLocalError(err.response?.data?.error || err.message || 'Registration failed');
+        } finally {
+            setIsAuthLoading(false);
         }
     };
 
@@ -68,6 +75,30 @@ const Register: React.FC = () => {
         { label: 'Contains lowercase letter', met: /[a-z]/.test(formData.password) },
         { label: 'Contains number', met: /[0-9]/.test(formData.password) },
     ];
+
+    if (isSuccess) {
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-neutral-50 via-neutral-100 to-neutral-50 p-4 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950">
+                <div className="w-full max-w-md text-center animate-fade-in space-y-6">
+                    <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+                        <CheckCircle2 className="h-10 w-10 text-green-600 dark:text-green-500" />
+                    </div>
+                    <h2 className="text-3xl font-bold text-neutral-900 dark:text-neutral-50">Check your email</h2>
+                    <p className="text-neutral-600 dark:text-neutral-400 max-w-sm mx-auto">
+                        We've sent a verification link to <strong>{formData.email}</strong>.
+                        Please check your inbox (and spam folder) to verify your account.
+                    </p>
+                    <div className="pt-4">
+                        <Link to="/login">
+                            <Button variant="outline" className="w-full">
+                                Back to Login
+                            </Button>
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-neutral-50 via-neutral-100 to-neutral-50 p-4 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950">
@@ -101,16 +132,14 @@ const Register: React.FC = () => {
                         <form onSubmit={handleSubmit} className="space-y-5">
                             {/* Error Alert */}
                             {(localError || authError) && (
-                                <div className="alert alert-error">
-                                    <p className="text-sm font-medium">
-                                        {localError || authError}
-                                    </p>
+                                <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/10 rounded-md">
+                                    {localError || authError}
                                 </div>
                             )}
 
                             {/* Name Field */}
-                            <div className="form-group">
-                                <label className="form-label" htmlFor="name">
+                            <div className="space-y-1">
+                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="name">
                                     Full name
                                 </label>
                                 <Input
@@ -119,7 +148,7 @@ const Register: React.FC = () => {
                                     placeholder="John Doe"
                                     type="text"
                                     autoComplete="name"
-                                    disabled={isLoading}
+                                    disabled={isLoading || isAuthLoading}
                                     value={formData.name}
                                     onChange={handleChange}
                                     required
@@ -128,8 +157,8 @@ const Register: React.FC = () => {
                             </div>
 
                             {/* Email Field */}
-                            <div className="form-group">
-                                <label className="form-label" htmlFor="email">
+                            <div className="space-y-1">
+                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="email">
                                     Email address
                                 </label>
                                 <Input
@@ -140,7 +169,7 @@ const Register: React.FC = () => {
                                     autoCapitalize="none"
                                     autoComplete="email"
                                     autoCorrect="off"
-                                    disabled={isLoading}
+                                    disabled={isLoading || isAuthLoading}
                                     value={formData.email}
                                     onChange={handleChange}
                                     required
@@ -149,8 +178,8 @@ const Register: React.FC = () => {
                             </div>
 
                             {/* Organization Name */}
-                            <div className="form-group">
-                                <label className="form-label" htmlFor="tenantName">
+                            <div className="space-y-1">
+                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="tenantName">
                                     Organization name
                                 </label>
                                 <Input
@@ -159,20 +188,20 @@ const Register: React.FC = () => {
                                     placeholder="Acme Corp"
                                     type="text"
                                     autoComplete="organization"
-                                    disabled={isLoading}
+                                    disabled={isLoading || isAuthLoading}
                                     value={formData.tenantName}
                                     onChange={handleChange}
                                     required
                                     className="h-11"
                                 />
-                                <p className="form-helper">
+                                <p className="text-[0.8rem] text-neutral-500 dark:text-neutral-400">
                                     This will be the name of your workspace
                                 </p>
                             </div>
 
                             {/* Password Field */}
-                            <div className="form-group">
-                                <label className="form-label" htmlFor="password">
+                            <div className="space-y-1">
+                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="password">
                                     Password
                                 </label>
                                 <div className="relative">
@@ -183,7 +212,7 @@ const Register: React.FC = () => {
                                         type={showPassword ? 'text' : 'password'}
                                         autoCapitalize="none"
                                         autoComplete="new-password"
-                                        disabled={isLoading}
+                                        disabled={isLoading || isAuthLoading}
                                         value={formData.password}
                                         onChange={handleChange}
                                         required
@@ -211,15 +240,15 @@ const Register: React.FC = () => {
                                             >
                                                 <CheckCircle2
                                                     className={`h-3 w-3 ${req.met
-                                                            ? 'text-success-600'
-                                                            : 'text-neutral-400'
+                                                        ? 'text-green-600 dark:text-green-500'
+                                                        : 'text-neutral-300 dark:text-neutral-600'
                                                         }`}
                                                 />
                                                 <span
                                                     className={
                                                         req.met
-                                                            ? 'text-success-700 dark:text-success-400'
-                                                            : 'text-neutral-600 dark:text-neutral-400'
+                                                            ? 'text-green-700 dark:text-green-400'
+                                                            : 'text-neutral-500 dark:text-neutral-500'
                                                     }
                                                 >
                                                     {req.label}
@@ -231,8 +260,8 @@ const Register: React.FC = () => {
                             </div>
 
                             {/* Confirm Password Field */}
-                            <div className="form-group">
-                                <label className="form-label" htmlFor="confirmPassword">
+                            <div className="space-y-1">
+                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="confirmPassword">
                                     Confirm password
                                 </label>
                                 <div className="relative">
@@ -243,7 +272,7 @@ const Register: React.FC = () => {
                                         type={showConfirmPassword ? 'text' : 'password'}
                                         autoCapitalize="none"
                                         autoComplete="new-password"
-                                        disabled={isLoading}
+                                        disabled={isLoading || isAuthLoading}
                                         value={formData.confirmPassword}
                                         onChange={handleChange}
                                         required
@@ -266,12 +295,12 @@ const Register: React.FC = () => {
 
                             {/* Submit Button */}
                             <Button
-                                className="h-11 w-full bg-gradient-to-r from-primary-600 to-primary-500 font-medium hover:from-primary-700 hover:to-primary-600"
+                                className="h-11 w-full bg-gradient-to-r from-indigo-600 to-purple-600 font-medium hover:from-indigo-700 hover:to-purple-700 text-white"
                                 type="submit"
-                                disabled={isLoading}
+                                disabled={isLoading || isAuthLoading}
                             >
-                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {isLoading ? 'Creating account...' : 'Create account'}
+                                {(isLoading || isAuthLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {(isLoading || isAuthLoading) ? 'Creating account...' : 'Create account'}
                             </Button>
                         </form>
                     </CardContent>
@@ -281,7 +310,7 @@ const Register: React.FC = () => {
                         </span>
                         <Link
                             to="/login"
-                            className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+                            className="text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
                         >
                             Sign in
                         </Link>
@@ -293,14 +322,14 @@ const Register: React.FC = () => {
                     By creating an account, you agree to our{' '}
                     <Link
                         to="/terms"
-                        className="font-medium underline underline-offset-4 hover:text-primary-600"
+                        className="font-medium underline underline-offset-4 hover:text-indigo-600"
                     >
                         Terms of Service
                     </Link>{' '}
                     and{' '}
                     <Link
                         to="/privacy"
-                        className="font-medium underline underline-offset-4 hover:text-primary-600"
+                        className="font-medium underline underline-offset-4 hover:text-indigo-600"
                     >
                         Privacy Policy
                     </Link>

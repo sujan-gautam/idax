@@ -29,7 +29,7 @@ const Pricing: React.FC = () => {
         {
             name: "Professional",
             description: "Ideal for growing teams and researchers",
-            price: isAnnual ? 470 : 49,
+            price: isAnnual ? 190 : 19,
             features: [
                 "Up to 100 datasets",
                 "50 GB cloud storage",
@@ -46,7 +46,7 @@ const Pricing: React.FC = () => {
         {
             name: "Enterprise",
             description: "Scale with confidence and dedicated support",
-            price: isAnnual ? 1990 : 199,
+            price: isAnnual ? 470 : 47,
             features: [
                 "Unlimited datasets",
                 "Unlimited storage",
