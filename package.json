@@ -18,6 +18,7 @@
     "build:packages": "npm run build -w @project-ida/logger && npm run build -w @project-ida/db && npm run build -w @project-ida/auth",
     "build:web": "npm run build -w @project-ida/web",
     "build:api": "npm run build -w @project-ida/unified-api && node scripts/collect-assets.js",
+    "build:vercel": "npm run generate && npm run build:packages && npm run build:web",
     "seed:admin": "node scripts/seed-admin.js"
   },
   "keywords": [],

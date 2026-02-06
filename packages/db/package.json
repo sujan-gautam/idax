@@ -4,8 +4,8 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {
-        "build": "tsc",
-        "dev": "tsc -w",
+        "build": "npx --package typescript tsc",
+        "dev": "npx --package typescript tsc -w",
         "generate": "prisma generate"
     },
     "dependencies": {
