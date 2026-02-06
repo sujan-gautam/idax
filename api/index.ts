@@ -79,8 +79,13 @@ const allowedOrigins = [
 
 const corsOptions: cors.CorsOptions = {
     origin: (origin, callback) => {
-        // Allow same-origin and localhost
-        if (!origin || allowedOrigins.includes(origin) || origin.includes('railway.app')) {
+        // Allow same-origin, localhost, railway domains, and vercel domains
+        if (
+            !origin ||
+            allowedOrigins.includes(origin) ||
+            origin.includes('railway.app') ||
+            origin.includes('vercel.app')
+        ) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));
