@@ -21,6 +21,8 @@ import { Progress } from '../ui/progress';
 import { chatWithAI, getAiUsage, getAiSessions, getAiSessionDetail, deleteAiSession } from '../../services/api';
 import { cn } from '../../lib/utils';
 import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -295,7 +297,29 @@ const AiChat: React.FC<AiChatProps> = ({ datasetId, projectId, onClose }) => {
                                             li: ({ children }: any) => <li className="mb-1">{children}</li>,
                                             h3: ({ children }: any) => <h3 className="text-xs md:text-sm font-black mt-3 md:mt-4 mb-2 uppercase tracking-wide text-slate-900 dark:text-slate-100">{children}</h3>,
                                             strong: ({ children }: any) => <strong className="font-bold text-indigo-600 dark:text-indigo-400">{children}</strong>,
-                                            code: ({ children }: any) => <code className="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-[10px] md:text-[11px] font-mono text-indigo-600 dark:text-indigo-400">{children}</code>
+                                            code: ({ node, inline, className, children, ...props }: any) => {
+                                                const match = /language-(\w+)/.exec(className || '');
+                                                return !inline && match ? (
+                                                    <div className="rounded-md overflow-hidden my-2 border border-slate-200 dark:border-slate-700">
+                                                        <div className="bg-slate-100 dark:bg-slate-800 px-3 py-1 flex items-center justify-between border-b border-slate-200 dark:border-slate-700">
+                                                            <span className="text-[10px] font-mono text-slate-500 lowercase">{match[1]}</span>
+                                                        </div>
+                                                        <SyntaxHighlighter
+                                                            {...props}
+                                                            style={vscDarkPlus}
+                                                            language={match[1]}
+                                                            PreTag="div"
+                                                            customStyle={{ margin: 0, borderRadius: 0, fontSize: '11px' }}
+                                                        >
+                                                            {String(children).replace(/\n$/, '')}
+                                                        </SyntaxHighlighter>
+                                                    </div>
+                                                ) : (
+                                                    <code className={cn("bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-[10px] md:text-[11px] font-mono text-indigo-600 dark:text-indigo-400", className)} {...props}>
+                                                        {children}
+                                                    </code>
+                                                );
+                                            }
                                         }}
                                     >
                                         {msg.content}
