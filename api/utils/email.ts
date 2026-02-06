@@ -47,7 +47,7 @@ export const sendVerificationEmail = async (to: string, token: string) => {
     const verificationUrl = `${process.env.FRONTEND_URL || 'https://projectida.up.railway.app'}/login?verify=${token}`;
 
     const emailPayload = {
-        from: process.env.EMAIL_FROM || 'Project IDA <onboarding@resend.dev>',
+        from: process.env.EMAIL_FROM || 'Project IDA <noreply@projectida.org>',
         to: [to],
         subject: 'Verify your Project IDA account',
         html: `
@@ -71,22 +71,22 @@ export const sendVerificationEmail = async (to: string, token: string) => {
     // FAST ASYNC LOGIC (Fire and Forget)
     const execSend = async () => {
         try {
-            // Priority 1: Resend API (Recommended for Railway - uses HTTPS/443)
-            if (resend) {
-                const { data, error } = await resend.emails.send(emailPayload);
-                if (error) throw error;
-                console.log(`[EMAIL] Sent via Resend API. ID: ${data?.id}`);
-                return;
-            }
-
-            // Priority 2: SMTP
+            // Priority 1: SMTP (Recommended for verified domain)
             const smtp = await getSmtpTransporter();
             if (smtp) {
                 const info = await smtp.sendMail({
                     ...emailPayload,
-                    to: to // Nodemailer expects string, Resend expects array/string
+                    to: to // Nodemailer expects string, not array
                 });
                 console.log(`[EMAIL] Sent via SMTP. ID: ${info.messageId}`);
+                return;
+            }
+
+            // Priority 2: Resend API (Fallback)
+            if (resend) {
+                const { data, error } = await resend.emails.send(emailPayload);
+                if (error) throw error;
+                console.log(`[EMAIL] Sent via Resend API. ID: ${data?.id}`);
                 return;
             }
 
