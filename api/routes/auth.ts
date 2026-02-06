@@ -27,6 +27,10 @@ function generateRefreshToken(payload: TokenPayload): string {
     return jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 }
 
+import { sendVerificationEmail } from '../utils/email';
+
+// ...
+
 // Register
 router.post('/register', async (req, res) => {
     try {
@@ -68,12 +72,14 @@ router.post('/register', async (req, res) => {
             return { tenant, user };
         });
 
-        // Mock Email Sending (Log to console for developer)
-        const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/login?verify=${verificationToken}`;
-        console.log('---------------------------------------------------');
-        console.log(`[EMAIL MOCK] Verification Email for ${email}`);
-        console.log(`[EMAIL MOCK] Link: ${verificationUrl}`);
-        console.log('---------------------------------------------------');
+        // Send Email (Real or Ethereal)
+        try {
+            await sendVerificationEmail(email, verificationToken);
+        } catch (emailError) {
+            console.error('[AUTH_REGISTER_EMAIL_ERROR]', emailError);
+            // Don't fail registration if email fails, but log it.
+            // In strict prod, you might want to rollback.
+        }
 
         res.status(201).json({
             message: 'Registration successful. Please check your email to verify account.',
@@ -112,6 +118,44 @@ router.post('/verify', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Verification failed' });
     }
+}
+});
+
+// Resend Verification Email Endpoint
+router.post('/start-verification', async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ error: 'Email required' });
+
+        const user = await prisma.user.findUnique({
+            where: { email }
+        });
+
+        if (!user) {
+            // Check security best practices: should we tell if user exists?
+            // For now, let's say "If an account exists, email sent" to prevent enumeration.
+            // But for detailed UX requested by user, I will be explicit for now as it's an MVP context.
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        if (user.status === 'ACTIVE') {
+            return res.status(400).json({ error: 'Account already verified' });
+        }
+
+        // Generate new token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { verificationToken }
+        });
+
+        await sendVerificationEmail(email, verificationToken);
+
+        res.json({ success: true, message: 'Verification email sent' });
+    } catch (error) {
+        console.error('[AUTH_RESEND_ERROR]', error);
+        res.status(500).json({ error: 'Failed to send verification email' });
+    }
 });
 
 // Login
@@ -133,8 +177,10 @@ router.post('/login', async (req, res) => {
         }
 
         if (user.status !== 'ACTIVE') {
-            return res.status(403).json({ error: 'Account is not active' });
+            return res.status(403).json({ error: 'Account is not active. Please verify your email.', requireVerification: true });
         }
+
+        // ... existing code ...
 
         const valid = await bcrypt.compare(password, user.passwordHash);
         if (!valid) {

@@ -51,55 +51,56 @@ const Login: React.FC = () => {
         verifyEmail();
     }, [location.search]);
 
+    const [showResend, setShowResend] = useState(false);
+    const [isResendLoading, setIsResendLoading] = useState(false);
+    const [resendMessage, setResendMessage] = useState('');
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLocalError('');
+        setShowResend(false);
+        setResendMessage('');
 
         try {
             await login(email, password);
             navigate(from, { replace: true });
         } catch (err: any) {
-            setLocalError(err.message || 'Login failed');
+            const msg = err.message || 'Login failed';
+            setLocalError(msg);
+            // Check if error relates to verification
+            if (msg.toLowerCase().includes('verify') || msg.toLowerCase().includes('active')) {
+                setShowResend(true);
+            }
+        }
+    };
+
+    const handleResend = async () => {
+        if (!email) return;
+        setIsResendLoading(true);
+        try {
+            await api.post('/auth/start-verification', { email });
+            setResendMessage('Verification email sent! Please check your inbox.');
+            setShowResend(false); // Hide the button after sending
+        } catch (err: any) {
+            setLocalError('Failed to resend email. Please try again.');
+        } finally {
+            setIsResendLoading(false);
         }
     };
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-neutral-50 via-neutral-100 to-neutral-50 p-4 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950">
             <div className="w-full max-w-[440px] space-y-8 animate-fade-in">
-                {/* Brand Header */}
-                <div className="flex flex-col items-center space-y-4 text-center">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-600 to-primary-500 shadow-lg shadow-primary-500/30">
-                        <Database className="h-8 w-8 text-white" />
-                    </div>
-                    <div className="space-y-2">
-                        <h1 className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
-                            Project IDA
-                        </h1>
-                        <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
-                            Enterprise Intelligent Data Analysis
-                        </p>
-                    </div>
-                </div>
+                {/* ... Header ... */}
 
-                {/* Verification Alerts */}
-                {verificationStatus === 'success' && (
-                    <div className="rounded-lg bg-green-50 p-4 text-sm text-green-800 dark:bg-green-900/30 dark:text-green-300 flex items-center gap-3 animate-fade-in border border-green-200 dark:border-green-800">
+                {/* Verification Alerts (from URL) */}
+                {/* ... existing code ... */}
+
+                {/* Resend Success Message */}
+                {resendMessage && (
+                    <div className="rounded-lg bg-green-50 p-4 text-sm text-green-800 dark:bg-green-900/30 dark:text-green-300 flex items-center gap-3 animate-fade-in border border-green-200 dark:border-green-800 mb-4">
                         <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
-                        <p>{verificationMessage}</p>
-                    </div>
-                )}
-
-                {verificationStatus === 'error' && (
-                    <div className="rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-300 flex items-center gap-3 animate-fade-in border border-red-200 dark:border-red-800">
-                        <AlertCircle className="h-5 w-5 flex-shrink-0" />
-                        <p>{verificationMessage}</p>
-                    </div>
-                )}
-
-                {verificationStatus === 'verifying' && (
-                    <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 flex items-center gap-3 animate-fade-in border border-blue-200 dark:border-blue-800">
-                        <Loader2 className="h-5 w-5 animate-spin flex-shrink-0" />
-                        <p>Verifying your email...</p>
+                        <p>{resendMessage}</p>
                     </div>
                 )}
 
@@ -117,10 +118,21 @@ const Login: React.FC = () => {
                         <form onSubmit={handleSubmit} className="space-y-5">
                             {/* Error Alert */}
                             {(localError || authError) && (
-                                <div className="alert alert-error">
+                                <div className="alert alert-error flex flex-col items-start gap-2">
                                     <p className="text-sm font-medium">
                                         {localError || authError}
                                     </p>
+                                    {showResend && (
+                                        <Button
+                                            type="button"
+                                            variant="link"
+                                            className="p-0 h-auto text-red-700 dark:text-red-300 underline font-semibold"
+                                            onClick={handleResend}
+                                            disabled={isResendLoading}
+                                        >
+                                            {isResendLoading ? 'Sending...' : 'Resend Verification Email'}
+                                        </Button>
+                                    )}
                                 </div>
                             )}
 

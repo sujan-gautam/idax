@@ -76,7 +76,23 @@ const Register: React.FC = () => {
         { label: 'Contains number', met: /[0-9]/.test(formData.password) },
     ];
 
+    const [isResendLoading, setIsResendLoading] = useState(false);
+    const [resendStatus, setResendStatus] = useState<'idle' | 'sent' | 'error'>('idle');
+
     if (isSuccess) {
+        const handleResendVerification = async () => {
+            setIsResendLoading(true);
+            setResendStatus('idle');
+            try {
+                await api.post('/auth/start-verification', { email: formData.email });
+                setResendStatus('sent');
+            } catch (err) {
+                setResendStatus('error');
+            } finally {
+                setIsResendLoading(false);
+            }
+        };
+
         return (
             <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-neutral-50 via-neutral-100 to-neutral-50 p-4 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950">
                 <div className="w-full max-w-md text-center animate-fade-in space-y-6">
@@ -88,12 +104,38 @@ const Register: React.FC = () => {
                         We've sent a verification link to <strong>{formData.email}</strong>.
                         Please check your inbox (and spam folder) to verify your account.
                     </p>
-                    <div className="pt-4">
-                        <Link to="/login">
+
+                    <div className="space-y-4 pt-4">
+                        <Link to="/login" className="block w-full">
                             <Button variant="outline" className="w-full">
                                 Back to Login
                             </Button>
                         </Link>
+
+                        <div className="text-sm">
+                            <p className="text-neutral-500 mb-2">Didn't receive the email?</p>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleResendVerification}
+                                disabled={isResendLoading || resendStatus === 'sent'}
+                                className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:text-indigo-400"
+                            >
+                                {isResendLoading ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                                        Sending...
+                                    </>
+                                ) : resendStatus === 'sent' ? (
+                                    "Email Resent!"
+                                ) : (
+                                    "Click to Resend"
+                                )}
+                            </Button>
+                            {resendStatus === 'error' && (
+                                <p className="text-xs text-red-500 mt-1">Failed to resend. Please try again.</p>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
