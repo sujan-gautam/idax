@@ -233,16 +233,58 @@ const AppShell: React.FC = () => {
 
                     {/* Right: Actions + User Menu */}
                     <div className="flex items-center gap-2">
-                        {/* Global Search - Future enhancement */}
-                        <button className="hidden rounded-md p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 md:block">
-                            <Search className="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
-                        </button>
+                        {/* Global Search */}
+                        <div className="hidden md:flex items-center relative">
+                            <Search className="h-4 w-4 text-neutral-500 absolute left-3" />
+                            <input
+                                type="text"
+                                placeholder="Search..."
+                                className="pl-9 pr-4 py-1.5 h-8 w-64 text-sm bg-neutral-100 dark:bg-neutral-800 border-none rounded-md focus:ring-1 focus:ring-brand-500 focus:outline-none transition-all"
+                            />
+                        </div>
 
-                        {/* Notifications - Future enhancement */}
-                        <button className="relative rounded-md p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800">
-                            <Bell className="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
-                            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
-                        </button>
+                        {/* Notifications */}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button className="relative rounded-md p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
+                                    <Bell className="h-4 w-4 text-neutral-600 dark:text-neutral-400" />
+                                    <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500 animate-pulse border border-white dark:border-neutral-900" />
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-80 p-0">
+                                <DropdownMenuLabel className="border-b border-neutral-100 dark:border-neutral-800 px-4 py-3">
+                                    Notifications
+                                </DropdownMenuLabel>
+                                <div className="max-h-[300px] overflow-y-auto">
+                                    <DropdownMenuItem className="flex flex-col items-start gap-1 p-3 cursor-pointer">
+                                        <div className="flex items-center gap-2 w-full">
+                                            <div className="h-2 w-2 rounded-full bg-blue-500 shrink-0" />
+                                            <span className="font-medium text-sm">Welcome to Project IDA</span>
+                                            <span className="ml-auto text-xs text-neutral-400">Just now</span>
+                                        </div>
+                                        <p className="text-xs text-neutral-500 pl-4 line-clamp-2">
+                                            Thanks for joining! Start by creating your first project or uploading a dataset.
+                                        </p>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem className="flex flex-col items-start gap-1 p-3 cursor-pointer">
+                                        <div className="flex items-center gap-2 w-full">
+                                            <div className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
+                                            <span className="font-medium text-sm">System Update</span>
+                                            <span className="ml-auto text-xs text-neutral-400">2h ago</span>
+                                        </div>
+                                        <p className="text-xs text-neutral-500 pl-4 line-clamp-2">
+                                            We've updated the AI model to Gemini 2.5 Flash for faster analytics.
+                                        </p>
+                                    </DropdownMenuItem>
+                                </div>
+                                <div className="border-t border-neutral-100 dark:border-neutral-800 p-2 text-center">
+                                    <Button variant="ghost" size="sm" className="w-full text-xs h-8">
+                                        Mark all as read
+                                    </Button>
+                                </div>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
 
                         {/* Theme Toggle */}
                         <button

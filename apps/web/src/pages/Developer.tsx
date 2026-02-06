@@ -303,76 +303,25 @@ const Developer: React.FC = () => {
 
                 {/* Documentation Tab */}
                 <TabsContent value="documentation" className="space-y-6">
-                    <div className="grid gap-6 md:grid-cols-2">
-                        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <BookOpen className="h-5 w-5" />
-                                    API Reference
-                                </CardTitle>
-                                <CardDescription>
-                                    Complete API documentation with examples
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <Button variant="outline" className="w-full">
-                                    View Documentation
-                                </Button>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Code2 className="h-5 w-5" />
-                                    SDKs & Libraries
-                                </CardTitle>
-                                <CardDescription>
-                                    Official SDKs for popular languages
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-2">
-                                    <Badge variant="outline">Python</Badge>
-                                    <Badge variant="outline">JavaScript</Badge>
-                                    <Badge variant="outline">Go</Badge>
-                                    <Badge variant="outline">Ruby</Badge>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Zap className="h-5 w-5" />
-                                    Tutorials
-                                </CardTitle>
-                                <CardDescription>
-                                    Step-by-step guides and examples
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <Button variant="outline" className="w-full">
-                                    Browse Tutorials
-                                </Button>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Terminal className="h-5 w-5" />
-                                    CLI Tool
-                                </CardTitle>
-                                <CardDescription>
-                                    Command-line interface for Project IDA
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <code className="text-sm">npm install -g @project-ida/cli</code>
-                            </CardContent>
-                        </Card>
-                    </div>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Documentation</CardTitle>
+                            <CardDescription>
+                                Guides, API references, and SDKs
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-center py-12">
+                                <BookOpen className="mx-auto h-12 w-12 text-neutral-300" />
+                                <h3 className="mt-4 text-lg font-medium text-neutral-900 dark:text-neutral-0">
+                                    Documentation Hub Coming Soon
+                                </h3>
+                                <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+                                    We're writing comprehensive guides and API references. Stay tuned!
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </TabsContent>
 
                 {/* Webhooks Tab */}

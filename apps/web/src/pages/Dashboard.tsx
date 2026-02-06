@@ -247,11 +247,11 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* Content Grid */}
-            <div className="grid gap-6 lg:grid-cols-3">
+            <div className="grid gap-6 lg:grid-cols-3 h-[600px]">
                 {/* Recent Activity */}
-                <div className="lg:col-span-2">
-                    <Card className="border-none bg-white shadow-sm dark:bg-neutral-900 h-full">
-                        <CardHeader className="border-b border-neutral-200 dark:border-neutral-800">
+                <div className="lg:col-span-2 h-full min-h-0">
+                    <Card className="border-none bg-white shadow-sm dark:bg-neutral-900 h-full flex flex-col">
+                        <CardHeader className="border-b border-neutral-200 dark:border-neutral-800 shrink-0">
                             <div className="flex items-center justify-between">
                                 <CardTitle className="flex items-center gap-2 text-base font-semibold">
                                     <Activity className="h-4 w-4" />
@@ -262,7 +262,7 @@ const Dashboard: React.FC = () => {
                                 </Button>
                             </div>
                         </CardHeader>
-                        <CardContent className="p-0">
+                        <CardContent className="p-0 flex-1 overflow-y-auto custom-scrollbar">
                             {recentActivity.length === 0 ? (
                                 <EmptyState
                                     icon={Clock}
@@ -311,7 +311,7 @@ const Dashboard: React.FC = () => {
                 </div>
 
                 {/* AI Chat Sidebar */}
-                <div className="lg:col-span-1">
+                <div className="lg:col-span-1 h-full min-h-0">
                     <AiChat />
                 </div>
             </div>
