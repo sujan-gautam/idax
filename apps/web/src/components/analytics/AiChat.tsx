@@ -133,8 +133,8 @@ const AiChat: React.FC<AiChatProps> = ({ datasetId, projectId, onClose }) => {
                 loadSessions(); // Refresh list
             }
 
-            if (!response.isUsingCustomKey) {
-                setUsage(prev => prev ? { ...prev, used: prev.used + response.usage.consumed } : null);
+            if (!response.isUsingCustomKey && response.usage) {
+                setUsage(prev => prev ? { ...prev, used: prev.used + (response.usage.consumed || 0) } : null);
             }
         } catch (err: any) {
             setError(err.response?.data?.message || 'Failed to get response from AI');
