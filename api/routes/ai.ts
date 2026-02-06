@@ -69,7 +69,8 @@ router.post('/chat', authMiddleware, async (req: AuthRequest, res) => {
             });
         }
 
-        const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+        // Use v1beta for preview models like gemini-3-flash-preview
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" }, { apiVersion: 'v1beta' });
         const result = await model.generateContent(message);
         const answer = result.response.text();
 
