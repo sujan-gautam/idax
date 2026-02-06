@@ -140,7 +140,16 @@ router.delete('/:id', authMiddleware, async (req: AuthRequest, res) => {
 
             // Delete related resources for these datasets
             if (datasetIds.length > 0) {
-                await tx.aiChatSession.deleteMany({ where: { datasetId: { in: datasetIds } } });
+                // Delete dataset-related chat sessions and messages
+                const datasetSessions = await tx.aiChatSession.findMany({
+                    where: { datasetId: { in: datasetIds } },
+                    select: { id: true }
+                });
+                const datasetSessionIds = datasetSessions.map(s => s.id);
+                if (datasetSessionIds.length > 0) {
+                    await tx.aiChatMessage.deleteMany({ where: { sessionId: { in: datasetSessionIds } } });
+                    await tx.aiChatSession.deleteMany({ where: { id: { in: datasetSessionIds } } });
+                }
                 await tx.recipe.deleteMany({ where: { datasetId: { in: datasetIds } } });
 
                 // Find versions to find EDA results
@@ -165,8 +174,16 @@ router.delete('/:id', authMiddleware, async (req: AuthRequest, res) => {
                 await tx.dataset.deleteMany({ where: { projectId: req.params.id } });
             }
 
-            // Delete project chat sessions first
-            await tx.aiChatSession.deleteMany({ where: { projectId: req.params.id } });
+            // Delete project chat sessions and messages
+            const projectSessions = await tx.aiChatSession.findMany({
+                where: { projectId: req.params.id },
+                select: { id: true }
+            });
+            const projectSessionIds = projectSessions.map(s => s.id);
+            if (projectSessionIds.length > 0) {
+                await tx.aiChatMessage.deleteMany({ where: { sessionId: { in: projectSessionIds } } });
+                await tx.aiChatSession.deleteMany({ where: { id: { in: projectSessionIds } } });
+            }
 
             // Delete the project
             await tx.project.delete({

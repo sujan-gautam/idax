@@ -293,7 +293,16 @@ router.delete('/:id', authMiddleware, async (req: AuthRequest, res) => {
         await prisma.$transaction(async (tx) => {
             const datasetId = req.params.id;
 
-            await tx.aiChatSession.deleteMany({ where: { datasetId } });
+            // Delete AI Chat Sessions and Messages
+            const sessions = await tx.aiChatSession.findMany({
+                where: { datasetId },
+                select: { id: true }
+            });
+            const sessionIds = sessions.map(s => s.id);
+            if (sessionIds.length > 0) {
+                await tx.aiChatMessage.deleteMany({ where: { sessionId: { in: sessionIds } } });
+                await tx.aiChatSession.deleteMany({ where: { id: { in: sessionIds } } });
+            }
             await tx.recipe.deleteMany({ where: { datasetId } });
             await tx.upload.deleteMany({ where: { datasetId } });
             await tx.job.deleteMany({ where: { datasetId } });
