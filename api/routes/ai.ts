@@ -3,6 +3,8 @@ import OpenAI from 'openai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { prisma } from '@project-ida/db';
 import { authMiddleware, AuthRequest } from '@project-ida/auth';
+import fs from 'fs';
+import path from 'path';
 
 const router = express.Router();
 
@@ -96,6 +98,23 @@ router.post('/chat', authMiddleware, async (req: AuthRequest, res) => {
                 const stats = version.statsSummaryJson as any;
                 const schema = version.schemaJson as any;
 
+                let rowDataSnippet = '';
+                try {
+                    if (version.artifactS3Key) {
+                        const LOCAL_STORAGE_DIR = path.join(process.cwd(), 'uploads-data');
+                        const filePath = path.join(LOCAL_STORAGE_DIR, version.artifactS3Key);
+                        if (fs.existsSync(filePath)) {
+                            const rawContent = fs.readFileSync(filePath, 'utf-8');
+                            const allData = JSON.parse(rawContent);
+                            // Take first 500 rows to fit in context window (Gemini 2.5 has huge window, but let's be safe)
+                            const sampleRows = allData.slice(0, 500);
+                            rowDataSnippet = JSON.stringify(sampleRows, null, 2);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Failed to read local dataset file for AI context', err);
+                }
+
                 systemContext += `
                 
                 Current Dataset Context:
@@ -108,6 +127,13 @@ router.post('/chat', authMiddleware, async (req: AuthRequest, res) => {
                 
                 Statistical Summary (first few):
                 ${JSON.stringify(stats || {}, null, 2).substring(0, 1000)}...
+
+                RAW DATA SAMPLES (First 500 rows):
+                ${rowDataSnippet}
+                
+                INSTRUCTION: The user wants you to analyze THIS specific data. You have access to the actual values above. 
+                Use these values to calculate correlations, aggregations, or specific queries the user asks for. 
+                If the dataset is larger than 500 rows, explain that you are analyzing the sample provided.
                 `;
             }
         }
