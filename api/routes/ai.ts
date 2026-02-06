@@ -89,7 +89,11 @@ router.post('/chat', authMiddleware, async (req: AuthRequest, res) => {
             })
         ]);
 
-        res.json({ answer, sessionId: session.id });
+        res.json({
+            answer,
+            sessionId: session.id,
+            usage: { consumed: totalTokens }
+        });
     } catch (error: any) {
         res.status(500).json({ error: 'AI Chat failed', details: error.message });
     }
