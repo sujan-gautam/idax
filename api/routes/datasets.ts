@@ -160,10 +160,13 @@ router.get('/:id/preview', authMiddleware, async (req: AuthRequest, res) => {
                     limit,
                     totalPages: Math.ceil(total / limit)
                 });
+            } else {
+                console.error(`Preview file not found at: ${filePath}`);
+                return res.json({ data: [], total: 0, page, limit });
             }
-            res.json({ data: [], total: 0, page, limit });
         } catch (err) {
-            res.json({ data: [], total: 0, page, limit });
+            console.error('Error reading preview file:', err);
+            return res.status(500).json({ error: 'Failed to read dataset file' });
         }
     } catch (error) {
         res.status(500).json({ error: 'Preview failed' });
@@ -242,7 +245,15 @@ router.get('/:id/eda/:tab', authMiddleware, async (req: AuthRequest, res) => {
         }
 
         if (tab === 'correlations') {
-            return res.json({ correlations: summary.correlations || [] });
+            const correlations = summary.correlations || [];
+            // Extract unique columns from correlation pairs to enable heatmap rendering
+            const columns = Array.from(new Set(correlations.flatMap((c: any) => [c.column1, c.column2]))).sort();
+
+            return res.json({
+                correlations,
+                columns,
+                method: req.query.method || 'pearson'
+            });
         }
 
         if (tab === 'outliers') {
