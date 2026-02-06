@@ -69,9 +69,75 @@ router.post('/chat', authMiddleware, async (req: AuthRequest, res) => {
             });
         }
 
-        // Use v1beta for preview models like gemini-3-flash-preview
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }, { apiVersion: 'v1beta' });
-        const result = await model.generateContent(message);
+        // Fetch dataset context if applicable
+        let systemContext = `You are IDA, an expert AI data analyst. You help users analyze their datasets.
+        
+        Guidelines:
+        - Be concise and helpful.
+        - If the user asks about specific data, refer to the provided schema/stats.
+        - If you don't have the data to answer, explain what you know and what you're missing.
+        - You can write SQL or Python pandas code if helpful.
+        `;
+
+        if (datasetId) {
+            const dataset = await prisma.dataset.findUnique({
+                where: { id: datasetId, tenantId },
+                include: {
+                    versions: {
+                        take: 1,
+                        orderBy: { versionNumber: 'desc' },
+                        where: { id: (await prisma.dataset.findUnique({ where: { id: datasetId } }))?.activeVersionId || undefined }
+                    }
+                }
+            });
+
+            if (dataset && dataset.versions.length > 0) {
+                const version = dataset.versions[0];
+                const stats = version.statsSummaryJson as any;
+                const schema = version.schemaJson as any;
+
+                systemContext += `
+                
+                Current Dataset Context:
+                - Name: ${dataset.name}
+                - Rows: ${version.rowCount || 'Unknown'}
+                - Columns: ${version.columnCount || 'Unknown'}
+                
+                Schema/Columns:
+                ${JSON.stringify(schema || {}, null, 2)}
+                
+                Statistical Summary (first few):
+                ${JSON.stringify(stats || {}, null, 2).substring(0, 1000)}...
+                `;
+            }
+        }
+
+        // Use v1beta for preview models like gemini-2.5-flash
+        const model = genAI.getGenerativeModel({
+            model: "gemini-2.5-flash",
+            systemInstruction: systemContext
+        }, { apiVersion: 'v1beta' });
+
+        let chatHistory: any[] = [];
+        if (session) {
+            // Load previous messages for context
+            const history = await prisma.aiChatMessage.findMany({
+                where: { sessionId: session.id },
+                orderBy: { createdAt: 'asc' },
+                take: 20
+            });
+
+            chatHistory = history.map(m => ({
+                role: m.role === 'assistant' ? 'model' : 'user',
+                parts: [{ text: m.content }]
+            }));
+        }
+
+        const chat = model.startChat({
+            history: chatHistory
+        });
+
+        const result = await chat.sendMessage(message);
         const answer = result.response.text();
 
         const totalTokens = Math.ceil((message.length + answer.length) / 4);
