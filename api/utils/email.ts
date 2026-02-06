@@ -2,11 +2,32 @@ import nodemailer from 'nodemailer';
 
 let transporter: nodemailer.Transporter | null = null;
 
+const createMockTransporter = () => {
+    return {
+        sendMail: async (options: any) => {
+            console.log('---------------------------------------------------');
+            console.log('[EMAIL MOCK LOG] SMTP not configured. Catching email:');
+            console.log(`To:      ${options.to}`);
+            console.log(`Subject: ${options.subject}`);
+            console.log(`Text:    ${options.text}`);
+            // Extract the verification link from the text to make it easy to copy
+            const linkMatch = options.text.match(/https?:\/\/[^\s]+/);
+            if (linkMatch) {
+                console.log(`LINK:    ${linkMatch[0]}`);
+            }
+            console.log('---------------------------------------------------');
+            return { messageId: 'mock-id-' + Date.now() };
+        },
+        // Mock getTestMessageUrl as well
+        verify: async () => true
+    } as any;
+};
+
 // Create a transporter.
-// By default, if no env vars are set, we will use Ethereal (fake SMTP) which provides a preview URL.
 const getTransporter = async () => {
     if (transporter) return transporter;
 
+    // Use Priority 1: Real SMTP
     if (process.env.SMTP_HOST) {
         console.log('[EMAIL] Using custom SMTP configuration:', process.env.SMTP_HOST);
         transporter = nodemailer.createTransport({
@@ -21,35 +42,38 @@ const getTransporter = async () => {
         return transporter;
     }
 
+    // Use Priority 2: In production without SMTP, skip network calls to avoid timeouts
+    const isProduction = process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT;
+    if (isProduction) {
+        console.log('[EMAIL] Running in production/Railway without SMTP_HOST. Falling back to mock logger to prevent hangs.');
+        transporter = createMockTransporter();
+        return transporter;
+    }
+
+    // Use Priority 3: Try Ethereal (usually works locally)
     try {
-        console.log('[EMAIL] No SMTP config found, attempting to create Ethereal test account...');
-        // Fallback to Ethereal
-        const testAccount = await nodemailer.createTestAccount();
+        console.log('[EMAIL] Attempting to create Ethereal test account...');
+        // Set a hard timeout for test account creation just in case
+        const testAccount = await Promise.race([
+            nodemailer.createTestAccount(),
+            new Promise<any>((_, reject) => setTimeout(() => reject(new Error('Ethereal timeout')), 5000))
+        ]);
+
         transporter = nodemailer.createTransport({
             host: 'smtp.ethereal.email',
             port: 587,
-            secure: false, // true for 465, false for other ports
+            secure: false,
             auth: {
-                user: testAccount.user, // generated ethereal user
-                pass: testAccount.pass, // generated ethereal password
+                user: testAccount.user,
+                pass: testAccount.pass,
             },
         });
         console.log('[EMAIL] Ethereal test account created successfully:', testAccount.user);
         return transporter;
     } catch (error) {
-        console.error('[EMAIL_INIT_ERROR] Failed to initialize email transporter:', error);
-        // Return a mock transporter that just logs to console so the app doesn't crash
-        return {
-            sendMail: async (options: any) => {
-                console.log('---------------------------------------------------');
-                console.log('[EMAIL MOCK FALLBACK] Transporter init failed. Here is the email:');
-                console.log(`To: ${options.to}`);
-                console.log(`Subject: ${options.subject}`);
-                console.log(`Text: ${options.text}`);
-                console.log('---------------------------------------------------');
-                return { messageId: 'mock-id-' + Date.now() };
-            }
-        } as any;
+        console.warn('[EMAIL_INIT_WARNING] Ethereal failed or timed out. Using mock logger.');
+        transporter = createMockTransporter();
+        return transporter;
     }
 };
 
@@ -82,21 +106,23 @@ export const sendVerificationEmail = async (to: string, token: string) => {
             `,
         });
 
-        console.log(`[EMAIL] Message sent successfully to ${to}. MessageID: ${info.messageId}`);
+        console.log(`[EMAIL] Info: Message sent successfully to ${to}. ID: ${info.messageId}`);
 
-        // Preview only available when using Ethereal
-        const previewUrl = nodemailer.getTestMessageUrl(info);
-        if (previewUrl) {
-            console.log('---------------------------------------------------');
-            console.log(`[EMAIL PREVIEW] View the email here: ${previewUrl}`);
-            console.log('---------------------------------------------------');
+        // Try to get preview URL if it's an Ethereal transporter
+        try {
+            const previewUrl = nodemailer.getTestMessageUrl(info);
+            if (previewUrl) {
+                console.log('---------------------------------------------------');
+                console.log(`[EMAIL PREVIEW] View the email here: ${previewUrl}`);
+                console.log('---------------------------------------------------');
+            }
+        } catch (e) {
+            // Likely a mock or real SMTP that doesn't support this
         }
 
         return info;
     } catch (error: any) {
         console.error('[EMAIL_SEND_ERROR] Critical failure in sendVerificationEmail:', error.message);
-        // If it's a mock transporter, it won't throw. If it's real, it might.
-        // We throw so start-verification can inform the user, but in some contexts we might want to suppress it.
         throw error;
     }
 };
