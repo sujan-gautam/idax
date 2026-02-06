@@ -71,7 +71,15 @@ export const sendVerificationEmail = async (to: string, token: string) => {
     // FAST ASYNC LOGIC (Fire and Forget)
     const execSend = async () => {
         try {
-            // Priority 1: SMTP (Recommended for verified domain)
+            // Priority 1: Resend API (Recommended for Railway - uses HTTPS/443, never blocked)
+            if (resend) {
+                const { data, error } = await resend.emails.send(emailPayload);
+                if (error) throw error;
+                console.log(`[EMAIL] Sent via Resend API. ID: ${data?.id}`);
+                return;
+            }
+
+            // Priority 2: SMTP (May timeout on Railway due to port restrictions)
             const smtp = await getSmtpTransporter();
             if (smtp) {
                 const info = await smtp.sendMail({
@@ -79,14 +87,6 @@ export const sendVerificationEmail = async (to: string, token: string) => {
                     to: to // Nodemailer expects string, not array
                 });
                 console.log(`[EMAIL] Sent via SMTP. ID: ${info.messageId}`);
-                return;
-            }
-
-            // Priority 2: Resend API (Fallback)
-            if (resend) {
-                const { data, error } = await resend.emails.send(emailPayload);
-                if (error) throw error;
-                console.log(`[EMAIL] Sent via Resend API. ID: ${data?.id}`);
                 return;
             }
 
