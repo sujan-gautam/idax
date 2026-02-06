@@ -118,7 +118,6 @@ router.post('/verify', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Verification failed' });
     }
-}
 });
 
 // Resend Verification Email Endpoint
@@ -166,7 +165,6 @@ router.post('/login', async (req, res) => {
         if (!email || !password) {
             return res.status(400).json({ error: 'Missing credentials' });
         }
-
         const user = await prisma.user.findUnique({
             where: { email },
             include: { tenant: true }
@@ -179,8 +177,6 @@ router.post('/login', async (req, res) => {
         if (user.status !== 'ACTIVE') {
             return res.status(403).json({ error: 'Account is not active. Please verify your email.', requireVerification: true });
         }
-
-        // ... existing code ...
 
         const valid = await bcrypt.compare(password, user.passwordHash);
         if (!valid) {
