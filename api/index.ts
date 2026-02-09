@@ -79,12 +79,13 @@ const allowedOrigins = [
 
 const corsOptions: cors.CorsOptions = {
     origin: (origin, callback) => {
-        // Allow same-origin, localhost, railway domains, and vercel domains
+        // Allow same-origin, localhost, railway domains, vercel domains, and projectida.org
         if (
             !origin ||
             allowedOrigins.includes(origin) ||
             origin.includes('railway.app') ||
-            origin.includes('vercel.app')
+            origin.includes('vercel.app') ||
+            origin.includes('projectida.org')
         ) {
             callback(null, true);
         } else {
