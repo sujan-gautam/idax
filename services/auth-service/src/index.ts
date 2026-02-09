@@ -3,7 +3,7 @@ import path from 'path';
 dotenv.config({ path: path.join(__dirname, '../../../.env') });
 
 import express from 'express';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { logger } from '@project-ida/logger';
 import { prisma } from '@project-ida/db';

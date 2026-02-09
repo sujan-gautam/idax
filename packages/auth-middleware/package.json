@@ -10,8 +10,8 @@
     "dependencies": {
         "@project-ida/logger": "*",
         "@project-ida/shared-types": "*",
-        "@types/bcrypt": "^6.0.0",
-        "bcrypt": "^6.0.0",
+        "@types/bcryptjs": "^2.4.6",
+        "bcryptjs": "^2.4.3",
         "jsonwebtoken": "^9.0.3",
         "uuid": "^13.0.0"
     },
