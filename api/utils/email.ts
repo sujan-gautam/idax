@@ -1,54 +1,115 @@
-import { Resend } from 'resend';
 import nodemailer from 'nodemailer';
 
-// Initialize Resend if API key is present
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+let transporter: nodemailer.Transporter | null = null;
 
-// Fallback SMTP Transporter
-let smtpTransporter: nodemailer.Transporter | null = null;
+/**
+ * Creates an Ethereal test account for development
+ * Ethereal is a fake SMTP service for testing - emails don't actually send
+ */
+const createEtherealTransporter = async (): Promise<nodemailer.Transporter> => {
+    try {
+        const testAccount = await nodemailer.createTestAccount();
+        console.log('[EMAIL] Using Ethereal test account:', testAccount.user);
 
-const createMockTransporter = () => {
-    return {
-        sendMail: async (options: any) => {
-            console.log('---------------------------------------------------');
-            console.log('[EMAIL MOCK LOG] No Email Service Configured.');
-            console.log(`To:      ${options.to}`);
-            console.log(`Subject: ${options.subject}`);
-            const linkMatch = (options.html || options.text).match(/https?:\/\/[^\s"<>]+/);
-            if (linkMatch) {
-                console.log(`VERIFICATION LINK: ${linkMatch[0]}`);
-            }
-            console.log('---------------------------------------------------');
-            return { id: 'mock-id-' + Date.now() };
-        }
-    };
-};
-
-const getSmtpTransporter = async () => {
-    if (smtpTransporter) return smtpTransporter;
-
-    if (process.env.SMTP_HOST) {
-        smtpTransporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: Number(process.env.SMTP_PORT) || 587,
-            secure: process.env.SMTP_SECURE === 'true',
+        return nodemailer.createTransport({
+            host: 'smtp.ethereal.email',
+            port: 587,
+            secure: false,
             auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
+                user: testAccount.user,
+                pass: testAccount.pass,
             },
         });
-        return smtpTransporter;
+    } catch (error) {
+        console.error('[EMAIL] Failed to create Ethereal account:', error);
+        throw error;
     }
-
-    return null;
 };
 
-export const sendVerificationEmail = async (to: string, token: string) => {
-    const verificationUrl = `${process.env.FRONTEND_URL || 'https://projectida.up.railway.app'}/login?verify=${token}`;
+/**
+ * Creates Gmail SMTP transporter for production
+ */
+const createGmailTransporter = (): nodemailer.Transporter => {
+    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+        throw new Error('Gmail credentials not configured');
+    }
 
-    const emailPayload = {
+    console.log('[EMAIL] Using Gmail SMTP');
+    return nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.GMAIL_USER,
+            pass: process.env.GMAIL_APP_PASSWORD,
+        },
+    });
+};
+
+/**
+ * Creates custom SMTP transporter
+ */
+const createCustomSmtpTransporter = (): nodemailer.Transporter => {
+    if (!process.env.SMTP_HOST) {
+        throw new Error('SMTP_HOST not configured');
+    }
+
+    console.log('[EMAIL] Using custom SMTP:', process.env.SMTP_HOST);
+    return nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT) || 587,
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+        },
+    });
+};
+
+/**
+ * Gets or creates email transporter with automatic fallback
+ */
+const getTransporter = async (): Promise<nodemailer.Transporter> => {
+    if (transporter) return transporter;
+
+    try {
+        // Priority 1: Gmail (if configured)
+        if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
+            transporter = createGmailTransporter();
+            await transporter.verify();
+            console.log('[EMAIL] Gmail SMTP verified and ready');
+            return transporter;
+        }
+
+        // Priority 2: Custom SMTP (if configured)
+        if (process.env.SMTP_HOST) {
+            transporter = createCustomSmtpTransporter();
+            await transporter.verify();
+            console.log('[EMAIL] Custom SMTP verified and ready');
+            return transporter;
+        }
+
+        // Priority 3: Ethereal (development/testing)
+        console.log('[EMAIL] No production email configured, using Ethereal test account');
+        transporter = await createEtherealTransporter();
+        return transporter;
+
+    } catch (error) {
+        console.error('[EMAIL] Transporter creation failed:', error);
+        // Fallback to Ethereal if everything else fails
+        console.log('[EMAIL] Falling back to Ethereal');
+        transporter = await createEtherealTransporter();
+        return transporter;
+    }
+};
+
+/**
+ * Sends verification email with automatic provider selection
+ */
+export const sendVerificationEmail = async (to: string, token: string) => {
+    const verificationUrl = `${process.env.FRONTEND_URL || 'https://projectida.org'}/login?verify=${token}`;
+
+    const mailOptions = {
         from: process.env.EMAIL_FROM || 'Project IDA <noreply@projectida.org>',
-        to: [to],
+        to: to,
         subject: 'Verify your Project IDA account',
         html: `
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1f2937;">
@@ -66,39 +127,35 @@ export const sendVerificationEmail = async (to: string, token: string) => {
                 </div>
             </div>
         `,
+        text: `Welcome to Project IDA! Please verify your email by visiting: ${verificationUrl}`,
     };
 
-    // FAST ASYNC LOGIC (Fire and Forget)
-    const execSend = async () => {
+    // FAST ASYNC SEND (Fire and Forget)
+    const sendAsync = async () => {
         try {
-            // Priority 1: Resend API (Recommended for Railway - uses HTTPS/443, never blocked)
-            if (resend) {
-                const { data, error } = await resend.emails.send(emailPayload);
-                if (error) throw error;
-                console.log(`[EMAIL] Sent via Resend API. ID: ${data?.id}`);
-                return;
+            const emailTransporter = await getTransporter();
+            const info = await emailTransporter.sendMail(mailOptions);
+
+            console.log('[EMAIL] ✓ Email sent successfully');
+            console.log('[EMAIL] Message ID:', info.messageId);
+
+            // If using Ethereal, log the preview URL
+            if (info.messageId && process.env.NODE_ENV !== 'production') {
+                const previewUrl = nodemailer.getTestMessageUrl(info);
+                if (previewUrl) {
+                    console.log('[EMAIL] 📧 Preview URL:', previewUrl);
+                    console.log('[EMAIL] ⚠️  Using Ethereal - emails are not actually sent!');
+                }
             }
-
-            // Priority 2: SMTP (May timeout on Railway due to port restrictions)
-            const smtp = await getSmtpTransporter();
-            if (smtp) {
-                const info = await smtp.sendMail({
-                    ...emailPayload,
-                    to: to // Nodemailer expects string, not array
-                });
-                console.log(`[EMAIL] Sent via SMTP. ID: ${info.messageId}`);
-                return;
-            }
-
-            // Priority 3: Mock Fallback
-            const mock = createMockTransporter();
-            await mock.sendMail({ ...emailPayload, to: to });
-
-        } catch (err: any) {
-            console.error('[EMAIL_ASYNC_ERROR]', err.message || err);
+        } catch (error: any) {
+            console.error('[EMAIL] ✗ Send failed:', error.message);
+            // Log verification link so it's not lost
+            console.log('[EMAIL] VERIFICATION LINK:', verificationUrl);
         }
     };
 
-    execSend();
+    // Execute asynchronously
+    sendAsync();
+
     return { success: true };
 };
