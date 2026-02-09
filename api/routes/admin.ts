@@ -1,7 +1,7 @@
 import express from 'express';
 import { prisma } from '@project-ida/db';
 import { authMiddleware, AuthRequest } from '@project-ida/auth';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 const router = express.Router();
 
